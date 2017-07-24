@@ -1,0 +1,52 @@
+{
+  "name": "rqlite-js",
+  "version": "0.0.3",
+  "description": "A client library for RQLite written in Javascript that works in NodeJS or the browser.",
+  "main": "index.js",
+  "scripts": {
+    "build": "./node_modules/.bin/gulp build",
+    "build-release": "npm run build && npm run test-build",
+    "test": "./node_modules/.bin/gulp test",
+    "test-integrations": "./node_modules/.bin/gulp test-integrations",
+    "test-build": "./node_modules/.bin/gulp test-build",
+    "test-build-integrations": "./node_modules/.bin/gulp test-build-integrations",
+    "release": "./node_modules/.bin/standard-version"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/justinmorant/rqlite-js.git"
+  },
+  "keywords": [
+    "rqlite",
+    "client",
+    "nodejs",
+    "browser"
+  ],
+  "author": "Justin Morant",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/justinmorant/rqlite-js/issues"
+  },
+  "homepage": "https://github.com/justinmorant/rqlite-js#readme",
+  "devDependencies": {
+    "babel": "^6.23.0",
+    "babel-core": "^6.25.0",
+    "babel-preset-env": "^1.6.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-register": "^6.24.1",
+    "chai": "^4.1.0",
+    "del": "^3.0.0",
+    "gulp": "^3.9.1",
+    "gulp-babel": "^6.1.2",
+    "gulp-mocha": "^4.3.1",
+    "mocha": "^3.4.2",
+    "nock": "^9.0.14",
+    "sinon": "^2.3.8",
+    "standard-version": "^4.2.0"
+  },
+  "dependencies": {
+    "lodash": "^4.17.4",
+    "rsvp": "^4.0.0",
+    "superagent": "^3.5.2"
+  }
+}
