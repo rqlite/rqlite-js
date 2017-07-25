@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="0.0.6"></a>
+## [0.0.6](https://github.com/rqlite/rqlite-js/compare/v0.0.5...v0.0.6) (2017-07-25)
+
+
+### Bug Fixes
+
+* **docs:** Accepting README changes and updating CHANGELOG double message. ([34a6738](https://github.com/rqlite/rqlite-js/commit/34a6738))
+
+
+
 <a name="0.0.5"></a>
 ## [0.0.5](https://github.com/rqlite/rqlite-js/compare/v0.0.1...v0.0.5) (2017-07-25)
 
