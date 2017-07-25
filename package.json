@@ -1,8 +1,8 @@
 {
   "name": "rqlite-js",
-  "version": "0.0.3",
+  "version": "0.0.1",
   "description": "A client library for RQLite written in Javascript that works in NodeJS or the browser.",
-  "main": "index.js",
+  "main": "lib/api/data/client/index.js",
   "scripts": {
     "build": "./node_modules/.bin/gulp build",
     "build-release": "npm run build && npm run test-build",
@@ -10,11 +10,12 @@
     "test-integrations": "./node_modules/.bin/gulp test-integrations",
     "test-build": "./node_modules/.bin/gulp test-build",
     "test-build-integrations": "./node_modules/.bin/gulp test-build-integrations",
-    "release": "./node_modules/.bin/standard-version"
+    "release": "./node_modules/.bin/standard-version",
+    "prepublishOnly": "npm run build && npm run test-build"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/justinmorant/rqlite-js.git"
+    "url": "git+https://github.com/rqlite/rqlite-js.git"
   },
   "keywords": [
     "rqlite",
@@ -25,9 +26,9 @@
   "author": "Justin Morant",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/justinmorant/rqlite-js/issues"
+    "url": "https://github.com/rqlite/rqlite-js/issues"
   },
-  "homepage": "https://github.com/justinmorant/rqlite-js#readme",
+  "homepage": "https://github.com/rqlite/rqlite-js#readme",
   "devDependencies": {
     "babel": "^6.23.0",
     "babel-core": "^6.25.0",
