@@ -1,6 +1,6 @@
 {
   "name": "rqlite-js",
-  "version": "0.0.1",
+  "version": "0.0.4",
   "description": "A client library for RQLite written in Javascript that works in NodeJS or the browser.",
   "main": "lib/api/data/client/index.js",
   "scripts": {
