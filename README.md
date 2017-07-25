@@ -83,7 +83,7 @@ connect('http://localhost:4001')
               console.error('rqlite results contained an error.', error)
               return
             }
-            console.log('This should be the value for the name field and equal fiona', results[0].values[0])
+            console.log('The value for the name field which should equal fiona', results[0].values[0])
             console.log('rqlite results are great, but I just want to work with the data', toPlainJs(results))
           })
       })
@@ -110,7 +110,8 @@ const keepaliveAgent = new Agent({
 
 const options = {
   url: 'http://localhost:4001',
-  // httpOptions will now be applied to all HTTP requests, but can still be overridden per request inside of connect.
+  // httpOptions will now be applied to all HTTP requests, but can 
+  // still be overridden per request inside of connect.
   httpOptions: {
     agent: keepaliveAgent,
     timeout: 60000
@@ -119,7 +120,8 @@ const options = {
 
 connect(options)
   .then(function onConnect (api) {
-    // This is the same INSERT quert from above, but now it is sent over an HTTP connection that remains open for the next request.
+    // This is the same INSERT quert from above, but now it is sent over an HTTP connection
+    // that remains open for the next request.
     const sql = 'INSERT INTO foo(name) VALUES(\"fiona\")'
     api.insert(sql)
       .then((res) => {
@@ -131,7 +133,8 @@ connect(options)
         }
         const id = results[0].last_insert_id
         const sql = `SELECT name FROM foo WHERE id="${id}"`
-        // Override the options and turn off keepalive for just this request and change the timeout to 10 seconds.
+        // Override the options and turn off keepalive for just this request and change
+        // the timeout to 10 seconds.
         const selectOptions = {
           httpOptions: {
             agent: undefined,
@@ -146,7 +149,7 @@ connect(options)
               console.error('rqlite results contained an error.', error)
               return
             }
-            console.log('This should be the value for the name field and equal fiona', results[0].values[0])
+            console.log('The value for the name field which should equal fiona', results[0].values[0])
             console.log('rqlite results are great, but I just want to work with the data', toPlainJs(results))
           })
       })
