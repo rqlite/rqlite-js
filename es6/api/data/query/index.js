@@ -1,5 +1,7 @@
 import _assign from 'lodash/assign'
+import _isArray from 'lodash/isArray'
 import {get} from '../../client'
+import {post} from '../../client'
 
 export const PATH = '/db/query'
 
@@ -11,6 +13,14 @@ export const PATH = '/db/query'
  */
 export default function (url, sql, options = {}) {
   let {httpOptions={}} = options
+  if (_isArray(sql)) {
+    const body = sql
+    // Put the body on the httpOptions
+    httpOptions = _assign({}, httpOptions, {body})
+    // Put the httpOptions back on the options
+    options = _assign({}, options, {httpOptions})
+    return post(url, PATH, options)
+  }
   let {query={}} = httpOptions
   // Add the q parameter which is used for SELECT statements.
   query = _assign({}, query, {q: sql})

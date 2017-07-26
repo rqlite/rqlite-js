@@ -24,6 +24,7 @@ describe('api client', function () {
         }
       }
       const options = {
+        level: true,
         pretty: true,
         timings: true,
         transaction: true,
@@ -31,6 +32,7 @@ describe('api client', function () {
       }
       const expected = {
         query: {
+          level: true,
           preserved: true,
           pretty: true,
           timings: true,

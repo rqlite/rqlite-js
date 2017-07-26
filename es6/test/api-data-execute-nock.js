@@ -14,10 +14,13 @@ export const EXECUTE_SUCCESS_RESPONSE = {
  * Creates a nock that represents a succesful call to data query endpoint.
  */
 export function executeSuccess (options) {
-  const {url, path, response = EXECUTE_SUCCESS_RESPONSE} = options
-  return nock(url)
+  const {url, path, auth, response = EXECUTE_SUCCESS_RESPONSE} = options
+  const scope = nock(url)
     .matchHeader('Accept', CONTENT_TYPE_APPLICATION_JSON)
     .matchHeader('Content-Type', CONTENT_TYPE_APPLICATION_JSON)
     .post(path)
-    .reply(200, response)
+  if (auth) {
+    scope.basicAuth(auth)
+  }
+  return scope.reply(200, response)
 }

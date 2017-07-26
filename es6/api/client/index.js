@@ -38,6 +38,7 @@ export function createHttpOptions (options) {
   let {query = {}} = httpOptions
   // Create the API query and remove any undefined values.
   const queryApiOptions = _omitBy({
+    level: _get(options, 'level'),
     pretty: _get(options, 'pretty'),
     timings: _get(options, 'timings'),
     transaction: _get(options, 'transaction')
