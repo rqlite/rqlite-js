@@ -14,6 +14,13 @@ import {
   createJsonHeaders
 } from './index'
 
+const username = 'TestUsername'
+const password = 'TestPassword'
+const auth = {
+  user: username,
+  pass: password
+}
+
 describe('http', function () {
   beforeEach(nock.cleanAll)
   describe('Function: createDefaultHeaders()', function () {
@@ -44,6 +51,22 @@ describe('http', function () {
         })
         .catch(done)
     })
+    it('should make a HTTP get request with basic authentication', function (done) {
+      const url = `http://${username}:${password}@www.rqlite.com:4001`
+      const path = '/test'
+      const query = {
+        test: '123'
+      }
+      const scope = querySuccess({url, path, auth})
+      get(`${url}${path}`, {query})
+        .then((res) => {
+          assert.isTrue(scope.isDone(), 'http request captured by nock')
+          assert.deepEqual(query, res.request.qs)
+          assert.deepEqual(QUERY_SUCCESS_RESPONSE, res.body)
+          done()
+        })
+        .catch(done)
+    })
   })
   describe('Function: post()', function () {
     it(`should make a HTTP post request and send a ${CONTENT_TYPE_APPLICATION_JSON} body`, function (done) {
@@ -54,6 +77,22 @@ describe('http', function () {
       ]
       const scope = executeSuccess({url, path})
       post(`${url}${path}`, {body})
+        .then((res) => {
+          assert.isTrue(scope.isDone(), 'http request captured by nock')
+          assert.deepEqual(body, res.request._data)
+          assert.deepEqual(EXECUTE_SUCCESS_RESPONSE, res.body)
+          done()
+        })
+        .catch(done)
+    })
+    it(`should make a HTTP post request and send a ${CONTENT_TYPE_APPLICATION_JSON} body with basic auth`, function (done) {
+      const url = `http://www.rqlite.com:4001`
+      const path = '/test'
+      const body = [
+        'INSERT INTO foo(name) VALUES("fiona")'
+      ]
+      const scope = executeSuccess({url, path, auth})
+      post(`${url}${path}`, {body, auth})
         .then((res) => {
           assert.isTrue(scope.isDone(), 'http request captured by nock')
           assert.deepEqual(body, res.request._data)

@@ -1,5 +1,6 @@
 import _get from 'lodash/get'
 import _assign from 'lodash/assign'
+import _isObject from 'lodash/isObject'
 import {
   HTTP_METHOD_GET,
   HTTP_METHOD_POST
@@ -36,7 +37,8 @@ export function prepare (url, options = {}) {
     query,
     body,
     agent,
-    timeout
+    timeout,
+    auth
   } = options
   let {headers = {}} = options
   const client = getHttpLibrary()[httpMethod](url)
@@ -47,6 +49,11 @@ export function prepare (url, options = {}) {
   // Add a query to the request
   if (query) {
     client.query(query)
+  }
+  // Add a query to the request
+  if (_isObject(auth)) {
+    const {user, pass, authOptions} = auth
+    client.auth(user, pass, authOptions)
   }
   if (body && httpMethod !== HTTP_METHOD_GET) {
     client.send(body)
