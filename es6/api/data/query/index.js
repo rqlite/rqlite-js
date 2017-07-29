@@ -7,7 +7,7 @@ export const PATH = '/db/query'
 
 /**
  * Get an api request to query SQL on an rqlite server.
- * @param {string} url - The full url for the request i.e. http://localhost:4001/db/query
+ * @param {string} url - The full url for the request i.e. http://localhost:4001
  * @param {string} sql - The SQL string to excute on the server.
  * @param {object=} options - HTTP client options.
  */

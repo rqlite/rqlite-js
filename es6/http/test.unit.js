@@ -41,11 +41,10 @@ describe('http', function () {
       const query = {
         test: '123'
       }
-      const scope = querySuccess({url, path})
+      const scope = querySuccess({url, path, query})
       get(`${url}${path}`, {query})
         .then((res) => {
           assert.isTrue(scope.isDone(), 'http request captured by nock')
-          assert.deepEqual(query, res.request.qs)
           assert.deepEqual(QUERY_SUCCESS_RESPONSE, res.body)
           done()
         })
@@ -57,11 +56,10 @@ describe('http', function () {
       const query = {
         test: '123'
       }
-      const scope = querySuccess({url, path, auth})
+      const scope = querySuccess({url, path, auth, query})
       get(`${url}${path}`, {query})
         .then((res) => {
           assert.isTrue(scope.isDone(), 'http request captured by nock')
-          assert.deepEqual(query, res.request.qs)
           assert.deepEqual(QUERY_SUCCESS_RESPONSE, res.body)
           done()
         })

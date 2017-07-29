@@ -12,7 +12,7 @@ const URL = 'http://www.rqlite.com:4001'
 
 describe('api data client', function () {
   beforeEach(nock.cleanAll)
-  describe('Function: api.connect()', function () {
+  describe('Function: connect()', function () {
     it(`should call the ${URL}${PATH_EXECUTE} endpoint with a request body using HTTP POST when performing an insert`, function (done) {
       connect(URL)
         .then(function (api) {
@@ -100,11 +100,10 @@ describe('api data client', function () {
           const query = {
             q: sql
           }
-          const scope = querySuccess({url: URL, path: PATH_QUERY})
+          const scope = querySuccess({url: URL, path: PATH_QUERY, query})
           api.select(sql)
             .then((res) => {
               assert.isTrue(scope.isDone(), 'http request captured by nock')
-              assert.deepEqual(query, res.request.qs)
               assert.deepEqual(QUERY_SUCCESS_RESPONSE, res.body)
               done()
             })

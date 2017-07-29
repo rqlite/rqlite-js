@@ -7,9 +7,12 @@ import {
 } from './http-methods'
 import {
   CONTENT_TYPE_APPLICATION_JSON,
-  CONTENT_TYPE_APPLICATION_X_WWW_FORM_URLENCODED
+  CONTENT_TYPE_APPLICATION_X_WWW_FORM_URLENCODED,
+  CONTENT_TYPE_APPLICATION_OCTET_STREAM
 } from './content-types'
 import superagent from 'superagent'
+import queryString from 'query-string'
+
 
 const DEAULT_TIMEOUT = 30
 
@@ -38,7 +41,9 @@ export function prepare (url, options = {}) {
     body,
     agent,
     timeout,
-    auth
+    auth,
+    buffer,
+    responseParserType
   } = options
   let {headers = {}} = options
   const client = getHttpLibrary()[httpMethod](url)
@@ -48,7 +53,7 @@ export function prepare (url, options = {}) {
   }
   // Add a query to the request
   if (query) {
-    client.query(query)
+    client.query(queryString.stringify(query))
   }
   // Add a query to the request
   if (_isObject(auth)) {
@@ -61,6 +66,13 @@ export function prepare (url, options = {}) {
   if (agent) {
     client.agent(agent)
   }
+  if (buffer) {
+    client.buffer(true)
+  }
+  if (responseParserType === CONTENT_TYPE_APPLICATION_OCTET_STREAM) {
+    const parser = superagent.parse[responseParserType]
+    client.parse(parser)
+  }
   client.timeout(timeout || DEAULT_TIMEOUT)
   client.set(createDefaultHeaders(headers))
   return client
@@ -71,7 +83,8 @@ export function prepare (url, options = {}) {
  * @param {object=} headers - HTTP headers to send with the request.
  */
 export function createDefaultHeaders (headers = {}) {
-  return _assign({}, headers, {Accept: CONTENT_TYPE_APPLICATION_JSON})
+  const {Accept = CONTENT_TYPE_APPLICATION_JSON} = headers
+  return _assign({}, headers, {Accept})
 }
 
 /**

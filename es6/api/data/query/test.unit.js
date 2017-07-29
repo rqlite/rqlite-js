@@ -22,11 +22,10 @@ describe('api data query', function () {
         q: sql,
         level
       }
-      const scope = querySuccess({url: URL, path: PATH})
+      const scope = querySuccess({url: URL, path: PATH, query: apiQuery})
       query(URL, sql, {level})
         .then((res) => {
           assert.isTrue(scope.isDone(), 'http request captured by nock')
-          assert.deepEqual(apiQuery, res.request.qs)
           assert.deepEqual(QUERY_SUCCESS_RESPONSE, res.body)
           done()
         })
@@ -38,11 +37,10 @@ describe('api data query', function () {
       const apiQuery = {
         level
       }
-      const scope = queryMultipleSuccess({url: URL, path: PATH})
+      const scope = queryMultipleSuccess({url: URL, path: PATH, query: apiQuery})
       query(URL, sql, {level})
         .then((res) => {
           assert.isTrue(scope.isDone(), 'http request captured by nock')
-          assert.deepEqual(apiQuery, res.request.qs)
           assert.deepEqual(QUERY_MULTIPLE_SUCCESS_RESPONSE, res.body)
           done()
         })
