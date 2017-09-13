@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="0.0.10"></a>
+## [0.0.10](https://github.com/rqlite/rqlite-js/compare/v0.0.9...v0.0.10) (2017-09-13)
+
+
+### Bug Fixes
+
+* **backups:** Added backup support to backups client. ([#11](https://github.com/rqlite/rqlite-js/issues/11)) ([ff9ca59](https://github.com/rqlite/rqlite-js/commit/ff9ca59))
+
+
+
 <a name="0.0.9"></a>
 ## [0.0.9](https://github.com/rqlite/rqlite-js/compare/v0.0.8...v0.0.9) (2017-07-28)
 
