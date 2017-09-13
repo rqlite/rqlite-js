@@ -63,11 +63,10 @@ describe('api client', function () {
       const query = {
         q: sql
       }
-      const scope = querySuccess({url: URL, path: PATH_QUERY})
+      const scope = querySuccess({url: URL, path: PATH_QUERY, query})
       get(URL, PATH_QUERY, {httpOptions: {query}})
         .then((res) => {
           assert.isTrue(scope.isDone(), 'http request captured by nock')
-          assert.deepEqual(query, res.request.qs)
           assert.deepEqual(QUERY_SUCCESS_RESPONSE, res.body)
           done()
         })

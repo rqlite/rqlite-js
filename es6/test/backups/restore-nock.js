@@ -1,10 +1,10 @@
 import nock from 'nock'
-import {CONTENT_TYPE_APPLICATION_JSON} from '../http/content-types'
+import {CONTENT_TYPE_TEXT_PLAIN, CONTENT_TYPE_APPLICATION_JSON} from '../../http/content-types'
 
-export const EXECUTE_SUCCESS_RESPONSE = {
+export const RESTORE_SUCCESS_RESPONSE = {
   results: [
     {
-      last_insert_id: 1,
+      last_insert_id: 2,
       rows_affected: 1
     }
   ]
@@ -13,11 +13,11 @@ export const EXECUTE_SUCCESS_RESPONSE = {
 /**
  * Creates a nock that represents a successful call to data query endpoint.
  */
-export function executeSuccess (options) {
-  const {url, path, auth, response = EXECUTE_SUCCESS_RESPONSE} = options
+export function restoreSuccess (options) {
+  const {url, path, auth, response = RESTORE_SUCCESS_RESPONSE} = options
   const scope = nock(url)
     .matchHeader('Accept', CONTENT_TYPE_APPLICATION_JSON)
-    .matchHeader('Content-Type', CONTENT_TYPE_APPLICATION_JSON)
+    // .matchHeader('Content-Type', CONTENT_TYPE_TEXT_PLAIN)
     .post(path)
   if (auth) {
     scope.basicAuth(auth)

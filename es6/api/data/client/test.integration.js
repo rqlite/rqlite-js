@@ -10,18 +10,21 @@ import {PATH as PATH_QUERY} from '../query'
 
 const URL = getUrl()
 
+function cleanUp (done) {
+  connect(getUrl())
+    .then(function (api) {
+      const sql = 'DROP TABLE IF EXISTS foo'
+      api.table.drop(sql)
+        .then(() => done())
+        .catch(done)
+    })
+    .catch(done)
+}
+
 describe('api data client', function () {
-  before(function (done) {
-    connect(getUrl())
-      .then(function (api) {
-        const sql = 'DROP TABLE foo IF EXISTS'
-        api.table.drop(sql)
-          .then(() => done())
-          .catch(done)
-      })
-      .catch(done)
-  })
-  describe('Function: api.connect()', function () {
+  before(cleanUp)
+  after(cleanUp)
+  describe('Function: connect()', function () {
     it(`should call ${URL}${PATH_EXECUTE} and create table named foo`, function (done) {
       connect(getUrl())
         .then(function (api) {

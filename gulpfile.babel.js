@@ -12,6 +12,8 @@ function getMocha () {
 
 function getBuildMocha () {
   return mocha({
+    timeout: 10000,
+    bail: true,
     reporter: 'tap'
   })
 }

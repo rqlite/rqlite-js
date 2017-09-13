@@ -44,6 +44,5 @@ export function createHttpOptions (options) {
     transaction: _get(options, 'transaction')
   }, _isUndefined)
   query = _assign({}, query, queryApiOptions)
-  httpOptions = _assign({}, httpOptions, {query})
-  return httpOptions
+  return _assign({}, httpOptions, {query})
 }
