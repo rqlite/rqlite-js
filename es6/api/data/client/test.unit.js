@@ -10,12 +10,12 @@ import {executeSuccess, EXECUTE_SUCCESS_RESPONSE} from '../../../test/api-data-e
 
 const URL = 'http://www.rqlite.com:4001'
 
-describe('api data client', function () {
+describe('api data client', () => {
   beforeEach(nock.cleanAll)
-  describe('Function: connect()', function () {
-    it(`should call the ${URL}${PATH_EXECUTE} endpoint with a request body using HTTP POST when performing an insert`, function (done) {
+  describe('Function: connect()', () => {
+    it(`should call the ${URL}${PATH_EXECUTE} endpoint with a request body using HTTP POST when performing an insert`, (done) => {
       connect(URL)
-        .then(function (api) {
+        .then((api) => {
           const sql = 'INSERT INTO foo(name) VALUES(\"fiona\")'
           const scope = executeSuccess({url: URL, path: PATH_EXECUTE})
           api.insert(sql)
@@ -29,9 +29,9 @@ describe('api data client', function () {
         })
         .catch(done)
     })
-    it(`should call the ${URL}${PATH_EXECUTE} endpoint with a request body using HTTP POST when performing an update`, function (done) {
+    it(`should call the ${URL}${PATH_EXECUTE} endpoint with a request body using HTTP POST when performing an update`, (done) => {
       connect(URL)
-        .then(function (api) {
+        .then((api) => {
           const sql = 'UPDATE foo SET name=\"fionaTest\" WHERE name=\"fiona\"'
           const scope = executeSuccess({url: URL, path: PATH_EXECUTE})
           api.update(sql)
@@ -45,9 +45,9 @@ describe('api data client', function () {
         })
         .catch(done)
     })
-    it(`should call the ${URL}${PATH_EXECUTE} endpoint with a request body using HTTP POST when performing a delete`, function (done) {
+    it(`should call the ${URL}${PATH_EXECUTE} endpoint with a request body using HTTP POST when performing a delete`, (done) => {
       connect(URL)
-        .then(function (api) {
+        .then((api) => {
           const sql = 'DELETE FROM foo WHERE name=\"fiona\"'
           const scope = executeSuccess({url: URL, path: PATH_EXECUTE})
           api.delete(sql)
@@ -61,9 +61,9 @@ describe('api data client', function () {
         })
         .catch(done)
     })
-    it(`should call the ${URL}${PATH_EXECUTE} endpoint with a request body using HTTP POST when performing a create table`, function (done) {
+    it(`should call the ${URL}${PATH_EXECUTE} endpoint with a request body using HTTP POST when performing a create table`, (done) => {
       connect(URL)
-        .then(function (api) {
+        .then((api) => {
           const sql = 'CREATE TABLE foo (id integer not null primary key, name text)'
           const scope = executeSuccess({url: URL, path: PATH_EXECUTE})
           api.table.create(sql)
@@ -77,9 +77,9 @@ describe('api data client', function () {
         })
         .catch(done)
     })
-    it(`should call the ${URL}${PATH_EXECUTE} endpoint with a request body using HTTP POST when performing a drop table`, function (done) {
+    it(`should call the ${URL}${PATH_EXECUTE} endpoint with a request body using HTTP POST when performing a drop table`, (done) => {
       connect(URL)
-        .then(function (api) {
+        .then((api) => {
           const sql = 'DROP TABLE foo'
           const scope = executeSuccess({url: URL, path: PATH_EXECUTE})
           api.table.create(sql)
@@ -93,12 +93,12 @@ describe('api data client', function () {
         })
         .catch(done)
     })
-    it(`should call the ${URL}${PATH_QUERY} endpoint with a query using HTTP GET when using select`, function (done) {
+    it(`should call the ${URL}${PATH_QUERY} endpoint with a query using HTTP GET when using select`, (done) => {
       connect(URL)
-        .then(function (api) {
+        .then((api) => {
           const sql = 'SELECT * FROM foo'
           const query = {
-            q: sql
+            q: sql,
           }
           const scope = querySuccess({url: URL, path: PATH_QUERY, query})
           api.select(sql)

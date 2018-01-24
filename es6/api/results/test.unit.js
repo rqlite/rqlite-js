@@ -2,39 +2,39 @@ import {describe, it} from 'mocha'
 import {assert} from 'chai'
 import {
   getError,
-  toPlainJs
+  toPlainJs,
 } from './index'
 
 const URL = 'http://www.rqlite.com:4001'
 
-describe('api data results', function () {
-  describe('Function: getError()', function () {
-    it(`should get an error from an data API results set`, function () {
+describe('api data results', () => {
+  describe('Function: getError()', () => {
+    it('should get an error from an data API results set', () => {
       const error = 'near "nonsense": syntax error'
       const errorResult = {error}
-      const results =  [errorResult]
+      const results = [errorResult]
       assert.equal(error, getError(results).message)
     })
   })
-  describe('Function: toPlainJs()', function () {
-    it(`should create a plain js array containing key value object pairs`, function () {
+  describe('Function: toPlainJs()', () => {
+    it('should create a plain js array containing key value object pairs', () => {
       const error = 'near "nonsense": syntax error'
       const errorResult = {error}
-      const results =  [
+      const results = [
         {
-          'columns': ['id', 'name'],
-          'types': ['integer','text'],
-          'values': [
-            [1, 'fiona']
+          columns: ['id', 'name'],
+          types: ['integer', 'text'],
+          values: [
+            [1, 'fiona'],
           ],
-          'time': 0.0150043
-        }
+          time: 0.0150043,
+        },
       ]
       const plainJs = [
         {
           id: 1,
-          name: 'fiona'
-        }
+          name: 'fiona',
+        },
       ]
       assert.deepEqual(plainJs, toPlainJs(results))
     })

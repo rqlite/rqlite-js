@@ -15,11 +15,11 @@ export default function (url, options = {}) {
   let {headers = {}} = httpOptions
   headers = _assign({}, headers, {
     Accept: CONTENT_TYPE_APPLICATION_OCTET_STREAM,
-    'Content-Type': CONTENT_TYPE_APPLICATION_OCTET_STREAM
+    'Content-Type': CONTENT_TYPE_APPLICATION_OCTET_STREAM,
   })
   httpOptions = _assign({}, httpOptions, {
     headers,
-    buffer: true // Create a buffer
+    buffer: true, // Create a buffer
   })
   options = _assign({}, options, {httpOptions})
   return get(url, PATH, options)

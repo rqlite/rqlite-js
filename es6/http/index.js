@@ -3,12 +3,12 @@ import _assign from 'lodash/assign'
 import _isObject from 'lodash/isObject'
 import {
   HTTP_METHOD_GET,
-  HTTP_METHOD_POST
+  HTTP_METHOD_POST,
 } from './http-methods'
 import {
   CONTENT_TYPE_APPLICATION_JSON,
   CONTENT_TYPE_APPLICATION_X_WWW_FORM_URLENCODED,
-  CONTENT_TYPE_APPLICATION_OCTET_STREAM
+  CONTENT_TYPE_APPLICATION_OCTET_STREAM,
 } from './content-types'
 import superagent from 'superagent'
 import queryString from 'query-string'
@@ -19,8 +19,8 @@ const DEAULT_TIMEOUT = 30
 /**
  * Get the HTTP library for use in requests.
  */
-export function getHttpLibrary () {
-  return superagent 
+export function getHttpLibrary() {
+  return superagent
 }
 
 /**
@@ -34,7 +34,7 @@ export function getHttpLibrary () {
  * @param {number=} options.timeout - Optional timeout to override default.
  * @param {object=} options.headers - HTTP headers to send with the request.
  */
-export function prepare (url, options = {}) {
+export function prepare(url, options = {}) {
   const {
     httpMethod = HTTP_METHOD_GET,
     query,
@@ -43,9 +43,9 @@ export function prepare (url, options = {}) {
     timeout,
     auth,
     buffer,
-    responseParserType
+    responseParserType,
   } = options
-  let {headers = {}} = options
+  let { headers = {} } = options
   const client = getHttpLibrary()[httpMethod](url)
   // Add headers for the JSON requests which are all non-get requests.
   if (httpMethod !== HTTP_METHOD_GET) {
@@ -57,7 +57,7 @@ export function prepare (url, options = {}) {
   }
   // Add a query to the request
   if (_isObject(auth)) {
-    const {user, pass, authOptions} = auth
+    const { user, pass, authOptions } = auth
     client.auth(user, pass, authOptions)
   }
   if (body && httpMethod !== HTTP_METHOD_GET) {
@@ -82,17 +82,17 @@ export function prepare (url, options = {}) {
  * Create default header for all HTTP requests.
  * @param {object=} headers - HTTP headers to send with the request.
  */
-export function createDefaultHeaders (headers = {}) {
-  const {Accept = CONTENT_TYPE_APPLICATION_JSON} = headers
-  return _assign({}, headers, {Accept})
+export function createDefaultHeaders(headers = {}) {
+  const { Accept = CONTENT_TYPE_APPLICATION_JSON } = headers
+  return _assign({}, headers, { Accept })
 }
 
 /**
  * Create JSON headers for all non HTTP GET requests.
  * @param {object=} headers - HTTP headers to send with the request.
  */
-export function createJsonHeaders (headers = {}) {
-  return _assign({}, headers, {'Content-Type': CONTENT_TYPE_APPLICATION_JSON})
+export function createJsonHeaders(headers = {}) {
+  return _assign({}, headers, { 'Content-Type': CONTENT_TYPE_APPLICATION_JSON })
 }
 
 /**
@@ -100,8 +100,8 @@ export function createJsonHeaders (headers = {}) {
  * @param {string} url - The url for the http request i.e. http://localhost:4001/db/query
  * @param {object=} options - See prepare() options.
  */
-export function get (url, options = {}) {
-  return prepare(url, _assign({}, options, {httpMethod: HTTP_METHOD_GET}))
+export function get(url, options = {}) {
+  return prepare(url, _assign({}, options, { httpMethod: HTTP_METHOD_GET }))
 }
 
 /**
@@ -109,6 +109,6 @@ export function get (url, options = {}) {
  * @param {string} url - The url for the http request i.e. http://localhost:4001/db/query
  * @param {object=} options - See prepare() options.
  */
-export function post (url, options = {}) {
-  return prepare(url, _assign({}, options, {httpMethod: HTTP_METHOD_POST}))
+export function post(url, options = {}) {
+  return prepare(url, _assign({}, options, { httpMethod: HTTP_METHOD_POST }))
 }

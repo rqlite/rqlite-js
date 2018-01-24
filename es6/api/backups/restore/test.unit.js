@@ -8,10 +8,10 @@ import {restoreSuccess, RESTORE_SUCCESS_RESPONSE} from '../../../test/backups/re
 
 const URL = 'http://www.rqlite.com:4001'
 
-describe('api backups restore', function () {
+describe('api backups restore', () => {
   beforeEach(nock.cleanAll)
-  describe('Function: execute()', function () {
-    it(`should call the ${URL}${PATH} endpoint using HTTP POST`, function (done) {
+  describe('Function: execute()', () => {
+    it(`should call the ${URL}${PATH} endpoint using HTTP POST`, (done) => {
       const scope = restoreSuccess({url: URL, path: PATH})
       restore(URL, {httpOptions: {body: BACKUP_SUCCESS_RESPONSE}})
         .then((res) => {

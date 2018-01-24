@@ -14,7 +14,7 @@ export default function (url, options = {}) {
   let {httpOptions = {}} = options
   let {headers = {}} = httpOptions
   headers = _assign({}, headers, {
-    'Content-Type': CONTENT_TYPE_TEXT_PLAIN
+    'Content-Type': CONTENT_TYPE_TEXT_PLAIN,
   })
   httpOptions = _assign({}, httpOptions, {headers})
   options = _assign({}, options, {httpOptions})

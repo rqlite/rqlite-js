@@ -4,13 +4,14 @@
   "description": "A client library for RQLite written in Javascript that works in NodeJS or the browser.",
   "main": "lib/api/data/client/index.js",
   "scripts": {
-    "build": "./node_modules/.bin/gulp build",
+    "build": "gulp build",
     "build-release": "npm run build && npm run test-build",
-    "test": "./node_modules/.bin/gulp test",
-    "test-integrations": "./node_modules/.bin/gulp test-integrations",
-    "test-build": "./node_modules/.bin/gulp test-build",
-    "test-build-integrations": "./node_modules/.bin/gulp test-build-integrations",
-    "release": "./node_modules/.bin/standard-version",
+    "lint": "eslint es6/**/*.js",
+    "test": "mocha --require babel-register --reporter tap es6/**/*.unit.js",
+    "test-integrations": "mocha --require babel-register --timeout 10000 --reporter tap es6/**/*.integration.js",
+    "test-build": "mocha --reporter tap lib/**/*.unit.js",
+    "test-build-integrations": "mocha  --timeout 10000 --reporter tap lib/**/*.integration.js",
+    "release": "standard-version",
     "prepublishOnly": "npm run build && npm run test-build"
   },
   "repository": {
@@ -35,9 +36,12 @@
     "babel-register": "^6.26.0",
     "chai": "^4.1.2",
     "del": "^3.0.0",
+    "eslint": "^4.16.0",
+    "eslint-config-airbnb": "^16.1.0",
+    "eslint-plugin-mocha": "^4.11.0",
+    "eslint-plugin-import": "^2.8.0",
     "gulp": "^3.9.1",
     "gulp-babel": "^7.0.0",
-    "gulp-mocha": "^4.3.1",
     "mocha": "^4.0.1",
     "nock": "^9.1.0",
     "sinon": "^4.1.2",
@@ -46,7 +50,6 @@
   "dependencies": {
     "lodash": "^4.17.4",
     "query-string": "^5.0.1",
-    "rsvp": "^4.7.0",
-    "superagent": "^3.8.1"
+    "superagent": "^3.8.2"
   }
 }

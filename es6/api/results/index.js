@@ -10,8 +10,8 @@ import _get from 'lodash/get'
  * an array of results that was a response from an rqlite server.
  * @param {array} results - A array from the results fields of sqlite response.
  */
-export function getError (results = []) {
-  const errorData = _find(results, (result) => _has(result, 'error'))
+export function getError(results = []) {
+  const errorData = _find(results, result => _has(result, 'error'))
   if (errorData) {
     return new Error(_get(errorData, 'error'))
   }
@@ -22,14 +22,12 @@ export function getError (results = []) {
  * Create a plain object for application use from a results object.
  * @param {array} results - A array from the results fields of sqlite response.
  */
-export function toPlainJs (results = []) {
-  return _map(results, function mapResults (result) {
+export function toPlainJs(results = []) {
+  return _map(results, (result) => {
     const columns = _get(result, 'columns', [])
     const values = _get(result, 'values', [])
     const columnDepth = 0
     const columnDepthValues = _get(values, columnDepth, [])
-    return _reduce(columns, function mapColumns (reduction, column, index) {
-      return _set(reduction, column, _get(columnDepthValues, index))
-    }, {})
+    return _reduce(columns, (reduction, column, index) => _set(reduction, column, _get(columnDepthValues, index)), {})
   })
 }

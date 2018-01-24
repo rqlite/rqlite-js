@@ -1,48 +1,48 @@
-import {describe, it} from 'mocha'
-import {assert} from 'chai'
+import { describe, it } from 'mocha'
+import { assert } from 'chai'
 import nock from 'nock'
-import {querySuccess, QUERY_SUCCESS_RESPONSE} from '../test/api-data-query-nock'
-import {executeSuccess, EXECUTE_SUCCESS_RESPONSE} from '../test/api-data-execute-nock'
+import { querySuccess, QUERY_SUCCESS_RESPONSE } from '../test/api-data-query-nock'
+import { executeSuccess, EXECUTE_SUCCESS_RESPONSE } from '../test/api-data-execute-nock'
 import {
   CONTENT_TYPE_APPLICATION_JSON,
-  CONTENT_TYPE_APPLICATION_X_WWW_FORM_URLENCODED
+  CONTENT_TYPE_APPLICATION_X_WWW_FORM_URLENCODED,
 } from './content-types'
 import {
   get,
   post,
   createDefaultHeaders,
-  createJsonHeaders
+  createJsonHeaders,
 } from './index'
 
 const username = 'TestUsername'
 const password = 'TestPassword'
 const auth = {
   user: username,
-  pass: password
+  pass: password,
 }
 
-describe('http', function () {
+describe('http', () => {
   beforeEach(nock.cleanAll)
-  describe('Function: createDefaultHeaders()', function () {
-    it(`should add the Accept header with a value of ${CONTENT_TYPE_APPLICATION_JSON}`, function () {
-      assert.deepEqual({Accept: CONTENT_TYPE_APPLICATION_JSON}, createDefaultHeaders())
+  describe('Function: createDefaultHeaders()', () => {
+    it(`should add the Accept header with a value of ${CONTENT_TYPE_APPLICATION_JSON}`, () => {
+      assert.deepEqual({ Accept: CONTENT_TYPE_APPLICATION_JSON }, createDefaultHeaders())
     })
   })
-  describe('Function: createJsonHeaders()', function () {
-    it(`should add the CotentType header with a value of ${CONTENT_TYPE_APPLICATION_JSON}`, function () {
-      const headers = {'Content-Type': CONTENT_TYPE_APPLICATION_JSON}
+  describe('Function: createJsonHeaders()', () => {
+    it(`should add the CotentType header with a value of ${CONTENT_TYPE_APPLICATION_JSON}`, () => {
+      const headers = { 'Content-Type': CONTENT_TYPE_APPLICATION_JSON }
       assert.deepEqual(headers, createJsonHeaders())
     })
   })
-  describe('Function: get()', function () {
-    it('should make a HTTP get request with a query', function (done) {
+  describe('Function: get()', () => {
+    it('should make a HTTP get request with a query', (done) => {
       const url = 'http://www.rqlite.com:4001'
       const path = '/test'
       const query = {
-        test: '123'
+        test: '123',
       }
-      const scope = querySuccess({url, path, query})
-      get(`${url}${path}`, {query})
+      const scope = querySuccess({ url, path, query })
+      get(`${url}${path}`, { query })
         .then((res) => {
           assert.isTrue(scope.isDone(), 'http request captured by nock')
           assert.deepEqual(QUERY_SUCCESS_RESPONSE, res.body)
@@ -50,14 +50,16 @@ describe('http', function () {
         })
         .catch(done)
     })
-    it('should make a HTTP get request with basic authentication', function (done) {
+    it('should make a HTTP get request with basic authentication', (done) => {
       const url = `http://${username}:${password}@www.rqlite.com:4001`
       const path = '/test'
       const query = {
-        test: '123'
+        test: '123',
       }
-      const scope = querySuccess({url, path, auth, query})
-      get(`${url}${path}`, {query})
+      const scope = querySuccess({
+        url, path, auth, query,
+      })
+      get(`${url}${path}`, { query })
         .then((res) => {
           assert.isTrue(scope.isDone(), 'http request captured by nock')
           assert.deepEqual(QUERY_SUCCESS_RESPONSE, res.body)
@@ -66,15 +68,15 @@ describe('http', function () {
         .catch(done)
     })
   })
-  describe('Function: post()', function () {
-    it(`should make a HTTP post request and send a ${CONTENT_TYPE_APPLICATION_JSON} body`, function (done) {
+  describe('Function: post()', () => {
+    it(`should make a HTTP post request and send a ${CONTENT_TYPE_APPLICATION_JSON} body`, (done) => {
       const url = 'http://www.rqlite.com:4001'
       const path = '/test'
       const body = [
-        'INSERT INTO foo(name) VALUES("fiona")'
+        'INSERT INTO foo(name) VALUES("fiona")',
       ]
-      const scope = executeSuccess({url, path})
-      post(`${url}${path}`, {body})
+      const scope = executeSuccess({ url, path })
+      post(`${url}${path}`, { body })
         .then((res) => {
           assert.isTrue(scope.isDone(), 'http request captured by nock')
           assert.deepEqual(body, res.request._data)
@@ -83,14 +85,14 @@ describe('http', function () {
         })
         .catch(done)
     })
-    it(`should make a HTTP post request and send a ${CONTENT_TYPE_APPLICATION_JSON} body with basic auth`, function (done) {
-      const url = `http://www.rqlite.com:4001`
+    it(`should make a HTTP post request and send a ${CONTENT_TYPE_APPLICATION_JSON} body with basic auth`, (done) => {
+      const url = 'http://www.rqlite.com:4001'
       const path = '/test'
       const body = [
-        'INSERT INTO foo(name) VALUES("fiona")'
+        'INSERT INTO foo(name) VALUES("fiona")',
       ]
-      const scope = executeSuccess({url, path, auth})
-      post(`${url}${path}`, {body, auth})
+      const scope = executeSuccess({ url, path, auth })
+      post(`${url}${path}`, { body, auth })
         .then((res) => {
           assert.isTrue(scope.isDone(), 'http request captured by nock')
           assert.deepEqual(body, res.request._data)

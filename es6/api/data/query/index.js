@@ -12,7 +12,7 @@ export const PATH = '/db/query'
  * @param {object=} options - HTTP client options.
  */
 export default function (url, sql, options = {}) {
-  let {httpOptions={}} = options
+  let {httpOptions = {}} = options
   if (_isArray(sql)) {
     const body = sql
     // Put the body on the httpOptions
@@ -21,7 +21,7 @@ export default function (url, sql, options = {}) {
     options = _assign({}, options, {httpOptions})
     return post(url, PATH, options)
   }
-  let {query={}} = httpOptions
+  let {query = {}} = httpOptions
   // Add the q parameter which is used for SELECT statements.
   query = _assign({}, query, {q: sql})
   // Put the query back on the httpOptions

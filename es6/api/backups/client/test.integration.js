@@ -14,13 +14,13 @@ const URL = getUrl()
 const BACKUP_SQL_STATEMENTS = [
   'CREATE TABLE foo (id integer not null primary key, name text);',
   'INSERT INTO foo(name) VALUES(\"fiona\");',
-  'INSERT INTO foo(name) VALUES(\"justin\");'
+  'INSERT INTO foo(name) VALUES(\"justin\");',
 ]
 const BACKUP_SQL = _join(BACKUP_SQL_STATEMENTS, '')
 
-function cleanUp (done) {
+function cleanUp(done) {
   connectData(getUrl())
-    .then(function (api) {
+    .then((api) => {
       const sql = 'DROP TABLE IF EXISTS fooBackups'
       api.table.drop(sql)
         .then(() => done())
@@ -29,9 +29,9 @@ function cleanUp (done) {
     .catch(done)
 }
 
-function createData (done) {
+function createData(done) {
   connectData(getUrl())
-    .then(function (api) {
+    .then((api) => {
       const sql = 'CREATE TABLE fooBackups (id integer not null primary key, name text)'
       api.table.create(sql)
         .then((res) => {
@@ -43,7 +43,7 @@ function createData (done) {
           }
           const sql = [
             'INSERT INTO fooBackups(name) VALUES(\"fiona\")',
-            'INSERT INTO fooBackups(name) VALUES(\"justin\")'
+            'INSERT INTO fooBackups(name) VALUES(\"justin\")',
           ]
           api.insert(sql, {transaction: true})
             .then((res) => {
@@ -62,9 +62,9 @@ function createData (done) {
     .catch(done)
 }
 
-function checkData (done) {
+function checkData(done) {
   connectData(URL)
-    .then(function (api) {
+    .then((api) => {
       const sql = 'SELECT id, name FROM foo WHERE name=\"fiona\"'
       api.select(sql)
         .then((res) => {
@@ -82,14 +82,14 @@ function checkData (done) {
     .catch(done)
 }
 
-describe('api backups client', function () {
+describe('api backups client', () => {
   beforeEach(cleanUp)
   after(cleanUp)
-  describe('Function: connect()', function () {
-    it(`should call ${URL}${PATH_BACKUP} and get a backup string`, function (done) {
+  describe('Function: connect()', () => {
+    it(`should call ${URL}${PATH_BACKUP} and get a backup string`, (done) => {
       before(createData)
       connect(URL)
-        .then(function (api) {
+        .then((api) => {
           api.backup()
             .then((res) => {
               const backupText = res.body.toString('utf8')
@@ -100,9 +100,9 @@ describe('api backups client', function () {
         })
         .catch(done)
     })
-    it(`should call ${URL}${PATH_RESTORE} and send a SQLite backup string`, function (done) {
+    it(`should call ${URL}${PATH_RESTORE} and send a SQLite backup string`, (done) => {
       connect(URL)
-        .then(function (api) {
+        .then((api) => {
           api.restore({httpOptions: {body: BACKUP_SQL}})
             .then((res) => {
               const results = _get(res, ['body', 'results'])

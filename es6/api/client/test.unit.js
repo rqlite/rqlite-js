@@ -4,7 +4,7 @@ import nock from 'nock'
 import {
   get,
   post,
-  createHttpOptions
+  createHttpOptions,
 } from './index'
 import {CONTENT_TYPE_APPLICATION_JSON} from '../../http/content-types'
 import {PATH as PATH_QUERY} from '../data/query'
@@ -14,21 +14,21 @@ import {executeSuccess, EXECUTE_SUCCESS_RESPONSE} from '../../test/api-data-exec
 
 const URL = 'http://www.rqlite.com:4001'
 
-describe('api client', function () {
+describe('api client', () => {
   beforeEach(nock.cleanAll)
-  describe('Function: createHttpOptions()', function () {
-    it('it should create the httpOptions using standard request options', function () {
+  describe('Function: createHttpOptions()', () => {
+    it('it should create the httpOptions using standard request options', () => {
       const httpOptions = {
         query: {
-          preserved: true
-        }
+          preserved: true,
+        },
       }
       const options = {
         level: true,
         pretty: true,
         timings: true,
         transaction: true,
-        httpOptions
+        httpOptions,
       }
       const expected = {
         query: {
@@ -36,15 +36,15 @@ describe('api client', function () {
           preserved: true,
           pretty: true,
           timings: true,
-          transaction: true
-        }
+          transaction: true,
+        },
       }
       const createdHttpOptions = createHttpOptions(options)
       assert.deepEqual(expected, createdHttpOptions)
     })
   })
-  describe('Function: post()', function () {
-    it(`should call the ${URL}${PATH_EXECUTE} endpoint with a request body using HTTP POST when using insert`, function (done) {
+  describe('Function: post()', () => {
+    it(`should call the ${URL}${PATH_EXECUTE} endpoint with a request body using HTTP POST when using insert`, (done) => {
       const sql = 'INSERT INTO foo(name) VALUES(\"fiona\")'
       const scope = executeSuccess({url: URL, path: PATH_EXECUTE})
       post(URL, PATH_EXECUTE, {httpOptions: {body: [sql]}})
@@ -57,11 +57,11 @@ describe('api client', function () {
         .catch(done)
     })
   })
-  describe('Function: get()', function () {
-    it(`should call the ${URL}${PATH_QUERY} endpoint with a query using HTTP GET when using select`, function (done) {
+  describe('Function: get()', () => {
+    it(`should call the ${URL}${PATH_QUERY} endpoint with a query using HTTP GET when using select`, (done) => {
       const sql = 'SELECT * FROM foo'
       const query = {
-        q: sql
+        q: sql,
       }
       const scope = querySuccess({url: URL, path: PATH_QUERY, query})
       get(URL, PATH_QUERY, {httpOptions: {query}})

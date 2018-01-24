@@ -10,9 +10,9 @@ import {PATH as PATH_QUERY} from '../query'
 
 const URL = getUrl()
 
-function cleanUp (done) {
+function cleanUp(done) {
   connect(getUrl())
-    .then(function (api) {
+    .then((api) => {
       const sql = 'DROP TABLE IF EXISTS foo'
       api.table.drop(sql)
         .then(() => done())
@@ -21,13 +21,13 @@ function cleanUp (done) {
     .catch(done)
 }
 
-describe('api data client', function () {
+describe('api data client', () => {
   before(cleanUp)
   after(cleanUp)
-  describe('Function: connect()', function () {
-    it(`should call ${URL}${PATH_EXECUTE} and create table named foo`, function (done) {
+  describe('Function: connect()', () => {
+    it(`should call ${URL}${PATH_EXECUTE} and create table named foo`, (done) => {
       connect(getUrl())
-        .then(function (api) {
+        .then((api) => {
           const sql = 'CREATE TABLE foo (id integer not null primary key, name text)'
           api.table.create(sql)
             .then((res) => {
@@ -44,9 +44,9 @@ describe('api data client', function () {
         })
         .catch(done)
     })
-    it(`should call ${URL}${PATH_EXECUTE} and insert a record with the name fiona`, function (done) {
+    it(`should call ${URL}${PATH_EXECUTE} and insert a record with the name fiona`, (done) => {
       connect(URL)
-        .then(function (api) {
+        .then((api) => {
           const sql = 'INSERT INTO foo(name) VALUES(\"fiona\")'
           api.insert(sql)
             .then((res) => {
@@ -64,9 +64,9 @@ describe('api data client', function () {
         })
         .catch(done)
     })
-    it(`should call ${URL}${PATH_QUERY} and select a record with the name fiona`, function (done) {
+    it(`should call ${URL}${PATH_QUERY} and select a record with the name fiona`, (done) => {
       connect(URL)
-        .then(function (api) {
+        .then((api) => {
           const sql = 'SELECT name FROM foo WHERE name=\"fiona\"'
           api.select(sql)
             .then((res) => {
@@ -83,9 +83,9 @@ describe('api data client', function () {
         })
         .catch(done)
     })
-    it(`should call the ${URL}${PATH_EXECUTE} and update the record with the name fiona to the name justin`, function (done) {
+    it(`should call the ${URL}${PATH_EXECUTE} and update the record with the name fiona to the name justin`, (done) => {
       connect(URL)
-        .then(function (api) {
+        .then((api) => {
           const sql = 'UPDATE foo SET name=\"justin\" WHERE name=\"fiona\"'
           api.update(sql)
             .then((res) => {
@@ -102,9 +102,9 @@ describe('api data client', function () {
         })
         .catch(done)
     })
-    it(`should call the ${URL}${PATH_QUERY} and select a record with the name justin`, function (done) {
+    it(`should call the ${URL}${PATH_QUERY} and select a record with the name justin`, (done) => {
       connect(URL)
-        .then(function (api) {
+        .then((api) => {
           const sql = 'SELECT name FROM foo WHERE name=\"justin\"'
           api.select(sql)
             .then((res) => {
@@ -121,9 +121,9 @@ describe('api data client', function () {
         })
         .catch(done)
     })
-    it(`should call the ${URL}${PATH_EXECUTE} and delete a record with the name justin`, function (done) {
+    it(`should call the ${URL}${PATH_EXECUTE} and delete a record with the name justin`, (done) => {
       connect(URL)
-        .then(function (api) {
+        .then((api) => {
           const sql = 'DELETE FROM foo WHERE name=\"justin\"'
           api.delete(sql)
             .then((res) => {
@@ -140,9 +140,9 @@ describe('api data client', function () {
         })
         .catch(done)
     })
-    it(`should call the ${URL}${PATH_QUERY} and select a count of foo item that has a result of zero`, function (done) {
+    it(`should call the ${URL}${PATH_QUERY} and select a count of foo item that has a result of zero`, (done) => {
       connect(URL)
-        .then(function (api) {
+        .then((api) => {
           const sql = 'SELECT COUNT(id) AS idCount FROM foo'
           api.select(sql)
             .then((res) => {
@@ -159,9 +159,9 @@ describe('api data client', function () {
         })
         .catch(done)
     })
-    it(`should call ${URL}${PATH_EXECUTE} and insert a record with the name fiona and justin using a transaction`, function (done) {
+    it(`should call ${URL}${PATH_EXECUTE} and insert a record with the name fiona and justin using a transaction`, (done) => {
       connect(URL)
-        .then(function (api) {
+        .then((api) => {
           const sql = [
             'INSERT INTO foo(name) VALUES(\"fiona\")',
             'INSERT INTO foo(name) VALUES(\"justin\")',
@@ -182,9 +182,9 @@ describe('api data client', function () {
         })
         .catch(done)
     })
-    it(`should call the ${URL}${PATH_QUERY} and select a count of foo items that has a result of two`, function (done) {
+    it(`should call the ${URL}${PATH_QUERY} and select a count of foo items that has a result of two`, (done) => {
       connect(URL)
-        .then(function (api) {
+        .then((api) => {
           const sql = 'SELECT COUNT(id) AS idCount FROM foo WHERE name IN(\"fiona\", \"justin\")'
           api.select(sql)
             .then((res) => {
@@ -201,12 +201,12 @@ describe('api data client', function () {
         })
         .catch(done)
     })
-    it(`should call the ${URL}${PATH_QUERY} and select an array of records with the name fiona then justin`, function (done) {
+    it(`should call the ${URL}${PATH_QUERY} and select an array of records with the name fiona then justin`, (done) => {
       connect(URL)
-        .then(function (api) {
+        .then((api) => {
           const sql = [
             'SELECT name FROM foo WHERE name=\"fiona\"',
-            'SELECT name FROM foo WHERE name=\"justin\"'
+            'SELECT name FROM foo WHERE name=\"justin\"',
           ]
           api.select(sql)
             .then((res) => {
@@ -224,9 +224,9 @@ describe('api data client', function () {
         })
         .catch(done)
     })
-    it(`should call the ${URL}${PATH_EXECUTE} and drop the table foo`, function (done) {
+    it(`should call the ${URL}${PATH_EXECUTE} and drop the table foo`, (done) => {
       connect(URL)
-        .then(function (api) {
+        .then((api) => {
           const sql = 'DROP TABLE foo'
           api.table.drop(sql)
             .then((res) => {

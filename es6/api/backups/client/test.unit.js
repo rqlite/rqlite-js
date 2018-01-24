@@ -10,12 +10,12 @@ import {restoreSuccess, RESTORE_SUCCESS_RESPONSE} from '../../../test/backups/re
 
 const URL = 'http://www.rqlite.com:4001'
 
-describe('api backups client', function () {
+describe('api backups client', () => {
   beforeEach(nock.cleanAll)
-  describe('Function: connect()', function () {
-    it(`should call the ${URL}${PATH_BACKUP} endpoint using HTTP GET when performing a backup`, function (done) {
+  describe('Function: connect()', () => {
+    it(`should call the ${URL}${PATH_BACKUP} endpoint using HTTP GET when performing a backup`, (done) => {
       connect(URL)
-        .then(function (api) {
+        .then((api) => {
           const scope = backupSuccess({url: URL, path: PATH_BACKUP})
           api.backup()
             .then((res) => {
@@ -27,9 +27,9 @@ describe('api backups client', function () {
         })
         .catch(done)
     })
-    it(`should call the ${URL}${PATH_RESTORE} endpoint with a request body using HTTP POST when performing a restore`, function (done) {
+    it(`should call the ${URL}${PATH_RESTORE} endpoint with a request body using HTTP POST when performing a restore`, (done) => {
       connect(URL)
-        .then(function (api) {
+        .then((api) => {
           const scope = restoreSuccess({url: URL, path: PATH_RESTORE})
           api.restore({httpOptions: {body: BACKUP_SUCCESS_RESPONSE}})
             .then((res) => {

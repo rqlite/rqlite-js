@@ -7,20 +7,20 @@ import {
   querySuccess,
   QUERY_SUCCESS_RESPONSE,
   queryMultipleSuccess,
-  QUERY_MULTIPLE_SUCCESS_RESPONSE
+  QUERY_MULTIPLE_SUCCESS_RESPONSE,
 } from '../../../test/api-data-query-nock'
 
 const URL = 'http://www.rqlite.com:4001'
 
-describe('api data query', function () {
+describe('api data query', () => {
   beforeEach(nock.cleanAll)
-  describe('Function: query()', function () {
-    it(`should call the ${URL}${PATH} endpoint with a query using HTTP GET and include a level query`, function (done) {
+  describe('Function: query()', () => {
+    it(`should call the ${URL}${PATH} endpoint with a query using HTTP GET and include a level query`, (done) => {
       const sql = 'SELECT * FROM foo'
       const level = 'strong'
       const apiQuery = {
         q: sql,
-        level
+        level,
       }
       const scope = querySuccess({url: URL, path: PATH, query: apiQuery})
       query(URL, sql, {level})
@@ -31,11 +31,11 @@ describe('api data query', function () {
         })
         .catch(done)
     })
-    it(`should call the ${URL}${PATH} endpoint with a query using HTTP POST if sql is an array`, function (done) {
+    it(`should call the ${URL}${PATH} endpoint with a query using HTTP POST if sql is an array`, (done) => {
       const sql = ['SELECT * FROM foo', 'SELECT * FROM bar']
       const level = 'weak'
       const apiQuery = {
-        level
+        level,
       }
       const scope = queryMultipleSuccess({url: URL, path: PATH, query: apiQuery})
       query(URL, sql, {level})

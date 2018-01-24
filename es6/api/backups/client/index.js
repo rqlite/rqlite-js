@@ -5,7 +5,6 @@ import _omit from 'lodash/omit'
 import _partial from 'lodash/partial'
 import backupApi from '../backup'
 import restoreApi from '../restore'
-import {Promise as PromiseRsvp} from 'rsvp'
 
 /**
  * Creates a promise which on success provides a client that can talk to a rqlite data api.
@@ -14,8 +13,8 @@ import {Promise as PromiseRsvp} from 'rsvp'
  * @param {object} options.httpOptions - The default options that are applied to all HTTP clients.
  * @param {object} options.httpOptions.agent - An agent to be used instead of the default http agent, this is useful for keep alive.
  */
-export default function connect (options = {}) {
-  return new PromiseRsvp(function handlePromise (resolve, reject) {
+export default function connect(options = {}) {
+  return new Promise(((resolve, reject) => {
     options = _isString(options) ? {url: options} : options
     const {url} = options
     if (!url) {
@@ -24,9 +23,9 @@ export default function connect (options = {}) {
     }
     resolve({
       backup: _partial(clientConnect, options, backupApi),
-      restore: _partial(clientConnect, options, restoreApi)
+      restore: _partial(clientConnect, options, restoreApi),
     })
-  })
+  }))
 }
 
 /**
@@ -36,7 +35,7 @@ export default function connect (options = {}) {
  * @param {string} path - The path this request i.e. /db/query.
  * @param {object} options - Options for this request that will me merged with connectOptions.
  */
-function clientConnect (connectOptions, clientMethod, options = {}) {
+function clientConnect(connectOptions, clientMethod, options = {}) {
   const {url} = connectOptions
   if (!_isString(url)) {
     throw new Error('The url argument is required to be a string.')
