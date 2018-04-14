@@ -14,7 +14,10 @@ import superagent from 'superagent'
 import queryString from 'query-string'
 
 
-const DEAULT_TIMEOUT = 30
+const DEAULT_TIMEOUT = {
+  response: 5000,  // Wait 5 seconds for the server to start sending,
+  deadline: 30000, // but allow 30 seconds for the data to finish loading.
+}
 
 /**
  * Get the HTTP library for use in requests.
@@ -31,7 +34,9 @@ export function getHttpLibrary() {
  * @param {object=} options.query - An object with the query to send with the HTTP request.
  * @param {object=} options.body - The body of the HTTP request for all non get requests.
  * @param {object=} options.agent - Agent to replace the default agent i.e. keepalive.
- * @param {number=} options.timeout - Optional timeout to override default.
+ * @param {object=} options.timeout - Optional timeout to override default.
+ * @param {number=} options.timeout.response - Milliseconds to wait for the server to start sending data.
+ * @param {number=} options.timeout.deadline - Milliseconds to wait for the data to finish being sent.
  * @param {object=} options.headers - HTTP headers to send with the request.
  */
 export function prepare(url, options = {}) {
@@ -40,12 +45,11 @@ export function prepare(url, options = {}) {
     query,
     body,
     agent,
-    timeout,
     auth,
     buffer,
     responseParserType,
   } = options
-  let { headers = {} } = options
+  let { headers = {}, timeout = {} } = options
   const client = getHttpLibrary()[httpMethod](url)
   // Add headers for the JSON requests which are all non-get requests.
   if (httpMethod !== HTTP_METHOD_GET) {
@@ -73,7 +77,11 @@ export function prepare(url, options = {}) {
     const parser = superagent.parse[responseParserType]
     client.parse(parser)
   }
-  client.timeout(timeout || DEAULT_TIMEOUT)
+  // Convert timeout to object if it is set and not an object
+  if (timeout && !_isObject(timeout)) {
+    timeout = { deadline: timeout }
+  }
+  client.timeout(_assign({}, timeout, DEAULT_TIMEOUT))
   client.set(createDefaultHeaders(headers))
   return client
 }

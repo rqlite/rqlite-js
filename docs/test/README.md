@@ -13,7 +13,19 @@ The data API can be run through a series of integration test using the following
 
     npm run test-integrations
 
-during development.  Please note that you will need a copy of rqlite running to be able to exercise these tests. If you need a quick way to spin up rqlite checkout the [docker image](https://hub.docker.com/r/rqlite/rqlite/).  The integration test by default attempt to connect to a server at `http://localhost:4001`, but you can override the URL value using the `RQLITE_URL` environment variable e.g.
+during development.  Please note that you will need a copy of rqlite running to be able to exercise these tests. If you need a quick way to spin up rqlite checkout the [docker image](https://hub.docker.com/r/rqlite/rqlite/) or you can use the npm command below to run a docker conatiner in the background:
+
+    npm run start-rqlite
+
+You can stop the docker container with this command:
+
+    npm run stop-rqlite
+
+You can delete the container with the following command:
+
+    npm run rm-rqlite
+
+The integration test by default attempts to connect to a server at `http://localhost:4001`, but you can override the URL value using the `RQLITE_URL` environment variable e.g.
 
     RQLITE_URL=http://10.0.0.1:4001 npm run test-integrations
 
