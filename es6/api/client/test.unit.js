@@ -7,7 +7,6 @@ import {
   post,
   createHttpOptions,
 } from './index'
-import {CONTENT_TYPE_APPLICATION_JSON} from '../../http/content-types'
 import {PATH as PATH_QUERY} from '../data/query'
 import {PATH as PATH_EXECUTE} from '../data/execute'
 import {querySuccess, QUERY_SUCCESS_RESPONSE} from '../../test/api-data-query-nock'
@@ -51,10 +50,11 @@ describe('api client', () => {
   })
   describe('Function: post()', () => {
     it(`should call the ${URL}${PATH_EXECUTE} endpoint with a request body using HTTP POST when using insert`, async () => {
-      const sql = 'INSERT INTO foo(name) VALUES(\"fiona\")'
+      const sql = 'INSERT INTO foo(name) VALUES("fiona")'
       const scope = executeSuccess({url: URL, path: PATH_EXECUTE})
       const res = await assert.isFulfilled(post(URL, PATH_EXECUTE, {httpOptions: {body: [sql]}}))
       assert.isTrue(scope.isDone(), 'http request captured by nock')
+      // eslint-disable-next-line  no-underscore-dangle
       assert.deepEqual([sql], res.request._data)
       assert.deepEqual(EXECUTE_SUCCESS_RESPONSE, res.body)
     })

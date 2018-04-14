@@ -3,7 +3,6 @@ import chai from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 import nock from 'nock'
 import execute, {PATH} from './index'
-import {CONTENT_TYPE_APPLICATION_JSON} from '../../../http/content-types'
 import {executeSuccess, EXECUTE_SUCCESS_RESPONSE} from '../../../test/api-data-execute-nock'
 
 chai.use(chaiAsPromised)
@@ -17,10 +16,11 @@ describe('api data execute', () => {
   after(() => nock.enableNetConnect())
   describe('Function: execute()', () => {
     it(`should call the ${URL}${PATH} endpoint with a query using HTTP POST`, async () => {
-      const sql = 'INSERT INTO foo(name) VALUES(\"fiona\")'
+      const sql = 'INSERT INTO foo(name) VALUES("fiona")'
       const scope = executeSuccess({url: URL, path: PATH})
       const res = await assert.isFulfilled(execute(URL, sql))
       assert.isTrue(scope.isDone(), 'http request captured by nock')
+      // eslint-disable-next-line no-underscore-dangle
       assert.deepEqual([sql], res.request._data)
       assert.deepEqual(EXECUTE_SUCCESS_RESPONSE, res.body)
     })

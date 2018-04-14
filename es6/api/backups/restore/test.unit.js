@@ -3,7 +3,6 @@ import chai from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 import nock from 'nock'
 import restore, {PATH} from './index'
-import {CONTENT_TYPE_APPLICATION_JSON} from '../../../http/content-types'
 import {BACKUP_SUCCESS_RESPONSE} from '../../../test/backups/backup-nock'
 import {restoreSuccess, RESTORE_SUCCESS_RESPONSE} from '../../../test/backups/restore-nock'
 
@@ -19,8 +18,11 @@ describe('api backups restore', () => {
   describe('Function: execute()', () => {
     it(`should call the ${URL}${PATH} endpoint using HTTP POST`, async () => {
       const scope = restoreSuccess({url: URL, path: PATH})
-      const res = await assert.isFulfilled(restore(URL, {httpOptions: {body: BACKUP_SUCCESS_RESPONSE}}))
+      const res = await assert.isFulfilled(restore(URL, {
+        httpOptions: {body: BACKUP_SUCCESS_RESPONSE},
+      }))
       assert.isTrue(scope.isDone(), 'http request captured by nock')
+      // eslint-disable-next-line no-underscore-dangle
       assert.equal(BACKUP_SUCCESS_RESPONSE, res.request._data)
       assert.deepEqual(RESTORE_SUCCESS_RESPONSE, res.body)
     })

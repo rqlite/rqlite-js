@@ -16,6 +16,6 @@ export default function (url, sql, options = {}) {
   // Add the body which is used for UPDATE, INSERT, DELETE, CREATE, DROP, etc. statements.
   httpOptions = _assign({}, httpOptions, {body})
   // Put the httpOptions back on the options
-  options = _assign({}, options, {httpOptions})
-  return post(url, PATH, options)
+  const opts = _assign({}, options, {httpOptions})
+  return post(url, PATH, opts)
 }

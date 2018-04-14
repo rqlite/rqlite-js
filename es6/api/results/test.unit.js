@@ -5,8 +5,6 @@ import {
   toPlainJs,
 } from './index'
 
-const URL = 'http://www.rqlite.com:4001'
-
 describe('api data results', () => {
   describe('Function: getError()', () => {
     it('should get an error from an data API results set', () => {
@@ -18,8 +16,6 @@ describe('api data results', () => {
   })
   describe('Function: toPlainJs()', () => {
     it('should create a plain js array containing key value object pairs', () => {
-      const error = 'near "nonsense": syntax error'
-      const errorResult = {error}
       const results = [
         {
           columns: ['id', 'name'],

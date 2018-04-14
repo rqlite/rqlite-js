@@ -2,10 +2,9 @@ import {describe, it} from 'mocha'
 import chai from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 import _join from 'lodash/join'
+import _get from 'lodash/get'
 import connect from './index'
 import connectData from '../../data/client'
-import _get from 'lodash/get'
-import _size from 'lodash/size'
 import {getUrl} from '../../../test/integrations'
 import {getError} from '../../results'
 import {PATH as PATH_BACKUP} from '../backup'
@@ -16,8 +15,8 @@ const {assert} = chai
 const URL = getUrl()
 const BACKUP_SQL_STATEMENTS = [
   'CREATE TABLE foo (id integer not null primary key, name text);',
-  'INSERT INTO foo(name) VALUES(\"fiona\");',
-  'INSERT INTO foo(name) VALUES(\"justin\");',
+  'INSERT INTO foo(name) VALUES("fiona");',
+  'INSERT INTO foo(name) VALUES("justin");',
 ]
 const BACKUP_SQL = _join(BACKUP_SQL_STATEMENTS, '')
 
@@ -39,8 +38,8 @@ async function createData() {
     throw error
   }
   res = await api.insert([
-    'INSERT INTO fooBackups(name) VALUES(\"fiona\")',
-    'INSERT INTO fooBackups(name) VALUES(\"justin\")',
+    'INSERT INTO fooBackups(name) VALUES("fiona")',
+    'INSERT INTO fooBackups(name) VALUES("justin")',
   ], {transaction: true})
   results = _get(res, ['body', 'results'])
   error = getError(results)
@@ -51,7 +50,7 @@ async function createData() {
 
 async function checkData() {
   const api = await connectData(URL)
-  const res = await api.select('SELECT id, name FROM foo WHERE name=\"fiona\"')
+  const res = await api.select('SELECT id, name FROM foo WHERE name="fiona"')
   const results = _get(res, ['body', 'results'])
   const error = getError(results)
   if (error) {

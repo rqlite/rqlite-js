@@ -23,33 +23,31 @@ The code sample shows how would connect to a rqlite server and create a table.
 import connect from 'rqlite-js/lib/api/data/client'
 import {getError, toPlainJs} from 'rqlite-js/lib/api/results'
 
-connect('http://localhost:4001')
-  .then(function onConnect (api) {
+try {
+  const api = await connect('http://localhost:4001')
+  try {
     // You can create your own raw SQL query or use another SQL generator library of your liking.
     const sql = 'CREATE TABLE foo (id integer not null primary key, name text)'
-    api.table.create(sql)
-      .then(function onSuccess (res) {
-        // We are given back the entire response object if anything is needed, otherwise
-        // the response body has our rqlite data.
-        const results = res.body.results
-        // Check the results for an error to make sure we the SQL query did
-        // not generate an error while executing.
-        const error = getError(results)
-        if (error) {
-          console.error('rqlite results contained an error.', error)
-          return
-        }
-        // We are successful and have results to use from our SQL query.
-        console.log('Checkout the rqlite results.', results)
-        console.log('Checkout the rqlite results as plain Js object for app use.', toPlainJs(results))
-      })
-      .catch(function onFailure (err) {
-        console.error('The HTTP client got an HTTP error, there must be something else going on.', err)
-      })
-  })
-  .catch(function onConnectError (err) {
-    console.error('The rqlite-js connect function threw an error.', err)
-  })
+    const res = await api.table.create(sql)
+    // We are given back the entire response object if anything is needed, otherwise
+    // the response body has our rqlite data.
+    const results = res.body.results
+    // Check the results for an error to make sure we the SQL query did
+    // not generate an error while executing.
+    const error = getError(results)
+    if (error) {
+      console.error('rqlite results contained an error.', error)
+      return
+    }
+    // We are successful and have results to use from our SQL query.
+    console.log('Checkout the rqlite results.', results)
+    console.log('Checkout the rqlite results as plain Js object for app use.', toPlainJs(results))
+  } catch (err) {
+    console.error('The HTTP client got an HTTP error, there must be something else going on.', err)
+  }
+} catch (err) {
+  console.error('The rqlite-js connect function threw an error.', err)
+}
 ```
 
 ### Chained QUERY Example
@@ -59,99 +57,74 @@ The code sample shows how would connect to a rqlite server insert a row then sel
 import connect from 'rqlite-js/lib/api/data/client'
 import {getError, toPlainJs} from 'rqlite-js/lib/api/results'
 
-connect('http://localhost:4001')
-  .then(function onConnect (api) {
-    // Insert a row into the table foo we create above in the CREATE TABLE example.
-    // The values for sql can be a string or an array if you want to execute multiple
-    // SQL queries on the server.
-    const sql = 'INSERT INTO foo(name) VALUES(\"fiona\")'
-    api.insert(sql)
-      .then((res) => {
-        const results = res.body.results
-        const error = getError(results)
-        if (error) {
-          console.error('rqlite results contained an error.', error)
-          return
-        }
-        const id = results[0].last_insert_id
-        const sql = `SELECT name FROM foo WHERE id="${id}"`
-        api.select(sql)
-          .then((res) => {
-            const results = res.body.results
-            const error = getError(results)
-            if (error) {
-              console.error('rqlite results contained an error.', error)
-              return
-            }
-            console.log('The value for the name field which should equal fiona', results[0].values[0])
-            console.log('rqlite results are great, but I just want to work with the data', toPlainJs(results))
-          })
-      })
-  })
-  .catch(function onConnectError (err) {
-    console.error('The rqlite-js connect function threw an error.', err)
-  })
+const api = await connect('http://localhost:4001')
+// Insert a row into the table foo we create above in the CREATE TABLE example.
+// The values for sql can be a string or an array if you want to execute multiple
+// SQL queries on the server.
+const sql = 'INSERT INTO foo(name) VALUES(\"fiona\")'
+const resInsert = await api.insert(sql)
+if (getError(resInsert.body.results)) {
+  console.error('rqlite results contained an error.', error)
+  return
+}
+const id = resInsert.body.results[0].last_insert_id
+const sql = `SELECT name FROM foo WHERE id="${id}"`
+const res = await api.select(sql)
+const results = res.body.results
+const error = getError(results)
+if (error) {
+  console.error('rqlite results contained an error.', error)
+  return
+}
+console.log('The value for the name field which should equal fiona', results[0].values[0])
+console.log('rqlite results are great, but I just want to work with the data', toPlainJs(results))
 ```
 
 ### Using transactions Example
-The code sample shows how would connect to a rqlite and run multiple insert queries within a transaction [strong consistency](https://github.com/rqlite/rqlite/blob/master/doc/DATA_API.md#transactions).
+The code sample shows how would connect to a rqlite and run multiple insert queries within a transaction [transactions](https://github.com/rqlite/rqlite/blob/master/DOC/DATA_API.md#transactions).
 
 ```javascript
 import connect from 'rqlite-js/lib/api/data/client'
 import {getError, toPlainJs} from 'rqlite-js/lib/api/results'
 
-connect('http://localhost:4001')
-  .then(function onConnect (api) {
-    const sql = [
-      'INSERT INTO foo(name) VALUES(\"fiona\")',
-      'INSERT INTO bar(name) VALUES(\"test\")'
-    ]
-    api.insert(sql, {transaction: true})
-      .then((res) => {
-        const results = res.body.results
-        const error = getError(results)
-        if (error) {
-          console.error('rqlite results contained an error.', error)
-          return
-        }
-        const id = results[0].last_insert_id
-        console.log('The id for the first insert is in index 0 last_insert_id', results[0].last_insert_id)
-        console.log('The id for the second insert is in index 1 last_insert_id', results[1].last_insert_id)
-      })
-  })
-  .catch(function onConnectError (err) {
-    console.error('The rqlite-js connect function threw an error.', err)
-  })
+const await api = connect('http://localhost:4001')
+// Insert a row into the table foo we create above in the CREATE TABLE example.
+// The values for sql can be a string or an array if you want to execute multiple
+// SQL queries on the server.
+ const sql = [
+  'INSERT INTO foo(name) VALUES(\"fiona\")',
+  'INSERT INTO bar(name) VALUES(\"test\")'
+]
+const res = api.insert(sql, {transaction: true})
+const results = res.body.results
+if (getError(results)) {
+  console.error('rqlite results contained an error.', error)
+  return
+}
+console.log('The id for the first insert is in index 0 last_insert_id', results[0].last_insert_id)
+console.log('The id for the second insert is in index 1 last_insert_id', results[1].last_insert_id)
 ```
 
 ### Multiple QUERY Example With Consistency
-The code sample shows how would connect to a rqlite and run multiple select queries with [strong consistency](https://github.com/rqlite/rqlite/blob/master/doc/CONSISTENCY.md).
+The code sample shows how would connect to a rqlite and run multiple select queries with [strong consistency](https://github.com/rqlite/rqlite/blob/master/DOC/CONSISTENCY.md).
 
 ```javascript
 import connect from 'rqlite-js/lib/api/data/client'
 import {getError, toPlainJs} from 'rqlite-js/lib/api/results'
 
-connect('http://localhost:4001')
-  .then(function onConnect (api) {
-    const sql = [
-      `SELECT name FROM foo WHERE id="1"`,
-      `SELECT id FROM bar WHERE name="test"`
-    ]
-    api.select(sql, {level: 'strong'})
-      .then((res) => {
-        const results = res.body.results
-        const error = getError(results)
-        if (error) {
-          console.error('rqlite results contained an error.', error)
-          return
-        }
-        console.log('The results for the first select are in index 0', results[0])
-        console.log('The results for the second select are in index 1', results[1])
-      })
-  })
-  .catch(function onConnectError (err) {
-    console.error('The rqlite-js connect function threw an error.', err)
-  })
+const api = await connect('http://localhost:4001')
+const sql = [
+  'SELECT name FROM foo WHERE id="1"',
+  'SELECT id FROM bar WHERE name="test"'
+]
+const res = await api.select(sql, {level: 'strong'})
+const results = res.body.results
+if (getError(results)) {
+  console.error('rqlite results contained an error.', error)
+  return
+}
+console.log('The results for the first select are in index 0', results[0])
+console.log('The results for the second select are in index 1', results[1])
 ```
 
 ### Keep Alive Example
@@ -175,49 +148,42 @@ const options = {
   // still be overridden per request inside of connect.
   httpOptions: {
     agent: keepaliveAgent,
-    timeout: 60000
+    timeout: {
+      deadline: 60000
+    }
   }
 }
 
-connect(options)
-  .then(function onConnect (api) {
-    // This is the same INSERT quert from above, but now it is sent over an HTTP connection
-    // that remains open for the next request.
-    const sql = 'INSERT INTO foo(name) VALUES(\"fiona\")'
-    api.insert(sql)
-      .then((res) => {
-        const results = res.body.results
-        const error = getError(results)
-        if (error) {
-          console.error('rqlite results contained an error.', error)
-          return
-        }
-        const id = results[0].last_insert_id
-        const sql = `SELECT name FROM foo WHERE id="${id}"`
-        // Override the options and turn off keepalive for just this request and change
-        // the timeout to 10 seconds.
-        const selectOptions = {
-          httpOptions: {
-            agent: undefined,
-            timeout: 10000
-          }
-        }
-        api.select(sql, selectOptions)
-          .then((res) => {
-            const results = res.body.results
-            const error = getError(results)
-            if (error) {
-              console.error('rqlite results contained an error.', error)
-              return
-            }
-            console.log('The value for the name field which should equal fiona', results[0].values[0])
-            console.log('rqlite results are great, but I just want to work with the data', toPlainJs(results))
-          })
-      })
-  })
-  .catch(function onConnectError (err) {
-    console.error('The rqlite-js connect function threw an error.', err)
-  })
+const api = await connect(options)
+// This is the same INSERT quert from above, but now it is sent over an HTTP connection
+// that remains open for the next request.
+const sql = 'INSERT INTO foo(name) VALUES(\"fiona\")'
+const resInsert = await api.insert(sql)
+if (getError(resInsert.body.results)) {
+  console.error('rqlite results contained an error.', error)
+  return
+}
+const id = resInsert.body.results[0].last_insert_id
+const sql = `SELECT name FROM foo WHERE id="${id}"`
+// Override the options and turn off keepalive for just this request and change
+// the timeout to 10 seconds.
+const selectOptions = {
+  httpOptions: {
+    agent: undefined,
+    timeout: {
+      deadline: 10000
+    }
+  }
+}
+const res = await api.select(sql, selectOptions)
+const results = res.body.results
+const error = getError(results)
+if (error) {
+  console.error('rqlite results contained an error.', error)
+  return
+}
+console.log('The value for the name field which should equal fiona', results[0].values[0])
+console.log('rqlite results are great, but I just want to work with the data', toPlainJs(results))
 ```
 
 ### Authentication
@@ -241,33 +207,23 @@ const options = {
   }
 }
 */
-connect(url)
-  .then(function onConnect (api) {
-    // You can create your own raw SQL query or use another SQL generator library of your liking.
-    const sql = 'CREATE TABLE foo (id integer not null primary key, name text)'
-    api.table.create(sql)
-      .then(function onSuccess (res) {
-        // We are given back the entire response object if anything is needed, otherwise
-        // the response body has our rqlite data.
-        const results = res.body.results
-        // Check the results for an error to make sure we the SQL query did
-        // not generate an error while executing.
-        const error = getError(results)
-        if (error) {
-          console.error('rqlite results contained an error.', error)
-          return
-        }
-        // We are successful and have results to use from our SQL query.
-        console.log('Checkout the rqlite results.', results)
-        console.log('Checkout the rqlite results as plain Js object for app use.', toPlainJs(results))
-      })
-      .catch(function onFailure (err) {
-        console.error('The HTTP client got an HTTP error, there must be something else going on.', err)
-      })
-  })
-  .catch(function onConnectError (err) {
-    console.error('The rqlite-js connect function threw an error.', err)
-  })
+const api = await connect(url)
+// You can create your own raw SQL query or use another SQL generator library of your liking.
+const sql = 'CREATE TABLE foo (id integer not null primary key, name text)'
+const res = await api.table.create(sql)
+// We are given back the entire response object if anything is needed, otherwise
+// the response body has our rqlite data.
+const results = res.body.results
+// Check the results for an error to make sure we the SQL query did
+// not generate an error while executing.
+const error = getError(results)
+if (error) {
+  console.error('rqlite results contained an error.', error)
+  return
+}
+// We are successful and have results to use from our SQL query.
+console.log('Checkout the rqlite results.', results)
+console.log('Checkout the rqlite results as plain Js object for app use.', toPlainJs(results))
 ```
 
 ## Testing

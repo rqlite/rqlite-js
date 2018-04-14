@@ -4,8 +4,8 @@ import {CONTENT_TYPE_APPLICATION_OCTET_STREAM} from '../../http/content-types'
 
 export const BACKUP_SUCCESS_RESPONSE = _join([
   'CREATE TABLE foo (id integer not null primary key, name text);',
-  'INSERT INTO foo(name) VALUES(\"fiona\");',
-  'INSERT INTO foo(name) VALUES(\"justin\");',
+  'INSERT INTO foo(name) VALUES("fiona");',
+  'INSERT INTO foo(name) VALUES("justin");',
 ], '')
 
 /**

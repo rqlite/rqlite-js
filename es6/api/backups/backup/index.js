@@ -21,6 +21,6 @@ export default function (url, options = {}) {
     headers,
     buffer: true, // Create a buffer
   })
-  options = _assign({}, options, {httpOptions})
-  return get(url, PATH, options)
+  const opts = _assign({}, options, {httpOptions})
+  return get(url, PATH, opts)
 }

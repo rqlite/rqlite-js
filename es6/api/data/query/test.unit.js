@@ -3,7 +3,6 @@ import chai from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 import nock from 'nock'
 import query, {PATH} from './index'
-import {CONTENT_TYPE_APPLICATION_JSON} from '../../../http/content-types'
 import {
   querySuccess,
   QUERY_SUCCESS_RESPONSE,
