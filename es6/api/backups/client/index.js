@@ -8,10 +8,10 @@ import restoreApi from '../restore'
 
 /**
  * Creates a promise which on success provides a client that can talk to a rqlite data api.
- * @param {object|string} options - Options for that will be used on all connections or the url if it is a string.
- * @param {string} options.url - The url for all connections i.e. http://localhost:4001.
- * @param {object} options.httpOptions - The default options that are applied to all HTTP clients.
- * @param {object} options.httpOptions.agent - An agent to be used instead of the default http agent, this is useful for keep alive.
+ * @param {object|string} options Options for that will be used on all connections or the url if it is a string.
+ * @param {string} options.url The url for all connections i.e. http://localhost:4001.
+ * @param {object} options.httpOptions The default options that are applied to all HTTP clients.
+ * @param {object} options.httpOptions.agent An agent to be used instead of the default http agent, this is useful for keep alive.
  */
 export default function connect(options = {}) {
   return new Promise(((resolve, reject) => {
@@ -30,10 +30,10 @@ export default function connect(options = {}) {
 
 /**
  * Wraps the client functions with connectOptions so defaults can be applied
- * @param {object} connectOptions - Options that were supplied to the connect function.
- * @param {function} clientMethod - The client method to be called.
- * @param {string} path - The path this request i.e. /db/query.
- * @param {object} options - Options for this request that will me merged with connectOptions.
+ * @param {object} connectOptions Options that were supplied to the connect function.
+ * @param {function} clientMethod The client method to be called.
+ * @param {string} path The path this request i.e. /db/query.
+ * @param {object} options Options for this request that will me merged with connectOptions.
  */
 function clientConnect(connectOptions, clientMethod, options = {}) {
   const {url} = connectOptions

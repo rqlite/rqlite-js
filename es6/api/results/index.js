@@ -8,7 +8,7 @@ import _get from 'lodash/get'
 /**
  * Get the first error or undefined if one does not exist from
  * an array of results that was a response from an rqlite server.
- * @param {array} results - A array from the results fields of sqlite response.
+ * @param {array} results A array from the results fields of sqlite response.
  */
 export function getError(results = []) {
   const errorData = _find(results, result => _has(result, 'error'))
@@ -20,7 +20,7 @@ export function getError(results = []) {
 
 /**
  * Create a plain object for application use from a results object.
- * @param {array} results - A array from the results fields of sqlite response.
+ * @param {array} results A array from the results fields of sqlite response.
  */
 export function toPlainJs(results = []) {
   return _map(results, (result) => {

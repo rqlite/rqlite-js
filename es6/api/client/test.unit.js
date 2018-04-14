@@ -15,7 +15,7 @@ import {executeSuccess, EXECUTE_SUCCESS_RESPONSE} from '../../test/api-data-exec
 const URL = 'http://www.rqlite.com:4001'
 
 describe('api client', () => {
-  beforeEach(nock.cleanAll)
+  beforeEach(() => nock.cleanAll())
   describe('Function: createHttpOptions()', () => {
     it('it should create the httpOptions using standard request options', () => {
       const httpOptions = {

@@ -9,7 +9,7 @@ import {restoreSuccess, RESTORE_SUCCESS_RESPONSE} from '../../../test/backups/re
 const URL = 'http://www.rqlite.com:4001'
 
 describe('api backups restore', () => {
-  beforeEach(nock.cleanAll)
+  beforeEach(() => nock.cleanAll())
   describe('Function: execute()', () => {
     it(`should call the ${URL}${PATH} endpoint using HTTP POST`, (done) => {
       const scope = restoreSuccess({url: URL, path: PATH})

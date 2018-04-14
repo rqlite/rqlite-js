@@ -11,7 +11,7 @@ import {executeSuccess, EXECUTE_SUCCESS_RESPONSE} from '../../../test/api-data-e
 const URL = 'http://www.rqlite.com:4001'
 
 describe('api data client', () => {
-  beforeEach(nock.cleanAll)
+  beforeEach(() => nock.cleanAll())
   describe('Function: connect()', () => {
     it(`should call the ${URL}${PATH_EXECUTE} endpoint with a request body using HTTP POST when performing an insert`, (done) => {
       connect(URL)

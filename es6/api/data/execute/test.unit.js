@@ -8,7 +8,7 @@ import {executeSuccess, EXECUTE_SUCCESS_RESPONSE} from '../../../test/api-data-e
 const URL = 'http://www.rqlite.com:4001'
 
 describe('api data execute', () => {
-  beforeEach(nock.cleanAll)
+  beforeEach(() => nock.cleanAll())
   describe('Function: execute()', () => {
     it(`should call the ${URL}${PATH} endpoint with a query using HTTP POST`, (done) => {
       const sql = 'INSERT INTO foo(name) VALUES(\"fiona\")'

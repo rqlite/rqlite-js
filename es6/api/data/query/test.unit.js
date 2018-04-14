@@ -13,7 +13,7 @@ import {
 const URL = 'http://www.rqlite.com:4001'
 
 describe('api data query', () => {
-  beforeEach(nock.cleanAll)
+  beforeEach(() => nock.cleanAll())
   describe('Function: query()', () => {
     it(`should call the ${URL}${PATH} endpoint with a query using HTTP GET and include a level query`, (done) => {
       const sql = 'SELECT * FROM foo'

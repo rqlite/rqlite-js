@@ -11,7 +11,7 @@ import {restoreSuccess, RESTORE_SUCCESS_RESPONSE} from '../../../test/backups/re
 const URL = 'http://www.rqlite.com:4001'
 
 describe('api backups client', () => {
-  beforeEach(nock.cleanAll)
+  beforeEach(() => nock.cleanAll())
   describe('Function: connect()', () => {
     it(`should call the ${URL}${PATH_BACKUP} endpoint using HTTP GET when performing a backup`, (done) => {
       connect(URL)

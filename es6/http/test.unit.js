@@ -3,10 +3,7 @@ import { assert } from 'chai'
 import nock from 'nock'
 import { querySuccess, QUERY_SUCCESS_RESPONSE } from '../test/api-data-query-nock'
 import { executeSuccess, EXECUTE_SUCCESS_RESPONSE } from '../test/api-data-execute-nock'
-import {
-  CONTENT_TYPE_APPLICATION_JSON,
-  CONTENT_TYPE_APPLICATION_X_WWW_FORM_URLENCODED,
-} from './content-types'
+import { CONTENT_TYPE_APPLICATION_JSON } from './content-types'
 import {
   get,
   post,
@@ -22,7 +19,7 @@ const auth = {
 }
 
 describe('http', () => {
-  beforeEach(nock.cleanAll)
+  beforeEach(() => nock.cleanAll())
   describe('Function: createDefaultHeaders()', () => {
     it(`should add the Accept header with a value of ${CONTENT_TYPE_APPLICATION_JSON}`, () => {
       assert.deepEqual({ Accept: CONTENT_TYPE_APPLICATION_JSON }, createDefaultHeaders())
@@ -79,6 +76,7 @@ describe('http', () => {
       post(`${url}${path}`, { body })
         .then((res) => {
           assert.isTrue(scope.isDone(), 'http request captured by nock')
+          // eslint-disable-next-line no-underscore-dangle
           assert.deepEqual(body, res.request._data)
           assert.deepEqual(EXECUTE_SUCCESS_RESPONSE, res.body)
           done()
@@ -95,6 +93,7 @@ describe('http', () => {
       post(`${url}${path}`, { body, auth })
         .then((res) => {
           assert.isTrue(scope.isDone(), 'http request captured by nock')
+          // eslint-disable-next-line no-underscore-dangle
           assert.deepEqual(body, res.request._data)
           assert.deepEqual(EXECUTE_SUCCESS_RESPONSE, res.body)
           done()

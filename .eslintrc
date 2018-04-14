@@ -1,4 +1,8 @@
 {
+  env: {
+    node: true,
+    mocha: true
+  },
   "extends": "airbnb/base",
   "plugins": [
     "mocha"
@@ -6,6 +10,7 @@
   "rules": {
     "semi": ["off"],
     "object-curly-spacing": ["off"],
+    "mocha/no-exclusive-tests": "error",
     "import/no-extraneous-dependencies": ["error", { "devDependencies": true }]
   }
 }
