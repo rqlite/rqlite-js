@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="0.0.14"></a>
+## [0.0.14](https://github.com/rqlite/rqlite-js/compare/v0.0.13...v0.0.14) (2018-04-14)
+
+
+### Bug Fixes
+
+* **eslint:** Updating code based on linter and adding linter to prepublish ([df822af](https://github.com/rqlite/rqlite-js/commit/df822af))
+
+
+
 <a name="0.0.13"></a>
 ## [0.0.13](https://github.com/rqlite/rqlite-js/compare/v0.0.12...v0.0.13) (2018-04-14)
 
