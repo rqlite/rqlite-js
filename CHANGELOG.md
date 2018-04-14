@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="0.0.13"></a>
+## [0.0.13](https://github.com/rqlite/rqlite-js/compare/v0.0.12...v0.0.13) (2018-04-14)
+
+
+### Bug Fixes
+
+* **timeout:** Changing timeout in http client to object ([a3cbbd1](https://github.com/rqlite/rqlite-js/commit/a3cbbd1))
+
+
+
 <a name="0.0.12"></a>
 ## [0.0.12](https://github.com/rqlite/rqlite-js/compare/v0.0.11...v0.0.12) (2018-01-24)
 
