@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="0.0.15"></a>
+## [0.0.15](https://github.com/rqlite/rqlite-js/compare/v0.0.14...v0.0.15) (2018-04-14)
+
+
+### Bug Fixes
+
+* **packages:** Removed del from package.json ([79f9f1f](https://github.com/rqlite/rqlite-js/commit/79f9f1f))
+* **unit-tests:** Unit tests updated to use async await ([fb6d7dc](https://github.com/rqlite/rqlite-js/commit/fb6d7dc))
+
+
+
 <a name="0.0.14"></a>
 ## [0.0.14](https://github.com/rqlite/rqlite-js/compare/v0.0.13...v0.0.14) (2018-04-14)
 
