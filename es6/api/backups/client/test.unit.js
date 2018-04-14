@@ -32,7 +32,7 @@ describe('api backups client', () => {
       const res = await assert.isFulfilled(api.restore({httpOptions: {body: BACKUP_SUCCESS_RESPONSE}}))
       assert.isTrue(scope.isDone(), 'http request captured by nock')
       assert.equal(BACKUP_SUCCESS_RESPONSE, res.request._data)
-      assert.deepEqual(RESTORE_SUCCESS_RESPONSE, res.body)    
+      assert.deepEqual(RESTORE_SUCCESS_RESPONSE, res.body)
     })
   })
 })
