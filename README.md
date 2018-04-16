@@ -87,7 +87,7 @@ The code sample shows how would connect to a rqlite and run multiple insert quer
 import connect from 'rqlite-js/lib/api/data/client'
 import {getError, toPlainJs} from 'rqlite-js/lib/api/results'
 
-const await api = connect('http://localhost:4001')
+const api = await connect('http://localhost:4001')
 // Insert a row into the table foo we create above in the CREATE TABLE example.
 // The values for sql can be a string or an array if you want to execute multiple
 // SQL queries on the server.
@@ -95,7 +95,7 @@ const await api = connect('http://localhost:4001')
   'INSERT INTO foo(name) VALUES(\"fiona\")',
   'INSERT INTO bar(name) VALUES(\"test\")'
 ]
-const res = api.insert(sql, {transaction: true})
+const res = await api.insert(sql, {transaction: true})
 const results = res.body.results
 if (getError(results)) {
   console.error('rqlite results contained an error.', error)
