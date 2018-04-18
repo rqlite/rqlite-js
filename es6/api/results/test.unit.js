@@ -15,24 +15,67 @@ describe('api data results', () => {
     })
   })
   describe('Function: toPlainJs()', () => {
-    it('should create a plain js array containing key value object pairs', () => {
+    it('should create a plain js array containing name value objects', () => {
       const results = [
         {
           columns: ['id', 'name'],
           types: ['integer', 'text'],
           values: [
             [1, 'fiona'],
+            [2, 'justin'],
+          ],
+          time: 0.0150043,
+        },
+        {
+          columns: ['id', 'name'],
+          types: ['integer', 'text'],
+          values: [
+            [5, 'bob'],
+            [10, 'sally'],
           ],
           time: 0.0150043,
         },
       ]
       const plainJs = [
-        {
-          id: 1,
-          name: 'fiona',
-        },
+        { id: 1, name: 'fiona' },
+        { id: 2, name: 'justin' },
+        { id: 5, name: 'bob' },
+        { id: 10, name: 'sally' },
       ]
       assert.deepEqual(plainJs, toPlainJs(results))
+    })
+    it('should create a plain js array containing an array of object with name value objects', () => {
+      const results = [
+        {
+          columns: ['id', 'name'],
+          types: ['integer', 'text'],
+          values: [
+            [1, 'fiona'],
+            [2, 'justin'],
+          ],
+          time: 0.0150043,
+        },
+        {
+          columns: ['id', 'name'],
+          types: ['integer', 'text'],
+          values: [
+            [5, 'bob'],
+            [10, 'sally'],
+          ],
+          time: 0.0150043,
+        },
+      ]
+      const plainJs = [
+        [
+          { id: 1, name: 'fiona' },
+          { id: 2, name: 'justin' },
+        ],
+        [
+          { id: 5, name: 'bob' },
+          { id: 10, name: 'sally' },
+        ],
+      ]
+      assert.deepEqual(plainJs, toPlainJs(results, {valuesAsArrays: true}))
     })
   })
 })
