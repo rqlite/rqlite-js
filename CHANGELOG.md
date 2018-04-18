@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="0.0.21"></a>
+## [0.0.21](https://github.com/rqlite/rqlite-js/compare/v0.0.20...v0.0.21) (2018-04-18)
+
+
+### Bug Fixes
+
+* **exports:** Adding babel support for module exports ([1f96358](https://github.com/rqlite/rqlite-js/commit/1f96358))
+
+
+
 <a name="0.0.20"></a>
 ## [0.0.20](https://github.com/rqlite/rqlite-js/compare/v0.0.19...v0.0.20) (2018-04-18)
 
