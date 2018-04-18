@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="0.0.19"></a>
+## [0.0.19](https://github.com/rqlite/rqlite-js/compare/v0.0.18...v0.0.19) (2018-04-18)
+
+
+### Bug Fixes
+
+* **plain-js:** The toPlainJS function now correctly parses all values ([2431992](https://github.com/rqlite/rqlite-js/commit/2431992))
+
+
+
 <a name="0.0.18"></a>
 ## [0.0.18](https://github.com/rqlite/rqlite-js/compare/v0.0.17...v0.0.18) (2018-04-16)
 
