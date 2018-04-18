@@ -16,7 +16,7 @@ describe('api backups restore', () => {
   beforeEach(() => nock.cleanAll())
   after(() => nock.enableNetConnect())
   describe('Function: execute()', () => {
-    it(`should call the ${URL}${PATH} endpoint using HTTP POST`, async () => {
+    it(`should call ${URL}${PATH} endpoint using HTTP POST`, async () => {
       const scope = restoreSuccess({url: URL, path: PATH})
       const res = await assert.isFulfilled(restore(URL, {
         httpOptions: {body: BACKUP_SUCCESS_RESPONSE},

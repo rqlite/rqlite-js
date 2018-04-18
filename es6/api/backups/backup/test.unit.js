@@ -15,7 +15,7 @@ describe('api backups backup', () => {
   beforeEach(() => nock.cleanAll())
   after(() => nock.enableNetConnect())
   describe('Function: backup()', () => {
-    it(`should call the ${URL}${PATH} endpoint using HTTP GET`, async () => {
+    it(`should call ${URL}${PATH} endpoint using HTTP GET`, async () => {
       const scope = backupSuccess({url: URL, path: PATH})
       const res = await assert.isFulfilled(backup(URL))
       assert.isTrue(scope.isDone(), 'http request captured by nock')

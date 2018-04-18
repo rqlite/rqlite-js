@@ -1,12 +1,12 @@
 {
-  "plugins": ["transform-runtime"],
+  "plugins": ["transform-runtime", "add-module-exports"],
   "presets": [
     [
   	  "env",
       {
         "targets": {
-          "browsers": ["last 2 versions", "safari >= 7"],
-  		    "node": "6.10"
+          "browsers": ["> 1%", "last 2 versions"],
+  		    "node": "6"
         }
       }
 	  ]

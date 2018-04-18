@@ -18,7 +18,7 @@ describe('api data client', () => {
   beforeEach(() => nock.cleanAll())
   after(() => nock.enableNetConnect())
   describe('Function: connect()', () => {
-    it(`should call the ${URL}${PATH_EXECUTE} endpoint with a request body using HTTP POST when performing an insert`, async () => {
+    it(`should call ${URL}${PATH_EXECUTE} endpoint with a request body using HTTP POST when performing an insert`, async () => {
       const api = await assert.isFulfilled(connect(URL))
       const scope = executeSuccess({url: URL, path: PATH_EXECUTE})
       const sql = 'INSERT INTO foo(name) VALUES("fiona")'
@@ -28,7 +28,7 @@ describe('api data client', () => {
       assert.deepEqual([sql], res.request._data)
       assert.deepEqual(EXECUTE_SUCCESS_RESPONSE, res.body)
     })
-    it(`should call the ${URL}${PATH_EXECUTE} endpoint with a request body using HTTP POST when performing an update`, async () => {
+    it(`should call ${URL}${PATH_EXECUTE} endpoint with a request body using HTTP POST when performing an update`, async () => {
       const api = await assert.isFulfilled(connect(URL))
       const scope = executeSuccess({url: URL, path: PATH_EXECUTE})
       const sql = 'UPDATE foo SET name="fionaTest" WHERE name="fiona"'
@@ -38,7 +38,7 @@ describe('api data client', () => {
       assert.deepEqual([sql], res.request._data)
       assert.deepEqual(EXECUTE_SUCCESS_RESPONSE, res.body)
     })
-    it(`should call the ${URL}${PATH_EXECUTE} endpoint with a request body using HTTP POST when performing a delete`, async () => {
+    it(`should call ${URL}${PATH_EXECUTE} endpoint with a request body using HTTP POST when performing a delete`, async () => {
       const api = await assert.isFulfilled(connect(URL))
       const scope = executeSuccess({url: URL, path: PATH_EXECUTE})
       const sql = 'DELETE FROM foo WHERE name="fiona"'
@@ -48,7 +48,7 @@ describe('api data client', () => {
       assert.deepEqual([sql], res.request._data)
       assert.deepEqual(EXECUTE_SUCCESS_RESPONSE, res.body)
     })
-    it(`should call the ${URL}${PATH_EXECUTE} endpoint with a request body using HTTP POST when performing a create table`, async () => {
+    it(`should call ${URL}${PATH_EXECUTE} endpoint with a request body using HTTP POST when performing a create table`, async () => {
       const api = await assert.isFulfilled(connect(URL))
       const scope = executeSuccess({url: URL, path: PATH_EXECUTE})
       const sql = 'CREATE TABLE foo (id integer not null primary key, name text)'
@@ -58,7 +58,7 @@ describe('api data client', () => {
       assert.deepEqual([sql], res.request._data)
       assert.deepEqual(EXECUTE_SUCCESS_RESPONSE, res.body)
     })
-    it(`should call the ${URL}${PATH_EXECUTE} endpoint with a request body using HTTP POST when performing a drop table`, async () => {
+    it(`should call ${URL}${PATH_EXECUTE} endpoint with a request body using HTTP POST when performing a drop table`, async () => {
       const api = await assert.isFulfilled(connect(URL))
       const scope = executeSuccess({url: URL, path: PATH_EXECUTE})
       const sql = 'DROP TABLE foo'
@@ -68,7 +68,7 @@ describe('api data client', () => {
       assert.deepEqual([sql], res.request._data)
       assert.deepEqual(EXECUTE_SUCCESS_RESPONSE, res.body)
     })
-    it(`should call the ${URL}${PATH_QUERY} endpoint with a query using HTTP GET when using select`, async () => {
+    it(`should call ${URL}${PATH_QUERY} endpoint with a query using HTTP GET when using select`, async () => {
       const api = await assert.isFulfilled(connect(URL))
       const sql = 'SELECT * FROM foo'
       const query = {

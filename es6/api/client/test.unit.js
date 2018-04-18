@@ -49,7 +49,7 @@ describe('api client', () => {
     })
   })
   describe('Function: post()', () => {
-    it(`should call the ${URL}${PATH_EXECUTE} endpoint with a request body using HTTP POST when using insert`, async () => {
+    it(`should call ${URL}${PATH_EXECUTE} endpoint with a request body using HTTP POST when using insert`, async () => {
       const sql = 'INSERT INTO foo(name) VALUES("fiona")'
       const scope = executeSuccess({url: URL, path: PATH_EXECUTE})
       const res = await assert.isFulfilled(post(URL, PATH_EXECUTE, {httpOptions: {body: [sql]}}))
@@ -60,7 +60,7 @@ describe('api client', () => {
     })
   })
   describe('Function: get()', () => {
-    it(`should call the ${URL}${PATH_QUERY} endpoint with a query using HTTP GET when using select`, async () => {
+    it(`should call ${URL}${PATH_QUERY} endpoint with a query using HTTP GET when using select`, async () => {
       const sql = 'SELECT * FROM foo'
       const query = {
         q: sql,

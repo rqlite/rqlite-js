@@ -20,7 +20,7 @@ describe('api data query', () => {
   beforeEach(() => nock.cleanAll())
   after(() => nock.enableNetConnect())
   describe('Function: query()', () => {
-    it(`should call the ${URL}${PATH} endpoint with a query using HTTP GET and include a level query`, async () => {
+    it(`should call ${URL}${PATH} endpoint with a query using HTTP GET and include a level query`, async () => {
       const sql = 'SELECT * FROM foo'
       const level = 'strong'
       const apiQuery = {
@@ -32,7 +32,7 @@ describe('api data query', () => {
       assert.isTrue(scope.isDone(), 'http request captured by nock')
       assert.deepEqual(QUERY_SUCCESS_RESPONSE, res.body)
     })
-    it(`should call the ${URL}${PATH} endpoint with a query using HTTP POST if sql is an array`, async () => {
+    it(`should call ${URL}${PATH} endpoint with a query using HTTP POST if sql is an array`, async () => {
       const sql = ['SELECT * FROM foo', 'SELECT * FROM bar']
       const level = 'weak'
       const apiQuery = {
