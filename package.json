@@ -15,7 +15,7 @@
     "rm-rqlite": "docker rm rqlite-js",
     "test": "mocha --require @babel/register es6/test/unit/index.unit.js es6/**/*.unit.js",
     "test-integrations": "mocha --require @babel/register --timeout 10000 es6/**/*.integration.js",
-    "test-build": "mocha lib/unit/index.unit.js lib/**/*.unit.js",
+    "test-build": "mocha lib/test/unit/index.unit.js lib/**/*.unit.js",
     "test-build-integrations": "mocha --timeout 10000 lib/**/*.integration.js",
     "prepublishOnly": "npm run lint && npm run build && npm run test-build"
   },
