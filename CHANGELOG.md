@@ -1,6 +1,15 @@
-# Change Log
+# Changelog
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+## [0.1.0](https://github.com/rqlite/rqlite-js/compare/v0.0.21...v0.1.0) (2019-07-13)
+
+
+### Features
+
+* **libraries:** Updating babel to 7.5, chai to 4.2, mocha to 6.1, elsint to 5.3, superagent to 5.1 and lodash to 4.17.14 ([1013524](https://github.com/rqlite/rqlite-js/commit/1013524))
+
+
 
 <a name="0.0.21"></a>
 ## [0.0.21](https://github.com/rqlite/rqlite-js/compare/v0.0.20...v0.0.21) (2018-04-18)
