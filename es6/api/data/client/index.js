@@ -8,10 +8,10 @@ import executeDataApi from '../execute'
 
 /**
  * Wraps the client functions with connectOptions so defaults can be applied
- * @param {object} connectOptions Options that were supplied to the connect function.
- * @param {function} clientMethod The client method to be called.
- * @param {array}string} sql String or array of string containing SQL queries.
- * @param {object} options Options for this request that will me merged with connectOptions.
+ * @param {Object} connectOptions Options that were supplied to the connect function.
+ * @param {Function} clientMethod The client method to be called.
+ * @param {String[]|String} sql String or array of string containing SQL queries.
+ * @param {Object} options Options for this request that will me merged with connectOptions.
  */
 function clientConnect(connectOptions, clientMethod, sql, options = {}) {
   const { url } = connectOptions
@@ -27,11 +27,11 @@ function clientConnect(connectOptions, clientMethod, sql, options = {}) {
 
 /**
  * Creates a promise which on success provides a client that can talk to a rqlite data api.
- * @param {object|string} options Options for that will be used on all connections or
+ * @param {Object|String} options Options for that will be used on all connections or
  * the url if it is a string.
- * @param {string} options.url The url for all connections i.e. http://localhost:4001.
- * @param {object} options.httpOptions The default options that are applied to all HTTP clients.
- * @param {object} options.httpOptions.agent An agent to be used instead of the default
+ * @param {String} options.url The url for all connections i.e. http://localhost:4001.
+ * @param {Object} options.httpOptions The default options that are applied to all HTTP clients.
+ * @param {Object} options.httpOptions.agent An agent to be used instead of the default
  * http agent, this is useful for keep alive.
  */
 export default async function connect(options = {}) {

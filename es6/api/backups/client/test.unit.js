@@ -1,7 +1,6 @@
 import { describe, it } from 'mocha'
 import chai from 'chai'
 import chaiAsPromised from 'chai-as-promised'
-import nock from 'nock'
 import connect from './index'
 import { PATH as PATH_BACKUP } from '../backup'
 import { PATH as PATH_RESTORE } from '../restore'
@@ -14,9 +13,6 @@ const { assert } = chai
 const URL = 'http://www.rqlite.com:4001'
 
 describe('api backups client', () => {
-  before(() => nock.disableNetConnect())
-  beforeEach(() => nock.cleanAll())
-  after(() => nock.enableNetConnect())
   describe('Function: connect()', () => {
     it(`should call ${URL}${PATH_BACKUP} endpoint using HTTP GET when performing a backup`, async () => {
       const api = await assert.isFulfilled(connect(URL))

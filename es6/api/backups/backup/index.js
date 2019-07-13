@@ -7,10 +7,10 @@ export const PATH = '/db/backup'
 /**
  * Get an api request to for backup SQL data on an rqlite server. This will return
  * a buffer by default.
- * @param {string} url The full url for the request i.e. http://localhost:4001
- * @param {object=} options HTTP client options.
+ * @param {String} url The full url for the request i.e. http://localhost:4001
+ * @param {Object} [options={}] HTTP client options.
  */
-export default function (url, options = {}) {
+export default function backup (url, options = {}) {
   let { httpOptions = {} } = options
   let { headers = {} } = httpOptions
   headers = _assign({}, headers, {

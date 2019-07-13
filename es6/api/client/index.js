@@ -10,7 +10,7 @@ function createApiUrl(url, path) {
 
 /**
  * Create the HTTP options object to be used in HTTP requests.
- * @param {object} options HTTP client options.
+ * @param {Object} options HTTP client options.
  */
 export function createHttpOptions(options) {
   const { httpOptions = {} } = options
@@ -28,9 +28,9 @@ export function createHttpOptions(options) {
 
 /**
  * Get an api client for a HTTP GET request.  This is the base for other more specific clients.
- * @param {string} url The base url for the request i.e. http://localhost:4001
- * @param {string} path The path for the request i.e. /db/query
- * @param {object} options HTTP client options.
+ * @param {String} url The base url for the request i.e. http://localhost:4001
+ * @param {String} path The path for the request i.e. /db/query
+ * @param {Object} options HTTP client options.
  */
 export function get(url, path, options) {
   return getHttp(createApiUrl(url, path), createHttpOptions(options))
@@ -39,9 +39,9 @@ export function get(url, path, options) {
 
 /**
  * Get an api client for a HTTP POST request.  This is the base for other more specific clients.
- * @param {string} url The base url for the request i.e. http://localhost:4001
- * @param {string} path The path for the request i.e. /db/execute
- * @param {object} options HTTP client options.
+ * @param {String} url The base url for the request i.e. http://localhost:4001
+ * @param {String} path The path for the request i.e. /db/execute
+ * @param {Object} options HTTP client options.
  */
 export function post(url, path, options) {
   return postHttp(createApiUrl(url, path), createHttpOptions(options))

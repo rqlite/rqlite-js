@@ -10,7 +10,7 @@ import _get from 'lodash/get'
 /**
  * Get the first error or undefined if one does not exist from
  * an array of results that was a response from an rqlite server.
- * @param {array} results A array from the results fields of rqlite response.
+ * @param {Array} results A array from the results fields of rqlite response.
  */
 export function getError(results = []) {
   const errorData = _find(results, result => _has(result, 'error'))
@@ -23,10 +23,10 @@ export function getError(results = []) {
 /**
  * Create a plain javascript array containing objects
  * representing name value pairs of the results.
- * @param {array} results An array from the results fields
+ * @param {Array} results An array from the results fields
  * of rqlite response.
- * @param {object} options Options for the function
- * @param {boolen} options.valuesAsArrays Preserve
+ * @param {Object} options Options for the function
+ * @param {Boolen} options.valuesAsArrays Preserve
  * the values as an array of arrays, defaults to a single
  * array of objects.
  */

@@ -1,7 +1,6 @@
 import { describe, it } from 'mocha'
 import chai from 'chai'
 import chaiAsPromised from 'chai-as-promised'
-import nock from 'nock'
 import { querySuccess, QUERY_SUCCESS_RESPONSE } from '../test/api-data-query-nock'
 import { executeSuccess, EXECUTE_SUCCESS_RESPONSE } from '../test/api-data-execute-nock'
 import { CONTENT_TYPE_APPLICATION_JSON } from './content-types'
@@ -23,9 +22,6 @@ const auth = {
 }
 
 describe('http', () => {
-  before(() => nock.disableNetConnect())
-  beforeEach(() => nock.cleanAll())
-  after(() => nock.enableNetConnect())
   describe('Function: createDefaultHeaders()', () => {
     it(`should add the Accept header with a value of ${CONTENT_TYPE_APPLICATION_JSON}`, () => {
       assert.deepEqual({ Accept: CONTENT_TYPE_APPLICATION_JSON }, createDefaultHeaders())

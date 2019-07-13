@@ -1,7 +1,6 @@
 import { describe, it } from 'mocha'
 import chai from 'chai'
 import chaiAsPromised from 'chai-as-promised'
-import nock from 'nock'
 import query, { PATH } from './index'
 import {
   querySuccess,
@@ -16,9 +15,6 @@ const { assert } = chai
 const URL = 'http://www.rqlite.com:4001'
 
 describe('api data query', () => {
-  before(() => nock.disableNetConnect())
-  beforeEach(() => nock.cleanAll())
-  after(() => nock.enableNetConnect())
   describe('Function: query()', () => {
     it(`should call ${URL}${PATH} endpoint with a query using HTTP GET and include a level query`, async () => {
       const sql = 'SELECT * FROM foo'

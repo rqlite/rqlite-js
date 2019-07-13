@@ -6,12 +6,12 @@ export const PATH = '/db/load'
 
 /**
  * Get an api request to query SQL on an rqlite server.
- * @param {string} url The full url for the request i.e. http://localhost:4001/db/query
- * @param {string=} backupString An optional body string is that is how you want to
+ * @param {String} url The full url for the request i.e. http://localhost:4001/db/query
+ * @param {String} [backupString] An optional body string is that is how you want to
  * send the backup string.
- * @param {object=} options HTTP client options.
+ * @param {Object} [options={}] HTTP client options.
  */
-export default function (url, options = {}) {
+export default function restore (url, options = {}) {
   let { httpOptions = {} } = options
   let { headers = {} } = httpOptions
   headers = _assign({}, headers, {

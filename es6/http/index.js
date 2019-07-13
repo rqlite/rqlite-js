@@ -26,7 +26,7 @@ export function getHttpLibrary() {
 
 /**
  * Create default header for all HTTP requests.
- * @param {object=} headers HTTP headers to send with the request.
+ * @param {Object} [headers={}] HTTP headers to send with the request.
  */
 export function createDefaultHeaders(headers = {}) {
   const { Accept = CONTENT_TYPE_APPLICATION_JSON } = headers
@@ -35,7 +35,7 @@ export function createDefaultHeaders(headers = {}) {
 
 /**
  * Create JSON headers for all non HTTP GET requests.
- * @param {object=} headers HTTP headers to send with the request.
+ * @param {Object} [headers={}] HTTP headers to send with the request.
  */
 export function createJsonHeaders(headers = {}) {
   return _assign({}, headers, { 'Content-Type': CONTENT_TYPE_APPLICATION_JSON })
@@ -43,17 +43,17 @@ export function createJsonHeaders(headers = {}) {
 
 /**
  * Prepare an http client promise with options.
- * @param {string} url The url for the http request i.e. http://localhost:4001/db/query
- * @param {object} options Options for the HTTP client.
- * @param {string=} options.httpMethod The HTTP method for the request i.e. get or post.
- * @param {object=} options.query An object with the query to send with the HTTP request.
- * @param {object=} options.body The body of the HTTP request for all non get requests.
- * @param {object=} options.agent Agent to replace the default agent i.e. keepalive.
- * @param {object=} options.timeout Optional timeout to override default.
- * @param {number=} options.timeout.response Milliseconds to wait for the server to start
+ * @param {String} url The url for the http request i.e. http://localhost:4001/db/query
+ * @param {Object} [options={}] Options for the HTTP client.
+ * @param {String} [options.httpMethod='get'] The HTTP method for the request i.e. get or post.
+ * @param {Object} [options.query] An object with the query to send with the HTTP request.
+ * @param {Object} [options.body] The body of the HTTP request for all non get requests.
+ * @param {Object} [options.agent] Agent to replace the default agent i.e. keepalive.
+ * @param {Object} [options.timeout={}] Optional timeout to override default.
+ * @param {Number} [options.timeout.response] Milliseconds to wait for the server to start
  * sending data.
- * @param {number=} options.timeout.deadline Milliseconds to wait for the data to finish being sent.
- * @param {object=} options.headers HTTP headers to send with the request.
+ * @param {Number} [options.timeout.deadline] Milliseconds to wait for the data to finish being sent.
+ * @param {Object} [options.headers={}] HTTP headers to send with the request.
  */
 export function prepare(url, options = {}) {
   const {
@@ -104,8 +104,8 @@ export function prepare(url, options = {}) {
 
 /**
  * Create an HTTP GET request.
- * @param {string} url The url for the http request i.e. http://localhost:4001/db/query
- * @param {object=} options See prepare() options.
+ * @param {String} url The url for the http request i.e. http://localhost:4001/db/query
+ * @param {Object} [options={}] See prepare() options.
  */
 export function get(url, options = {}) {
   return prepare(url, _assign({}, options, { httpMethod: HTTP_METHOD_GET }))
@@ -113,8 +113,8 @@ export function get(url, options = {}) {
 
 /**
  * Create an HTTP POST request.
- * @param {string} url The url for the http request i.e. http://localhost:4001/db/query
- * @param {object=} options See prepare() options.
+ * @param {String} url The url for the http request i.e. http://localhost:4001/db/query
+ * @param {Object} [options={}] See prepare() options.
  */
 export function post(url, options = {}) {
   return prepare(url, _assign({}, options, { httpMethod: HTTP_METHOD_POST }))

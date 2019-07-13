@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "es6"
+  },
+  "exclude": [
+    "node_modules",
+    "lib"
+  ],
+  "files.eol": "\n",
+  "editor.insertSpaces": true,
+  "editor.tabSize": 2,
+  "editor.detectIndentation": false
+}
