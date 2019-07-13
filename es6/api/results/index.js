@@ -12,7 +12,7 @@ import _get from 'lodash/get'
  * an array of results that was a response from an rqlite server.
  * @param {Array} results A array from the results fields of rqlite response.
  */
-export function getError(results = []) {
+export function getError (results = []) {
   const errorData = _find(results, result => _has(result, 'error'))
   if (errorData) {
     return new Error(_get(errorData, 'error'))
@@ -30,7 +30,7 @@ export function getError(results = []) {
  * the values as an array of arrays, defaults to a single
  * array of objects.
  */
-export function toPlainJs(results = [], options = {}) {
+export function toPlainJs (results = [], options = {}) {
   const { valuesAsArrays } = options
   return _reduce(results, (reduction, result, resultIndex) => {
     const columns = _get(result, 'columns', [])

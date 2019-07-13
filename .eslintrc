@@ -11,6 +11,7 @@
     "semi": [2, "never"],
     "object-curly-spacing": [2, "always"],
     "mocha/no-exclusive-tests": "error",
-    "import/no-extraneous-dependencies": ["error", { "devDependencies": true }]
+    "import/no-extraneous-dependencies": ["error", { "devDependencies": true }],
+    "space-before-function-paren": [2, "always"]
   }
 }

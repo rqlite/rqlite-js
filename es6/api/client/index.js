@@ -4,7 +4,7 @@ import _assign from 'lodash/assign'
 import _get from 'lodash/get'
 import { get as getHttp, post as postHttp } from '../../http'
 
-function createApiUrl(url, path) {
+function createApiUrl (url, path) {
   return `${url}${path}`
 }
 
@@ -12,7 +12,7 @@ function createApiUrl(url, path) {
  * Create the HTTP options object to be used in HTTP requests.
  * @param {Object} options HTTP client options.
  */
-export function createHttpOptions(options) {
+export function createHttpOptions (options) {
   const { httpOptions = {} } = options
   let { query = {} } = httpOptions
   // Create the API query and remove any undefined values.
@@ -32,7 +32,7 @@ export function createHttpOptions(options) {
  * @param {String} path The path for the request i.e. /db/query
  * @param {Object} options HTTP client options.
  */
-export function get(url, path, options) {
+export function get (url, path, options) {
   return getHttp(createApiUrl(url, path), createHttpOptions(options))
 }
 
@@ -43,6 +43,6 @@ export function get(url, path, options) {
  * @param {String} path The path for the request i.e. /db/execute
  * @param {Object} options HTTP client options.
  */
-export function post(url, path, options) {
+export function post (url, path, options) {
   return postHttp(createApiUrl(url, path), createHttpOptions(options))
 }

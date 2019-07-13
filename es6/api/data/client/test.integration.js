@@ -13,7 +13,7 @@ chai.use(chaiAsPromised)
 const { assert } = chai
 const URL = getUrl()
 
-async function cleanUp() {
+async function cleanUp () {
   const api = await connect(getUrl())
   await api.table.drop('DROP TABLE IF EXISTS foo')
 }

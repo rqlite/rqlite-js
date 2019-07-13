@@ -13,7 +13,7 @@ export const RESTORE_SUCCESS_RESPONSE = {
 /**
  * Creates a nock that represents a successful call to data query endpoint.
  */
-export function restoreSuccess(options) {
+export function restoreSuccess (options) {
   const {
     url, path, auth, response = RESTORE_SUCCESS_RESPONSE,
   } = options

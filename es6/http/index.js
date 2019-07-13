@@ -20,7 +20,7 @@ const DEAULT_TIMEOUT = {
 /**
  * Get the HTTP library for use in requests.
  */
-export function getHttpLibrary() {
+export function getHttpLibrary () {
   return superagent
 }
 
@@ -28,7 +28,7 @@ export function getHttpLibrary() {
  * Create default header for all HTTP requests.
  * @param {Object} [headers={}] HTTP headers to send with the request.
  */
-export function createDefaultHeaders(headers = {}) {
+export function createDefaultHeaders (headers = {}) {
   const { Accept = CONTENT_TYPE_APPLICATION_JSON } = headers
   return _assign({}, headers, { Accept })
 }
@@ -37,7 +37,7 @@ export function createDefaultHeaders(headers = {}) {
  * Create JSON headers for all non HTTP GET requests.
  * @param {Object} [headers={}] HTTP headers to send with the request.
  */
-export function createJsonHeaders(headers = {}) {
+export function createJsonHeaders (headers = {}) {
   return _assign({}, headers, { 'Content-Type': CONTENT_TYPE_APPLICATION_JSON })
 }
 
@@ -52,10 +52,11 @@ export function createJsonHeaders(headers = {}) {
  * @param {Object} [options.timeout={}] Optional timeout to override default.
  * @param {Number} [options.timeout.response] Milliseconds to wait for the server to start
  * sending data.
- * @param {Number} [options.timeout.deadline] Milliseconds to wait for the data to finish being sent.
+ * @param {Number} [options.timeout.deadline] Milliseconds to wait for the data to finish
+ * being sent.
  * @param {Object} [options.headers={}] HTTP headers to send with the request.
  */
-export function prepare(url, options = {}) {
+export function prepare (url, options = {}) {
   const {
     httpMethod = HTTP_METHOD_GET,
     query,
@@ -107,7 +108,7 @@ export function prepare(url, options = {}) {
  * @param {String} url The url for the http request i.e. http://localhost:4001/db/query
  * @param {Object} [options={}] See prepare() options.
  */
-export function get(url, options = {}) {
+export function get (url, options = {}) {
   return prepare(url, _assign({}, options, { httpMethod: HTTP_METHOD_GET }))
 }
 
@@ -116,6 +117,6 @@ export function get(url, options = {}) {
  * @param {String} url The url for the http request i.e. http://localhost:4001/db/query
  * @param {Object} [options={}] See prepare() options.
  */
-export function post(url, options = {}) {
+export function post (url, options = {}) {
   return prepare(url, _assign({}, options, { httpMethod: HTTP_METHOD_POST }))
 }

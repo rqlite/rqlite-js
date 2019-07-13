@@ -20,12 +20,12 @@ const BACKUP_SQL_STATEMENTS = [
 ]
 const BACKUP_SQL = _join(BACKUP_SQL_STATEMENTS, '')
 
-async function cleanUp() {
+async function cleanUp () {
   const api = await connectData(getUrl())
   await api.table.drop('DROP TABLE IF EXISTS fooBackups')
 }
 
-async function createData() {
+async function createData () {
   let error
   let res
   let results
@@ -48,7 +48,7 @@ async function createData() {
   }
 }
 
-async function checkData() {
+async function checkData () {
   const api = await connectData(URL)
   const res = await api.select('SELECT id, name FROM foo WHERE name="fiona"')
   const results = _get(res, ['body', 'results'])

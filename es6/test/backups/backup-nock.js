@@ -11,7 +11,7 @@ export const BACKUP_SUCCESS_RESPONSE = _join([
 /**
  * Creates a nock that represents a successful call to data query endpoint.
  */
-export function backupSuccess(options) {
+export function backupSuccess (options) {
   const {
     url, path, auth, response = BACKUP_SUCCESS_RESPONSE,
   } = options

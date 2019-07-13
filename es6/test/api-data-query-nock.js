@@ -26,14 +26,14 @@ export const QUERY_MULTIPLE_SUCCESS_RESPONSE = {
   ],
 }
 
-function queryAllowAll() {
+function queryAllowAll () {
   return true
 }
 
 /**
  * Creates a nock that represents a successful call to data query endpoint.
  */
-export function querySuccess(options) {
+export function querySuccess (options) {
   const {
     url, path, auth, response = QUERY_SUCCESS_RESPONSE, query = queryAllowAll,
   } = options
@@ -47,7 +47,7 @@ export function querySuccess(options) {
   return scope.reply(200, response)
 }
 
-export function queryMultipleSuccess(options) {
+export function queryMultipleSuccess (options) {
   const {
     url, path, auth, response = QUERY_MULTIPLE_SUCCESS_RESPONSE, query = queryAllowAll,
   } = options

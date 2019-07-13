@@ -10,7 +10,7 @@ export const PATH = '/db/query'
  * @param {String} sql The SQL string to excute on the server.
  * @param {Object} [options={}] HTTP client options.
  */
-export default function query (url, sql, options = {}) {
+export default function queryApiRequest (url, sql, options = {}) {
   let { httpOptions = {} } = options
   let opts = options
   if (_isArray(sql)) {

@@ -13,7 +13,7 @@ import restoreApi from '../restore'
  * @param {String} path The path this request i.e. /db/query.
  * @param {Object} options Options for this request that will me merged with connectOptions.
  */
-function clientConnect(connectOptions, clientMethod, options = {}) {
+function clientConnect (connectOptions, clientMethod, options = {}) {
   const { url } = connectOptions
   if (!_isString(url)) {
     throw new Error('The url argument is required to be a string.')
@@ -34,7 +34,7 @@ function clientConnect(connectOptions, clientMethod, options = {}) {
  * @param {Object} options.httpOptions.agent An agent to be used instead of the default
  * http agent, this is useful for keep alive.
  */
-export default async function connect(options = {}) {
+export default async function connect (options = {}) {
   const opts = _isString(options) ? { url: options } : options
   const { url } = opts
   if (!url) {
