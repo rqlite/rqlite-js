@@ -1,10 +1,10 @@
-import {describe, it} from 'mocha'
+import { describe, it } from 'mocha'
 import chai from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 import nock from 'nock'
-import {querySuccess, QUERY_SUCCESS_RESPONSE} from '../test/api-data-query-nock'
-import {executeSuccess, EXECUTE_SUCCESS_RESPONSE} from '../test/api-data-execute-nock'
-import {CONTENT_TYPE_APPLICATION_JSON} from './content-types'
+import { querySuccess, QUERY_SUCCESS_RESPONSE } from '../test/api-data-query-nock'
+import { executeSuccess, EXECUTE_SUCCESS_RESPONSE } from '../test/api-data-execute-nock'
+import { CONTENT_TYPE_APPLICATION_JSON } from './content-types'
 import {
   get,
   post,
@@ -13,7 +13,7 @@ import {
 } from './index'
 
 chai.use(chaiAsPromised)
-const {assert} = chai
+const { assert } = chai
 
 const username = 'TestUsername'
 const password = 'TestPassword'

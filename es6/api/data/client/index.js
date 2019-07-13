@@ -14,7 +14,7 @@ import executeDataApi from '../execute'
  * @param {object} options Options for this request that will me merged with connectOptions.
  */
 function clientConnect(connectOptions, clientMethod, sql, options = {}) {
-  const {url} = connectOptions
+  const { url } = connectOptions
   if (!_isString(url)) {
     throw new Error('The url argument is required to be a string.')
   }
@@ -35,8 +35,8 @@ function clientConnect(connectOptions, clientMethod, sql, options = {}) {
  * http agent, this is useful for keep alive.
  */
 export default async function connect(options = {}) {
-  const opts = _isString(options) ? {url: options} : options
-  const {url} = opts
+  const opts = _isString(options) ? { url: options } : options
+  const { url } = opts
   if (!url) {
     throw new Error('The url option is required to connect to a data api.')
   }

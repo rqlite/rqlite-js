@@ -1,17 +1,17 @@
-import {describe, it} from 'mocha'
+import { describe, it } from 'mocha'
 import chai from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 import _join from 'lodash/join'
 import _get from 'lodash/get'
 import connect from './index'
 import connectData from '../../data/client'
-import {getUrl} from '../../../test/integrations'
-import {getError} from '../../results'
-import {PATH as PATH_BACKUP} from '../backup'
-import {PATH as PATH_RESTORE} from '../restore'
+import { getUrl } from '../../../test/integrations'
+import { getError } from '../../results'
+import { PATH as PATH_BACKUP } from '../backup'
+import { PATH as PATH_RESTORE } from '../restore'
 
 chai.use(chaiAsPromised)
-const {assert} = chai
+const { assert } = chai
 const URL = getUrl()
 const BACKUP_SQL_STATEMENTS = [
   'CREATE TABLE foo (id integer not null primary key, name text);',
@@ -40,7 +40,7 @@ async function createData() {
   res = await api.insert([
     'INSERT INTO fooBackups(name) VALUES("fiona")',
     'INSERT INTO fooBackups(name) VALUES("justin")',
-  ], {transaction: true})
+  ], { transaction: true })
   results = _get(res, ['body', 'results'])
   error = getError(results)
   if (error) {
@@ -72,7 +72,7 @@ describe('api backups client', () => {
     })
     it(`should call ${URL}${PATH_RESTORE} and send a SQLite backup string`, async () => {
       const api = await connect(URL)
-      const res = await assert.isFulfilled(api.restore({httpOptions: {body: BACKUP_SQL}}))
+      const res = await assert.isFulfilled(api.restore({ httpOptions: { body: BACKUP_SQL } }))
       const results = _get(res, ['body', 'results'])
       const error = getError(results)
       if (error) {

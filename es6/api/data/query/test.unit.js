@@ -1,8 +1,8 @@
-import {describe, it} from 'mocha'
+import { describe, it } from 'mocha'
 import chai from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 import nock from 'nock'
-import query, {PATH} from './index'
+import query, { PATH } from './index'
 import {
   querySuccess,
   QUERY_SUCCESS_RESPONSE,
@@ -11,7 +11,7 @@ import {
 } from '../../../test/api-data-query-nock'
 
 chai.use(chaiAsPromised)
-const {assert} = chai
+const { assert } = chai
 
 const URL = 'http://www.rqlite.com:4001'
 
@@ -27,8 +27,8 @@ describe('api data query', () => {
         q: sql,
         level,
       }
-      const scope = querySuccess({url: URL, path: PATH, query: apiQuery})
-      const res = await assert.isFulfilled(query(URL, sql, {level}))
+      const scope = querySuccess({ url: URL, path: PATH, query: apiQuery })
+      const res = await assert.isFulfilled(query(URL, sql, { level }))
       assert.isTrue(scope.isDone(), 'http request captured by nock')
       assert.deepEqual(QUERY_SUCCESS_RESPONSE, res.body)
     })
@@ -38,8 +38,8 @@ describe('api data query', () => {
       const apiQuery = {
         level,
       }
-      const scope = queryMultipleSuccess({url: URL, path: PATH, query: apiQuery})
-      const res = await assert.isFulfilled(query(URL, sql, {level}))
+      const scope = queryMultipleSuccess({ url: URL, path: PATH, query: apiQuery })
+      const res = await assert.isFulfilled(query(URL, sql, { level }))
       assert.isTrue(scope.isDone(), 'http request captured by nock')
       assert.deepEqual(QUERY_MULTIPLE_SUCCESS_RESPONSE, res.body)
     })

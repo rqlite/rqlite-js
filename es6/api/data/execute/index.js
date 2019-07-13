@@ -1,6 +1,6 @@
 import _assign from 'lodash/assign'
 import _isArray from 'lodash/isArray'
-import {post} from '../../client'
+import { post } from '../../client'
 
 export const PATH = '/db/execute'
 
@@ -11,11 +11,11 @@ export const PATH = '/db/execute'
  * @param {object=} options HTTP client options.
  */
 export default function (url, sql, options = {}) {
-  let {httpOptions = {}} = options
+  let { httpOptions = {} } = options
   const body = _isArray(sql) ? sql : [sql]
   // Add the body which is used for UPDATE, INSERT, DELETE, CREATE, DROP, etc. statements.
-  httpOptions = _assign({}, httpOptions, {body})
+  httpOptions = _assign({}, httpOptions, { body })
   // Put the httpOptions back on the options
-  const opts = _assign({}, options, {httpOptions})
+  const opts = _assign({}, options, { httpOptions })
   return post(url, PATH, opts)
 }

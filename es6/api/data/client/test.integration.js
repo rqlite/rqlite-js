@@ -1,16 +1,16 @@
-import {describe, it} from 'mocha'
+import { describe, it } from 'mocha'
 import chai from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 import _get from 'lodash/get'
 import _size from 'lodash/size'
 import connect from './index'
-import {getUrl} from '../../../test/integrations'
-import {getError} from '../../results'
-import {PATH as PATH_EXECUTE} from '../execute'
-import {PATH as PATH_QUERY} from '../query'
+import { getUrl } from '../../../test/integrations'
+import { getError } from '../../results'
+import { PATH as PATH_EXECUTE } from '../execute'
+import { PATH as PATH_QUERY } from '../query'
 
 chai.use(chaiAsPromised)
-const {assert} = chai
+const { assert } = chai
 const URL = getUrl()
 
 async function cleanUp() {
@@ -106,7 +106,7 @@ describe('api data client', () => {
         'INSERT INTO foo(name) VALUES("fiona")',
         'INSERT INTO foo(name) VALUES("justin")',
       ]
-      const res = await api.insert(sql, {transaction: true})
+      const res = await api.insert(sql, { transaction: true })
       const results = _get(res, ['body', 'results'])
       const error = getError(results)
       if (error) {

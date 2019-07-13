@@ -1,6 +1,6 @@
 import _assign from 'lodash/assign'
-import {get} from '../../client'
-import {CONTENT_TYPE_APPLICATION_OCTET_STREAM} from '../../../http/content-types'
+import { get } from '../../client'
+import { CONTENT_TYPE_APPLICATION_OCTET_STREAM } from '../../../http/content-types'
 
 export const PATH = '/db/backup'
 
@@ -11,8 +11,8 @@ export const PATH = '/db/backup'
  * @param {object=} options HTTP client options.
  */
 export default function (url, options = {}) {
-  let {httpOptions = {}} = options
-  let {headers = {}} = httpOptions
+  let { httpOptions = {} } = options
+  let { headers = {} } = httpOptions
   headers = _assign({}, headers, {
     Accept: CONTENT_TYPE_APPLICATION_OCTET_STREAM,
     'Content-Type': CONTENT_TYPE_APPLICATION_OCTET_STREAM,
@@ -21,6 +21,6 @@ export default function (url, options = {}) {
     headers,
     buffer: true, // Create a buffer
   })
-  const opts = _assign({}, options, {httpOptions})
+  const opts = _assign({}, options, { httpOptions })
   return get(url, PATH, opts)
 }

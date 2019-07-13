@@ -1,5 +1,5 @@
-import {describe, it} from 'mocha'
-import {assert} from 'chai'
+import { describe, it } from 'mocha'
+import { assert } from 'chai'
 import {
   getError,
   toPlainJs,
@@ -9,7 +9,7 @@ describe('api data results', () => {
   describe('Function: getError()', () => {
     it('should get an error from an data API results set', () => {
       const error = 'near "nonsense": syntax error'
-      const errorResult = {error}
+      const errorResult = { error }
       const results = [errorResult]
       assert.equal(error, getError(results).message)
     })
@@ -75,7 +75,7 @@ describe('api data results', () => {
           { id: 10, name: 'sally' },
         ],
       ]
-      assert.deepEqual(plainJs, toPlainJs(results, {valuesAsArrays: true}))
+      assert.deepEqual(plainJs, toPlainJs(results, { valuesAsArrays: true }))
     })
   })
 })

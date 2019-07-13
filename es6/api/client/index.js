@@ -2,7 +2,7 @@ import _omitBy from 'lodash/omitBy'
 import _isUndefined from 'lodash/isUndefined'
 import _assign from 'lodash/assign'
 import _get from 'lodash/get'
-import {get as getHttp, post as postHttp} from '../../http'
+import { get as getHttp, post as postHttp } from '../../http'
 
 function createApiUrl(url, path) {
   return `${url}${path}`
@@ -13,8 +13,8 @@ function createApiUrl(url, path) {
  * @param {object} options HTTP client options.
  */
 export function createHttpOptions(options) {
-  const {httpOptions = {}} = options
-  let {query = {}} = httpOptions
+  const { httpOptions = {} } = options
+  let { query = {} } = httpOptions
   // Create the API query and remove any undefined values.
   const queryApiOptions = _omitBy({
     level: _get(options, 'level'),
@@ -23,7 +23,7 @@ export function createHttpOptions(options) {
     transaction: _get(options, 'transaction'),
   }, _isUndefined)
   query = _assign({}, query, queryApiOptions)
-  return _assign({}, httpOptions, {query})
+  return _assign({}, httpOptions, { query })
 }
 
 /**

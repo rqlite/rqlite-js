@@ -1,6 +1,6 @@
 import _assign from 'lodash/assign'
-import {post} from '../../client'
-import {CONTENT_TYPE_TEXT_PLAIN} from '../../../http/content-types'
+import { post } from '../../client'
+import { CONTENT_TYPE_TEXT_PLAIN } from '../../../http/content-types'
 
 export const PATH = '/db/load'
 
@@ -12,12 +12,12 @@ export const PATH = '/db/load'
  * @param {object=} options HTTP client options.
  */
 export default function (url, options = {}) {
-  let {httpOptions = {}} = options
-  let {headers = {}} = httpOptions
+  let { httpOptions = {} } = options
+  let { headers = {} } = httpOptions
   headers = _assign({}, headers, {
     'Content-Type': CONTENT_TYPE_TEXT_PLAIN,
   })
-  httpOptions = _assign({}, httpOptions, {headers})
-  const opts = _assign({}, options, {httpOptions})
+  httpOptions = _assign({}, httpOptions, { headers })
+  const opts = _assign({}, options, { httpOptions })
   return post(url, PATH, opts)
 }

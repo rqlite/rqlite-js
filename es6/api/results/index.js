@@ -31,7 +31,7 @@ export function getError(results = []) {
  * array of objects.
  */
 export function toPlainJs(results = [], options = {}) {
-  const {valuesAsArrays} = options
+  const { valuesAsArrays } = options
   return _reduce(results, (reduction, result, resultIndex) => {
     const columns = _get(result, 'columns', [])
     const values = _get(result, 'values', [])

@@ -1,14 +1,23 @@
 {
-  "plugins": ["transform-runtime", "add-module-exports"],
-  "presets": [
+  "presets": [
     [
-  	  "env",
+      "@babel/preset-env",
       {
-        "targets": {
-          "browsers": ["> 1%", "last 2 versions"],
-  		    "node": "6"
-        }
+        "targets": {
+          "browsers": ["last 2 versions, > 5%"],
+          "node": "6"
+        }
       }
-	  ]
-  ]
+    ]
+  ],
+  "plugins": [
+    "@babel/plugin-transform-runtime",
+    "add-module-exports"
+  ],
+  "env": {
+    "development": {
+      "retainLines": true,
+      "sourceMaps": "both"
+    }
+  }
 }
