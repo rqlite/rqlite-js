@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.1](https://github.com/rqlite/rqlite-js/compare/v0.1.0...v0.1.1) (2019-07-13)
+
+
+### Bug Fixes
+
+* **jsdocs-vscode-tests:** Fixing JSDocs to have proper types for params, adding jsconfig.json to support VSCode project settings, and adding docker integration test script ([2a98103](https://github.com/rqlite/rqlite-js/commit/2a98103))
+
+
+
 ## [0.1.0](https://github.com/rqlite/rqlite-js/compare/v0.0.21...v0.1.0) (2019-07-13)
 
 
