@@ -1,6 +1,5 @@
 import { describe, it } from 'mocha'
-import chai from 'chai'
-import chaiAsPromised from 'chai-as-promised'
+import { assert } from 'chai'
 import _get from 'lodash/get'
 import _size from 'lodash/size'
 import connect from './index'
@@ -9,8 +8,6 @@ import { getError } from '../../results'
 import { PATH as PATH_EXECUTE } from '../execute'
 import { PATH as PATH_QUERY } from '../query'
 
-chai.use(chaiAsPromised)
-const { assert } = chai
 const URL = getUrl()
 
 async function cleanUp () {

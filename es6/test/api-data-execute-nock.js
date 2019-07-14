@@ -1,5 +1,5 @@
 import nock from 'nock'
-import { CONTENT_TYPE_APPLICATION_JSON } from '../http/content-types'
+import { CONTENT_TYPE_APPLICATION_JSON } from '../http-request/content-types'
 
 export const EXECUTE_SUCCESS_RESPONSE = {
   results: [

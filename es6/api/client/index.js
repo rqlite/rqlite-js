@@ -2,7 +2,7 @@ import _omitBy from 'lodash/omitBy'
 import _isUndefined from 'lodash/isUndefined'
 import _assign from 'lodash/assign'
 import _get from 'lodash/get'
-import { get as getHttp, post as postHttp } from '../../http'
+import { get as getHttp, post as postHttp } from '../../http-request'
 
 function createApiUrl (url, path) {
   return `${url}${path}`

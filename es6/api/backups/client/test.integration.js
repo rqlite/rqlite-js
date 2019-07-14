@@ -1,6 +1,5 @@
 import { describe, it } from 'mocha'
-import chai from 'chai'
-import chaiAsPromised from 'chai-as-promised'
+import { assert } from 'chai'
 import _join from 'lodash/join'
 import _get from 'lodash/get'
 import connect from './index'
@@ -10,8 +9,6 @@ import { getError } from '../../results'
 import { PATH as PATH_BACKUP } from '../backup'
 import { PATH as PATH_RESTORE } from '../restore'
 
-chai.use(chaiAsPromised)
-const { assert } = chai
 const URL = getUrl()
 const BACKUP_SQL_STATEMENTS = [
   'CREATE TABLE foo (id integer not null primary key, name text);',

@@ -1,6 +1,6 @@
 import _assign from 'lodash/assign'
 import { post } from '../../client'
-import { CONTENT_TYPE_TEXT_PLAIN } from '../../../http/content-types'
+import { CONTENT_TYPE_TEXT_PLAIN } from '../../../http-request/content-types'
 
 export const PATH = '/db/load'
 

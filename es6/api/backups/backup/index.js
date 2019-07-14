@@ -1,6 +1,6 @@
 import _assign from 'lodash/assign'
 import { get } from '../../client'
-import { CONTENT_TYPE_APPLICATION_OCTET_STREAM } from '../../../http/content-types'
+import { CONTENT_TYPE_APPLICATION_OCTET_STREAM } from '../../../http-request/content-types'
 
 export const PATH = '/db/backup'
 

@@ -1,11 +1,7 @@
 import { describe, it } from 'mocha'
-import chai from 'chai'
-import chaiAsPromised from 'chai-as-promised'
+import { assert } from 'chai'
 import execute, { PATH } from './index'
 import { executeSuccess, EXECUTE_SUCCESS_RESPONSE } from '../../../test/api-data-execute-nock'
-
-chai.use(chaiAsPromised)
-const { assert } = chai
 
 const URL = 'http://www.rqlite.com:4001'
 
