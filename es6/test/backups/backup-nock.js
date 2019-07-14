@@ -1,12 +1,11 @@
-import _join from 'lodash/join'
 import nock from 'nock'
-import { CONTENT_TYPE_APPLICATION_OCTET_STREAM } from '../../http/content-types'
+import { CONTENT_TYPE_APPLICATION_OCTET_STREAM } from '../../http-request/content-types'
 
-export const BACKUP_SUCCESS_RESPONSE = _join([
+export const BACKUP_SUCCESS_RESPONSE = [
   'CREATE TABLE foo (id integer not null primary key, name text);',
   'INSERT INTO foo(name) VALUES("fiona");',
   'INSERT INTO foo(name) VALUES("justin");',
-], '')
+].join('')
 
 /**
  * Creates a nock that represents a successful call to data query endpoint.

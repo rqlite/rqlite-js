@@ -8,7 +8,7 @@ Development unit tests can be run using the following command:
 npm run test
 ```
 
-These tests will all be run against the ES6 code and are used to check errors during development.  Once a build is complete tests can be run on the babelifed, ES5 code, with this command `npm run test-build`.  The test-build task will run as part of the release process to prevent failing builds from being released.
+These tests will all be run against the ES6 code and are used to check errors during development.  Once a build is complete tests can be run on the babelifed, ES5 code, with this command [./bin/docker-test-integrations.sh](../../bin/docker-test-integrations.sh).  The npm `test-build` task will run as part of the release process to prevent ES5 code which fails builds from being released.
 
 ## Integration Tests
 There is a script to help with runnig docker integrations tests end to end just run the following command:
@@ -20,35 +20,9 @@ There is a script to help with runnig docker integrations tests end to end just 
 The data API can be run through a series of integration test using the following command:
 
 ```console
-npm run test-integrations
+./bin/docker-test-integrations.sh
 ```
 
-during development.  Please note that you will need a copy of rqlite running to be able to exercise these tests. If you need a quick way to spin up rqlite checkout the [docker image](https://hub.docker.com/r/rqlite/rqlite/) or you can use the npm command below to run a docker conatiner in the background:
+during development.  This will spin up one docker container that will run npm install and build RQLiteJS plus an RQLiteJS server docker container.  The integration tests will run against the the built code and the RQLite server instance.  When the test complete pass or fail all containers are torn down.
 
-```console
-npm run start-rqlite
-```
-
-You can stop the docker container with this command:
-
-```console
-npm run stop-rqlite
-```
-
-You can delete the container with the following command:
-
-```console
-npm run rm-rqlite
-```
-
-The integration test by default attempts to connect to a server at `http://localhost:4001`, but you can override the URL value using the `RQLITE_URL` environment variable e.g.
-
-```console
-RQLITE_URL=http://10.0.0.1:4001 npm run test-integrations
-```
-
-Integration tests can be run on post build code as well by running the command:
-
-```console
-npm run test-build-integrations
-```
+If you are curious how to run each of the individual docker commands on your own you can checkout [bin/docker-test-integrations.sh](../../bin/docker-test-integrations.sh)

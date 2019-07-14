@@ -1,48 +1,77 @@
-import _omitBy from 'lodash/omitBy'
-import _isUndefined from 'lodash/isUndefined'
-import _assign from 'lodash/assign'
-import _get from 'lodash/get'
-import { get as getHttp, post as postHttp } from '../../http'
+/**
+ * Base API client for RQLite which abstracts the HTTP calls
+ * @module api/client
+ */
+import HttpRequest from '../../http-request'
+import { HTTP_METHOD_GET, HTTP_METHOD_POST } from '../../http-request/http-methods'
 
-function createApiUrl (url, path) {
-  return `${url}${path}`
+/**
+ * Create the base HTTP query options from RQLite API options
+ * @param {Object} [options={}] The RQLite API options
+ * @param {String} [options.level] The consistency level
+ * @param {String} [options.pretty] Pretty print the response body
+ * @param {String} [options.timings] Provide query timings
+ * @param {String} [options.atomic] Treat all commands in the request as a single transaction
+ * for RQLite v5 and higher
+ * @param {String} [options.transaction] Treat all commands in the request as a single transaction
+ * for RQLite v4 and lower
+ * @returns {Object} The HTTP query
+ */
+export function createQuery (options = {}) {
+  const { level, pretty, timings, atomic, transaction } = options
+
+  // Remove all undefined values
+  const query = { level, pretty, timings, atomic, transaction }
+  return Object.entries(query).reduce((acc, entry) => {
+    const [key, val] = entry
+    // Only take defined values
+    if (typeof val !== 'undefined') {
+      acc[key] = val
+    }
+    return acc
+  }, {})
 }
 
 /**
- * Create the HTTP options object to be used in HTTP requests.
- * @param {Object} options HTTP client options.
+ * Base API client for RQLite which abstracts the HTTP calls
+ * from the user
  */
-export function createHttpOptions (options) {
-  const { httpOptions = {} } = options
-  let { query = {} } = httpOptions
-  // Create the API query and remove any undefined values.
-  const queryApiOptions = _omitBy({
-    level: _get(options, 'level'),
-    pretty: _get(options, 'pretty'),
-    timings: _get(options, 'timings'),
-    transaction: _get(options, 'transaction'),
-  }, _isUndefined)
-  query = _assign({}, query, queryApiOptions)
-  return _assign({}, httpOptions, { query })
-}
+export default class ApiClient extends HttpRequest {
+  /**
+   * Perform a RQLite data API get request
+   * @param {String} path The path for the request i.e. /db/query
+   * @param {Object} [options={}] RQLite API options
+   */
+  async get (path, sql, options = {}) {
+    const { useLeader } = options
+    if (!path) {
+      throw new Error('The path argument is required')
+    }
+    return super.get({
+      useLeader,
+      uri: path,
+      httpMethod: HTTP_METHOD_GET,
+      query: { ...createQuery(options), q: sql },
+    })
+  }
 
-/**
- * Get an api client for a HTTP GET request.  This is the base for other more specific clients.
- * @param {String} url The base url for the request i.e. http://localhost:4001
- * @param {String} path The path for the request i.e. /db/query
- * @param {Object} options HTTP client options.
- */
-export function get (url, path, options) {
-  return getHttp(createApiUrl(url, path), createHttpOptions(options))
-}
-
-
-/**
- * Get an api client for a HTTP POST request.  This is the base for other more specific clients.
- * @param {String} url The base url for the request i.e. http://localhost:4001
- * @param {String} path The path for the request i.e. /db/execute
- * @param {Object} options HTTP client options.
- */
-export function post (url, path, options) {
-  return postHttp(createApiUrl(url, path), createHttpOptions(options))
+  /**
+   * Perform a RQLite data API post request
+   * @param {String} path The path for the request i.e. /db/query
+   * @param {String[]|String} path The path for the request i.e. /db/query
+   * @param {Object} [options={}] RQLite API options
+   */
+  async post (path, sql, options = {}) {
+    const { useLeader } = options
+    if (!path) {
+      throw new Error('The path argument is required')
+    }
+    return super.post({
+      useLeader,
+      uri: path,
+      httpMethod: HTTP_METHOD_POST,
+      query: createQuery(options),
+      body: Array.isArray(sql) ? sql : [sql],
+    })
+  }
 }

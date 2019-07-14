@@ -60,3 +60,36 @@ typings/
 # dotenv environment variables file
 .env
 
+# Docker related files for integration testing
+.dockerignore
+docker-compose.yml
+docker
+Dockerfile
+
+# Babel
+.babelrc
+
+# Integration testing scripts
+bin
+
+# Build scripts
+travis.yml
+
+# VSCode config
+jsconfig
+
+CHANGELOG.md
+
+# Tap test results
+tap
+
+# Test help folder
+test
+
+# unit tests
+*.unit.js
+*.unit.js.map
+
+# integration tests
+*.integration.js
+*.integration.js.map

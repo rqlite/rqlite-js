@@ -4,13 +4,13 @@
       "@babel/preset-env",
       {
         "targets": {
-          "browsers": ["last 2 versions, > 5%"],
           "node": "6"
         }
       }
     ]
   ],
   "plugins": [
+    "@babel/plugin-proposal-class-properties",
     "@babel/plugin-transform-runtime",
     "add-module-exports"
   ],

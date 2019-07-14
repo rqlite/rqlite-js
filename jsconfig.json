@@ -6,6 +6,9 @@
     "node_modules",
     "lib"
   ],
+  "include": [
+    "es6/**/*"
+  ],
   "files.eol": "\n",
   "editor.insertSpaces": true,
   "editor.tabSize": 2,

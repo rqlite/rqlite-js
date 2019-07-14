@@ -5,13 +5,16 @@
   },
   "extends": "airbnb-base",
   "plugins": [
-    "mocha"
+    "mocha",
+    "babel"
   ],
   "rules": {
-    "semi": [2, "never"],
-    "object-curly-spacing": [2, "always"],
-    "mocha/no-exclusive-tests": "error",
     "import/no-extraneous-dependencies": ["error", { "devDependencies": true }],
+    "mocha/no-exclusive-tests": "error",
+    "object-curly-newline": 0,
+    "object-curly-spacing": [2, "always"],
+    "semi": [2, "never"],
     "space-before-function-paren": [2, "always"]
-  }
+  },
+  "parser": "babel-eslint"
 }

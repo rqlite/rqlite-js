@@ -6,18 +6,19 @@ services:
 language: node_js
 
 node_js:
-  - "6"
+  - "10"
 
 cache:
   directories:
     - "node_modules"
 
 before_install:
-  - npm i -g npm@5
-  - docker pull rqlite/rqlite
-  - docker run -d -p 4001:4001 -p4002:4002 --name=rqlite-js rqlite/rqlite
+  - docker pull rqlite/rqlite:4.5.0
+  - docker run -d -p 4001:4001 -p4002:4002 --name=rqlite-js rqlite/rqlite:4.5.0
 
 script:
-  - npm run build
+  - npm run build-all
   - npm run test-build -- --reporter tap
   - npm run test-build-integrations -- --reporter tap
+  - docker stop rqlite-js
+  - docker rm rqlite-js
