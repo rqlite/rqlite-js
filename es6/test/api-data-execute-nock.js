@@ -34,6 +34,7 @@ export const EXECUTE_SUCCESS_RESPONSE = {
 export function executeSuccess (options = {}) {
   const {
     auth,
+    body,
     path,
     response = EXECUTE_SUCCESS_RESPONSE,
     url,
@@ -41,7 +42,7 @@ export function executeSuccess (options = {}) {
   const scope = nock(url)
     .matchHeader('Accept', CONTENT_TYPE_APPLICATION_JSON)
     .matchHeader('Content-Type', CONTENT_TYPE_APPLICATION_JSON)
-    .post(path)
+    .post(path, body)
   if (auth) {
     scope.basicAuth(auth)
   }

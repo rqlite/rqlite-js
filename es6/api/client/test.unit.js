@@ -1,11 +1,11 @@
 import { assert } from 'chai'
-import ApiClient, { createQuery } from './index'
 import { PATH as PATH_QUERY } from '../data/query'
 import { PATH as PATH_EXECUTE } from '../data/execute'
 import { querySuccess, QUERY_SUCCESS_RESPONSE } from '../../test/api-data-query-nock'
 import { executeSuccess, EXECUTE_SUCCESS_RESPONSE } from '../../test/api-data-execute-nock'
+import ApiClient, { createQuery } from '.'
 
-const URL = 'http://www.rqlite.com:4001'
+const HOST = 'http://www.rqlite.com:4001'
 
 describe('api client', () => {
   describe('Function: createQuery()', () => {
@@ -18,7 +18,6 @@ describe('api client', () => {
       }
       const expected = {
         level: true,
-        preserved: true,
         pretty: true,
         timings: true,
         transaction: true,
@@ -28,28 +27,25 @@ describe('api client', () => {
     })
   })
   describe('Function: post()', () => {
-    it(`should call ${URL}${PATH_EXECUTE} endpoint with a request body using HTTP POST when using insert`, async () => {
+    it(`should call ${HOST}${PATH_EXECUTE} endpoint with a request body using HTTP POST when using insert`, async () => {
+      const apiClient = new ApiClient(HOST)
       const sql = 'INSERT INTO foo(name) VALUES("fiona")'
-      const scope = executeSuccess({ url: URL, path: PATH_EXECUTE })
-      const res = await assert.isFulfilled(post(URL, PATH_EXECUTE, {
-        httpOptions: { body: [sql] },
-      }))
+      const scope = executeSuccess({ url: HOST, path: PATH_EXECUTE, body: [sql] })
+      const res = await apiClient.post(PATH_EXECUTE, sql)
       assert.isTrue(scope.isDone(), 'http request captured by nock')
       // eslint-disable-next-line  no-underscore-dangle
-      assert.deepEqual([sql], res.request._data)
-      assert.deepEqual(EXECUTE_SUCCESS_RESPONSE, res.body)
+      assert.deepEqual(res.body, EXECUTE_SUCCESS_RESPONSE)
     })
   })
   describe('Function: get()', () => {
-    it(`should call ${URL}${PATH_QUERY} endpoint with a query using HTTP GET when using select`, async () => {
+    it(`should call ${HOST}${PATH_QUERY} endpoint with a query using HTTP GET when using select`, async () => {
+      const apiClient = new ApiClient(HOST)
       const sql = 'SELECT * FROM foo'
-      const query = {
-        q: sql,
-      }
-      const scope = querySuccess({ url: URL, path: PATH_QUERY, query })
-      const res = await assert.isFulfilled(get(URL, PATH_QUERY, { httpOptions: { query } }))
+      const query = { q: sql }
+      const scope = querySuccess({ url: HOST, path: PATH_QUERY, query })
+      const res = await apiClient.get(PATH_QUERY, sql)
       assert.isTrue(scope.isDone(), 'http request captured by nock')
-      assert.deepEqual(QUERY_SUCCESS_RESPONSE, res.body)
+      assert.deepEqual(res.body, QUERY_SUCCESS_RESPONSE)
     })
   })
 })
