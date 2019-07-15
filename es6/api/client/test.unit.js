@@ -1,10 +1,5 @@
-import { describe, it } from 'mocha'
 import { assert } from 'chai'
-import {
-  get,
-  post,
-  createHttpOptions,
-} from './index'
+import ApiClient, { createQuery } from './index'
 import { PATH as PATH_QUERY } from '../data/query'
 import { PATH as PATH_EXECUTE } from '../data/execute'
 import { querySuccess, QUERY_SUCCESS_RESPONSE } from '../../test/api-data-query-nock'
@@ -13,31 +8,23 @@ import { executeSuccess, EXECUTE_SUCCESS_RESPONSE } from '../../test/api-data-ex
 const URL = 'http://www.rqlite.com:4001'
 
 describe('api client', () => {
-  describe('Function: createHttpOptions()', () => {
+  describe('Function: createQuery()', () => {
     it('it should create the httpOptions using standard request options', () => {
-      const httpOptions = {
-        query: {
-          preserved: true,
-        },
-      }
       const options = {
         level: true,
         pretty: true,
         timings: true,
         transaction: true,
-        httpOptions,
       }
       const expected = {
-        query: {
-          level: true,
-          preserved: true,
-          pretty: true,
-          timings: true,
-          transaction: true,
-        },
+        level: true,
+        preserved: true,
+        pretty: true,
+        timings: true,
+        transaction: true,
       }
-      const createdHttpOptions = createHttpOptions(options)
-      assert.deepEqual(expected, createdHttpOptions)
+      const result = createQuery(options)
+      assert.deepEqual(result, expected)
     })
   })
   describe('Function: post()', () => {

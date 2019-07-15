@@ -1,4 +1,3 @@
-import { describe, it } from 'mocha'
 import { assert } from 'chai'
 import query, { PATH } from './index'
 import {

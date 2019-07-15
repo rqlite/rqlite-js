@@ -1,2 +1,2 @@
-export const HTTP_METHOD_GET = 'get'
-export const HTTP_METHOD_POST = 'post'
+export const HTTP_METHOD_GET = 'GET'
+export const HTTP_METHOD_POST = 'POST'

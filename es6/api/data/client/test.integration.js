@@ -1,4 +1,3 @@
-import { describe, it } from 'mocha'
 import { assert } from 'chai'
 import _get from 'lodash/get'
 import _size from 'lodash/size'

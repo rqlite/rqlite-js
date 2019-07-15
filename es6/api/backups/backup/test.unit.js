@@ -1,4 +1,3 @@
-import { describe, it } from 'mocha'
 import { assert } from 'chai'
 import backup, { PATH } from './index'
 import { backupSuccess, BACKUP_SUCCESS_RESPONSE } from '../../../test/backups/backup-nock'

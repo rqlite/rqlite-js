@@ -1,4 +1,3 @@
-import { describe, it } from 'mocha'
 import { assert } from 'chai'
 import execute, { PATH } from './index'
 import { executeSuccess, EXECUTE_SUCCESS_RESPONSE } from '../../../test/api-data-execute-nock'

@@ -1,6 +1,6 @@
 /**
  * Plain HTTP client to be used when creating RQLite specific API HTTP clients
- * @module http
+ * @module http-request
  */
 import assign from 'lodash/assign'
 import isArray from 'lodash/isArray'
@@ -8,15 +8,15 @@ import map from 'lodash/map'
 import replace from 'lodash/replace'
 import size from 'lodash/size'
 import split from 'lodash/split'
-import requestPromise from 'request-promise'
-import request from 'request'
+import rp from 'request-promise'
+import r from 'request'
 import {
   HTTP_METHOD_GET,
   HTTP_METHOD_POST,
 } from './http-methods'
 import {
   CONTENT_TYPE_APPLICATION_JSON,
-  CONTENT_TYPE_APPLICATION_OCTET_STREAM,
+  // CONTENT_TYPE_APPLICATION_OCTET_STREAM,
 } from './content-types'
 
 /**
@@ -41,13 +41,18 @@ export function createDefaultHeaders (headers = {}) {
 
 /**
  * Clean the request path remove / from the beginning
- * @param {String} path 
+ * @param {String} path The path to clean
  * @returns {String} The clean path
  */
 function cleanPath (path) {
   return replace(path, /^\//, '')
 }
 
+/**
+ * Generic HTTP Request class which all RQLiteJS client
+ * should extend for consistent communitication with an RQLite
+ * server
+ */
 export default class HttpRequest {
   /**
    * The index of the host in this.hosts which will be tried
@@ -55,6 +60,12 @@ export default class HttpRequest {
    * @type {Number}
    */
   activeHostIndex = 0
+
+  /**
+   * The regex pattern to check if a uri is absolute or relative,
+   * if it is absolute the host is not appended
+   */
+  absoluteUriPattern = /^https?:\/\//
 
   /**
    * A list of hosts that are tried in round robin fashion
@@ -68,9 +79,8 @@ export default class HttpRequest {
    * @param {String[]|String} hosts An array of RQLite hosts or a string
    * that will be split on "," to create an array of hosts, the first
    * host will be tried first when there are multiple hosts
-   * @param {Object} [options={}] The options
    */
-  constructor (hosts, options = {}) {
+  constructor (hosts) {
     this.setHosts(hosts)
     if (this.getTotalHosts() === 0) {
       throw new Error('At least one host must be provided')
@@ -125,81 +135,110 @@ export default class HttpRequest {
   getTotalHosts () {
     return size(this.getHosts())
   }
-  
+
+  /**
+   * Returns whether or not the uri passes a test for this.absoluteUriPattern
+   * @returns {Boolean} True if the path is absolute
+   */
+  uriIsAbsolute (uri) {
+    return this.absoluteUriPattern.test(uri)
+  }
+
   /**
    * Perform an HTTP request using the provided options
-   * @param {String} url The url for the http request i.e. http://localhost:4001/db/query
    * @param {Object} [options={}] Options for the HTTP client
-   * @param {String} [options.httpMethod='get'] The HTTP method for the request i.e. get or post
-   * @param {Object} [options.query] An object with the query to send with the HTTP request
-   * @param {Object} [options.body] The body of the HTTP request for all non get requests
-   * @param {Object} [options.json=true] When true automatically parse JSON in the response
-   * @param {Object} [options.agent] Agent to replace the default agent i.e. keepalive
-   * @param {Object} [options.timeout={}] Optional timeout to override default
-   * @param {Number} [options.timeout.response] Milliseconds to wait for the server to start
-   * sending data
-   * @param {Number} [options.timeout.deadline] Milliseconds to wait for the data to finish
-   * being sent
+   * @param {Object} [options.auth] A object for user authentication
+   * i.e. { username: 'test', password: "password" }
+   * @param {Object} [options.body] The body of the HTTP request
+   * @param {Boolean} [options.forever=true] When true use the forever keepalive agent
+   * @param {Boolean|Function} [options.gzip=true] If true add accept deflate headers and
+   * uncompress the response body
    * @param {Object} [options.headers={}] HTTP headers to send with the request
-   * @returns {Object} Request promise response
+   * @param {String} [options.httpMethod=HTTP_METHOD_GET] The HTTP method for the request
+   * i.e. GET or POST
+   * @param {Boolean} [options.json=true] When true automatically parse JSON in the response body
+   * and stringify the request body
+   * @param {Object} [options.query] An object with the query to send with the HTTP request
+   * @param {Boolean} [options.stream=false] When true the returned value is a request object with
+   * stream support instead of a request-promise result
+   * @param {Object} [options.timeout=DEAULT_TIMEOUT] Optional timeout to override default
+   * @param {String} options.uri The uri for the request which can be a relative path to use
+   * the currently active host or a full i.e. http://localhost:4001/db/query which is used
+   * literally
+   * @returns {Object} A request-promise result when stream is false and a request object
+   * with stream support when stream is true
    */
   async fetch (options = {}) {
     const {
-      agent,
-      attempt = 0,
       auth,
       body,
-      path,
-      stream = false,
-      followAllRedirects = true,
-      followOriginalHttpMethod = true,
+      forever = true,
+      gzip = true,
       headers = {},
       httpMethod = HTTP_METHOD_GET,
       json = true,
       query,
-      resolveWithFullResponse = true,
+      stream = false,
       timeout = DEAULT_TIMEOUT,
     } = options
-    if (!path) {
-      throw new Error('The path option is required')
+    let { uri } = options
+    if (!uri) {
+      throw new Error('The uri option is required')
     }
-    try {
-      const requestOptions = {
-        agent,
+    uri = this.uriIsAbsolute(uri) ? uri : `${this.getActiveHost()}/${cleanPath(uri)}`
+    // If a stream is request use the request library directly
+    if (stream) {
+      return r({
         auth,
-        method: httpMethod,
         body,
-        followAllRedirects,
-        followOriginalHttpMethod,
-        qs: query,
-        resolveWithFullResponse,
-        uri: `${this.getActiveHost()}/${cleanPath(path)}`,
+        forever,
+        gzip,
+        followAllRedirects: true,
+        followOriginalHttpMethod: true,
+        followRedirect: true,
         headers: assign({}, createDefaultHeaders(headers)),
-        json, // Automatically parses the JSON string in the response
+        json,
+        method: httpMethod,
+        qs: query,
         timeout,
-      }
-      if (stream) {
-        return request(requestOptions)
-      }
-      return await requestPromise(requestOptions)
-    } catch (e) {
-      const { response: { statusCode } = {} } = e
-      // Handle a gateway timeout by trying the next host
-      if (statusCode === 503) {
-        this.setNextActiveHostIndex()
-        const totalHosts = this.getTotalHosts()
-        if (totalHosts > 1 && attempt !== this.getTotalHosts()) {
-          return this.fetch(assign({}, options, { attempt: attempt + 1 }))
-        }
-      }
-      throw e
+        uri,
+      })
     }
+    const requestPromiseOptions = {
+      auth,
+      body,
+      followAllRedirects: false,
+      followOriginalHttpMethod: false,
+      followRedirect: false,
+      forever,
+      gzip,
+      headers: assign({}, createDefaultHeaders(headers)),
+      json,
+      method: httpMethod,
+      qs: query,
+      resolveWithFullResponse: true,
+      simple: false,
+      timeout,
+      transform (responseBody, response, resolveWithFullResponse) {
+        // Handle 301 and 302 redirects
+        const { statusCode: responseStatusCode, headers: responseHeaders = {} } = response
+        if (responseStatusCode === 301 || responseStatusCode === 302) {
+          const { location: redirectUri } = responseHeaders
+          this.uri = redirectUri
+          this.qs = undefined
+          return rp(assign({}, requestPromiseOptions, { uri: redirectUri }))
+        }
+        return resolveWithFullResponse ? response : responseBody
+      },
+      uri,
+    }
+    return rp(requestPromiseOptions)
   }
 
   /**
    * Perform an HTTP GET request
    * @param {Object} [options={}] The options
-   * @see fetch() for options 
+   * @see fetch() for options
    */
   async get (options = {}) {
     return this.fetch(assign({}, options, { httpMethod: HTTP_METHOD_GET }))
@@ -208,7 +247,7 @@ export default class HttpRequest {
   /**
    * Perform an HTTP POST request
    * @param {Object} [options={}] The options
-   * @see fetch() for options 
+   * @see fetch() for options
    */
   async post (options = {}) {
     return this.fetch(assign({}, options, { httpMethod: HTTP_METHOD_POST }))
