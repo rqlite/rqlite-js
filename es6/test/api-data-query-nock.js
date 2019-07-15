@@ -102,7 +102,6 @@ export function queryRedirectSuccess (options = {}) {
   const scope = nock(url)
     .matchHeader('Accept', CONTENT_TYPE_APPLICATION_JSON)
     .get(path)
-    .times(1)
     .query(query)
   if (auth) {
     scope.basicAuth(auth)
@@ -125,6 +124,7 @@ export function queryRedirectSuccess (options = {}) {
 export function queryMultipleSuccess (options = {}) {
   const {
     auth,
+    body,
     path,
     query = queryAllowAll,
     response = QUERY_MULTIPLE_SUCCESS_RESPONSE,
@@ -132,7 +132,7 @@ export function queryMultipleSuccess (options = {}) {
   } = options
   const scope = nock(url)
     .matchHeader('Accept', CONTENT_TYPE_APPLICATION_JSON)
-    .post(path)
+    .post(path, body)
     .query(query)
   if (auth) {
     scope.basicAuth(auth)

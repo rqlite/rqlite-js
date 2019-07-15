@@ -62,6 +62,7 @@ export function executeSuccess (options = {}) {
 export function executeRedirectSuccess (options = {}) {
   const {
     auth,
+    body,
     path,
     redirectLocation,
     statusCode = 301,
@@ -70,7 +71,7 @@ export function executeRedirectSuccess (options = {}) {
   const scope = nock(url)
     .matchHeader('Accept', CONTENT_TYPE_APPLICATION_JSON)
     .matchHeader('Content-Type', CONTENT_TYPE_APPLICATION_JSON)
-    .post(path)
+    .post(path, body)
   if (auth) {
     scope.basicAuth(auth)
   }

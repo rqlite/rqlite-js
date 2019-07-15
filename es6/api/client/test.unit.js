@@ -1,6 +1,5 @@
 import { assert } from 'chai'
-import { PATH as PATH_QUERY } from '../data/query'
-import { PATH as PATH_EXECUTE } from '../data/execute'
+import { PATH_QUERY, PATH_EXECUTE } from '../data'
 import { querySuccess, QUERY_SUCCESS_RESPONSE } from '../../test/api-data-query-nock'
 import { executeSuccess, EXECUTE_SUCCESS_RESPONSE } from '../../test/api-data-execute-nock'
 import ApiClient, { createQuery } from '.'
