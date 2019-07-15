@@ -1,5 +1,5 @@
 import nock from 'nock'
-import { CONTENT_TYPE_APPLICATION_JSON } from '../../http-request/content-types'
+import { CONTENT_TYPE_APPLICATION_JSON, CONTENT_TYPE_TEXT_PLAIN } from '../../http-request/content-types'
 
 export const RESTORE_SUCCESS_RESPONSE = {
   results: [
@@ -15,11 +15,12 @@ export const RESTORE_SUCCESS_RESPONSE = {
  */
 export function restoreSuccess (options) {
   const {
-    url, path, auth, response = RESTORE_SUCCESS_RESPONSE,
+    url, path, auth, response = RESTORE_SUCCESS_RESPONSE, body,
   } = options
   const scope = nock(url)
     .matchHeader('Accept', CONTENT_TYPE_APPLICATION_JSON)
-    .post(path)
+    .matchHeader('Content-Type', CONTENT_TYPE_TEXT_PLAIN)
+    .post(path, body)
   if (auth) {
     scope.basicAuth(auth)
   }
