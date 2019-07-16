@@ -1,8 +1,7 @@
 import { assert } from 'chai'
-import _join from 'lodash/join'
+import join from 'lodash/join'
 import get from 'lodash/get'
 import { getUrl } from '../../test/integrations'
-import { getError } from '../results'
 import DataApiClient from '../data'
 import BackupApiClient, { PATH_LOAD, PATH_BACKUP } from '.'
 
@@ -12,7 +11,7 @@ const BACKUP_SQL_STATEMENTS = [
   'INSERT INTO foo(name) VALUES("fiona");',
   'INSERT INTO foo(name) VALUES("justin");',
 ]
-const BACKUP_SQL = _join(BACKUP_SQL_STATEMENTS, '')
+const BACKUP_SQL = join(BACKUP_SQL_STATEMENTS, '')
 
 /**
  * Capture the stream data and resolve a promise with the parsed JSON
@@ -38,35 +37,26 @@ describe('api backups client', () => {
   }
 
   async function createData () {
-    let error
-    let res
-    let results
     const sql = 'CREATE TABLE fooBackups (id integer not null primary key, name text)'
-    res = await dataApiClient.createTable(sql)
-    results = get(res, ['body', 'results'])
-    error = getError(results)
-    if (error) {
-      throw error
-    }
-    res = await dataApiClient.insert([
+    let dataResults = await dataApiClient.createTable(sql)
+    assert.isUndefined(dataResults.getFirstError(), 'error')
+    dataResults = await dataApiClient.insert([
       'INSERT INTO fooBackups(name) VALUES("fiona")',
       'INSERT INTO fooBackups(name) VALUES("justin")',
-    ], { transaction: true })
-    results = get(res, ['body', 'results'])
-    error = getError(results)
-    if (error) {
-      throw error
-    }
+    ], { atomic: true })
+    assert.isUndefined(dataResults.getFirstError(), 'error')
   }
 
   async function checkData () {
-    const res = await dataApiClient.select('SELECT id, name FROM foo WHERE name="fiona"')
-    const results = get(res, ['body', 'results'])
-    const error = getError(results)
+    const dataResults = await dataApiClient.select('SELECT id, name FROM foo WHERE name="fiona"')
+    const error = dataResults.getFirstError()
     if (error) {
       throw error
     }
-    assert.deepEqual([1, 'fiona'], get(results, [0, 'values', 0]))
+    const dataResult = dataResults.get(0)
+    assert.isDefined(dataResult, 'dataResult')
+    assert.deepEqual(dataResult.get('id'), 1, 'id')
+    assert.deepEqual(dataResult.get('name'), 'fiona', 'name')
   }
 
   beforeEach(cleanUp)
@@ -81,11 +71,9 @@ describe('api backups client', () => {
     })
     it(`should call ${HOST}${PATH_LOAD} and send a SQLite backup string`, async () => {
       const request = await backupApiClient.load(BACKUP_SQL)
-      const results = JSON.parse(await handleRequestSteamAsPromise(request))
-      const error = getError(get(results, 'results'))
-      if (error) {
-        throw error
-      }
+      let results = JSON.parse(await handleRequestSteamAsPromise(request))
+      results = get(results, 'results')
+      assert.notNestedPropertyVal(results, '0.error', 'has an error')
       await checkData()
     })
   })

@@ -11,13 +11,17 @@ import { HTTP_METHOD_GET, HTTP_METHOD_POST } from '../../http-request/http-metho
 
 /**
  * Create the base HTTP query options from RQLite API options
- * @param {Object} query The RQLite API options
+ * @param {Object} [options={}] The RQLite API options
+ * @param {String} [options.level] The consistency level
+ * @param {String} [options.pretty] Pretty print the response body
+ * @param {String} [options.timings] Provide query timings
+ * @param {String} [options.atomic] Treat all commands in the request as a single transaction
  * @returns {Object} The HTTP query
  */
 export function createQuery (options = {}) {
-  const { level, pretty, timings, transaction } = options
+  const { level, pretty, timings, atomic } = options
   // Create the API query and remove any undefined values.
-  return omitBy({ level, pretty, timings, transaction }, isUndefined)
+  return omitBy({ level, pretty, timings, atomic }, isUndefined)
 }
 
 /**

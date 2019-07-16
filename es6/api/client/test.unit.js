@@ -13,13 +13,13 @@ describe('api client', () => {
         level: true,
         pretty: true,
         timings: true,
-        transaction: true,
+        atomic: true,
       }
       const expected = {
         level: true,
         pretty: true,
         timings: true,
-        transaction: true,
+        atomic: true,
       }
       const result = createQuery(options)
       assert.deepEqual(result, expected)

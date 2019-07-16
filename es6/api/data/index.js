@@ -5,6 +5,7 @@
  */
 import isArray from 'lodash/isArray'
 import ApiClient from '../client'
+import { DataResults } from '../results'
 
 /**
  * The RQLite query api path
@@ -17,6 +18,22 @@ export const PATH_QUERY = '/db/query'
 export const PATH_EXECUTE = '/db/execute'
 
 /**
+ * Send an RQLite query API request to the RQLite server
+ * @param {String} sql The SQL string to excute on the server
+ * @param {Object} [options={}] RQLite api options
+ * @param {Object} [options.raw] If true return the raw http resposne from
+ * RQLite response
+ */
+function handleResponse (response, options = {}) {
+  const { raw } = options
+  const { body } = response
+  if (raw) {
+    return response
+  }
+  return new DataResults(body)
+}
+
+/**
  * Data api client to perform RQLite queries
  */
 export default class DataApiClient extends ApiClient {
@@ -24,12 +41,16 @@ export default class DataApiClient extends ApiClient {
    * Send an RQLite query API request to the RQLite server
    * @param {String} sql The SQL string to excute on the server
    * @param {Object} [options={}] RQLite api options
+   * @param {Object} [options.raw] If true return the raw http resposne from
+   * RQLite response
    */
   async query (sql, options = {}) {
     if (isArray(sql)) {
-      return super.post(PATH_QUERY, sql, options)
+      const response = await super.post(PATH_QUERY, sql, options)
+      return handleResponse(response, options)
     }
-    return super.get(PATH_QUERY, sql, options)
+    const response = await super.get(PATH_QUERY, sql, options)
+    return handleResponse(response, options)
   }
 
   /**
@@ -38,7 +59,8 @@ export default class DataApiClient extends ApiClient {
    * @param {Object} [options={}] RQLite api options
    */
   async execute (sql, options = {}) {
-    return super.post(PATH_EXECUTE, sql, options)
+    const response = await super.post(PATH_EXECUTE, sql, options)
+    return handleResponse(response, options)
   }
 
   /**
