@@ -4,7 +4,7 @@ import StatusApiClient, { PATH_STATUS } from '.'
 
 const HOST = getUrl()
 
-describe('api data client', () => {
+describe('api status client', () => {
   const statusApiClient = new StatusApiClient(HOST)
 
   before(() => checkRqliteServerReady())
