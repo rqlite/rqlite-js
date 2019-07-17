@@ -16,12 +16,15 @@ import { HTTP_METHOD_GET, HTTP_METHOD_POST } from '../../http-request/http-metho
  * @param {String} [options.pretty] Pretty print the response body
  * @param {String} [options.timings] Provide query timings
  * @param {String} [options.atomic] Treat all commands in the request as a single transaction
+ * for RQLite v5 and higher
+ * @param {String} [options.transaction] Treat all commands in the request as a single transaction
+ * for RQLite v4 and lower
  * @returns {Object} The HTTP query
  */
 export function createQuery (options = {}) {
-  const { level, pretty, timings, atomic } = options
+  const { level, pretty, timings, atomic, transaction } = options
   // Create the API query and remove any undefined values.
-  return omitBy({ level, pretty, timings, atomic }, isUndefined)
+  return omitBy({ level, pretty, timings, atomic, transaction }, isUndefined)
 }
 
 /**
@@ -35,10 +38,12 @@ export default class ApiClient extends HttpRequest {
    * @param {Object} [options={}] RQLite API options
    */
   async get (path, sql, options = {}) {
+    const { useMaster } = options
     if (!path) {
       throw new Error('The path argument is required')
     }
     return super.get({
+      useMaster,
       uri: path,
       httpMethod: HTTP_METHOD_GET,
       query: assign({}, createQuery(options), { q: sql }),
@@ -52,10 +57,12 @@ export default class ApiClient extends HttpRequest {
    * @param {Object} [options={}] RQLite API options
    */
   async post (path, sql, options = {}) {
+    const { useMaster } = options
     if (!path) {
       throw new Error('The path argument is required')
     }
     return super.post({
+      useMaster,
       uri: path,
       httpMethod: HTTP_METHOD_POST,
       query: createQuery(options),

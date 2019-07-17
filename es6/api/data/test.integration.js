@@ -1,14 +1,17 @@
 import { assert } from 'chai'
-import { getUrl } from '../../test/integrations'
+import { getUrl, checkRqliteServerReady } from '../../test/integrations'
 import DataApiClient, { PATH_EXECUTE, PATH_QUERY } from '.'
 
 const HOST = getUrl()
 
 describe('api data client', () => {
   const dataApiClient = new DataApiClient(HOST)
+
   async function cleanUp () {
     await dataApiClient.dropTable('DROP TABLE IF EXISTS foo')
   }
+
+  before(() => checkRqliteServerReady())
   before(cleanUp)
   after(cleanUp)
   describe('create table', () => {
@@ -81,7 +84,7 @@ describe('api data client', () => {
         'INSERT INTO foo(name) VALUES("fiona")',
         'INSERT INTO foo(name) VALUES("justin")',
       ]
-      const dataResults = await dataApiClient.insert(sql, { atomic: true })
+      const dataResults = await dataApiClient.insert(sql, { transaction: true })
       assert.isUndefined(dataResults.getFirstError(), 'error')
       const dataResult = dataResults.get(0)
       assert.isDefined(dataResult, 'dataResult')

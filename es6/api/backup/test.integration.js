@@ -1,7 +1,7 @@
 import { assert } from 'chai'
 import join from 'lodash/join'
 import get from 'lodash/get'
-import { getUrl } from '../../test/integrations'
+import { getUrl, checkRqliteServerReady } from '../../test/integrations'
 import DataApiClient from '../data'
 import BackupApiClient, { PATH_LOAD, PATH_BACKUP } from '.'
 
@@ -43,7 +43,7 @@ describe('api backups client', () => {
     dataResults = await dataApiClient.insert([
       'INSERT INTO fooBackups(name) VALUES("fiona")',
       'INSERT INTO fooBackups(name) VALUES("justin")',
-    ], { atomic: true })
+    ], { transaction: true })
     assert.isUndefined(dataResults.getFirstError(), 'error')
   }
 
@@ -59,9 +59,10 @@ describe('api backups client', () => {
     assert.deepEqual(dataResult.get('name'), 'fiona', 'name')
   }
 
+  before(() => checkRqliteServerReady())
   beforeEach(cleanUp)
   after(cleanUp)
-  describe('Function: connect()', () => {
+  describe('backup database', () => {
     it(`should call ${HOST}${PATH_BACKUP} and get a backup string`, async () => {
       before(createData)
       const request = await backupApiClient.backup()
@@ -69,6 +70,8 @@ describe('api backups client', () => {
       const backupText = data.toString('utf8')
       assert.isString(backupText)
     })
+  })
+  describe('restore database', () => {
     it(`should call ${HOST}${PATH_LOAD} and send a SQLite backup string`, async () => {
       const request = await backupApiClient.load(BACKUP_SQL)
       let results = JSON.parse(await handleRequestSteamAsPromise(request))

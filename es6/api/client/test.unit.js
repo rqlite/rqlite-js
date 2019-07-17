@@ -10,16 +10,18 @@ describe('api client', () => {
   describe('Function: createQuery()', () => {
     it('it should create the httpOptions using standard request options', () => {
       const options = {
-        level: true,
+        atomic: true,
+        level: 'strong',
         pretty: true,
         timings: true,
-        atomic: true,
+        transaction: true,
       }
       const expected = {
-        level: true,
+        atomic: true,
+        level: 'strong',
         pretty: true,
         timings: true,
-        atomic: true,
+        transaction: true,
       }
       const result = createQuery(options)
       assert.deepEqual(result, expected)

@@ -4,12 +4,15 @@
  */
 import assign from 'lodash/assign'
 import isArray from 'lodash/isArray'
+import isBoolean from 'lodash/isBoolean'
+import isFinite from 'lodash/isFinite'
 import map from 'lodash/map'
 import replace from 'lodash/replace'
 import size from 'lodash/size'
 import split from 'lodash/split'
 import rp from 'request-promise'
 import r from 'request'
+import { isUndefined } from 'util'
 import {
   HTTP_METHOD_GET,
   HTTP_METHOD_POST,
@@ -62,6 +65,12 @@ export default class HttpRequest {
   activeHostIndex = 0
 
   /**
+   * Whether or not the setNextActiveHostIndex() should
+   * perform a round robin strategy
+   */
+  activeHostRoundRobin = true
+
+  /**
    * The regex pattern to check if a uri is absolute or relative,
    * if it is absolute the host is not appended
    */
@@ -79,11 +88,18 @@ export default class HttpRequest {
    * @param {String[]|String} hosts An array of RQLite hosts or a string
    * that will be split on "," to create an array of hosts, the first
    * host will be tried first when there are multiple hosts
+   * @param {Object} [options={}] Additional options
+   * @param {Boolean} [options.activeHostRoundRobin=true] If true this.setNextActiveHostIndex()
+   * will perform a round robin when called
    */
-  constructor (hosts) {
+  constructor (hosts, options = {}) {
     this.setHosts(hosts)
     if (this.getTotalHosts() === 0) {
       throw new Error('At least one host must be provided')
+    }
+    const { activeHostRoundRobin = true } = options
+    if (!isUndefined(activeHostRoundRobin)) {
+      this.setActiveHostRoundRobin(activeHostRoundRobin)
     }
   }
 
@@ -109,10 +125,62 @@ export default class HttpRequest {
 
   /**
    * Get the current active host from the hosts array
+   * @param {Boolean} useMaster If true use the first host which is always
+   * the master, this is prefered for write operations
    * @returns {String} The active host
    */
-  getActiveHost () {
-    return this.getHosts()[this.activeHostIndex]
+  getActiveHost (useMaster) {
+    // When useMaster is true we should just use the first host
+    const activeHostIndex = useMaster ? 0 : this.activeHostIndex
+    return this.getHosts()[activeHostIndex]
+  }
+
+  /**
+   * Set the active host index with check based on this.hosts
+   * @param {Number} activeHostIndex The index
+   */
+  setActiveHostIndex (activeHostIndex) {
+    if (!isFinite(activeHostIndex)) {
+      throw new Error('The activeHostIndex should be a finite number')
+    }
+    const totalHosts = this.getTotalHosts()
+    if (activeHostIndex < 0) {
+      // Don't allow an index less then zero
+      this.activeHostIndex = 0
+    } else if (activeHostIndex >= totalHosts) {
+      // Don't allow an index greater then the length of the hosts
+      this.activeHostIndex = size(activeHostIndex) - 1
+    } else {
+      this.activeHostIndex = activeHostIndex
+    }
+  }
+
+  /**
+   * Get the active host index
+   * @returns {Number} The active host index
+   */
+  getActiveHostIndex () {
+    return this.activeHostIndex
+  }
+
+  /**
+   * Set active host round robin value
+   * @param {Boolean} activeHostRoundRobin If true setActiveHostIndex() will
+   * perform a round robin
+   */
+  setActiveHostRoundRobin (activeHostRoundRobin) {
+    if (!isBoolean(activeHostRoundRobin)) {
+      throw new Error('The activeHostRoundRobin argument must be boolean')
+    }
+    this.activeHostRoundRobin = activeHostRoundRobin
+  }
+
+  /**
+   * Get active host round robin value
+   * @returns {Boolean} The value of activeHostRoundRobin
+   */
+  getActiveHostRoundRobin () {
+    return this.activeHostRoundRobin
   }
 
   /**
@@ -120,12 +188,16 @@ export default class HttpRequest {
    * round robin strategy
    */
   setNextActiveHostIndex () {
+    // Don't bother if we only have one host
+    if (this.activeHostRoundRobin && size(this.getHosts()) === 0) {
+      return
+    }
     let nextIndex = this.activeHostIndex + 1
     // If we are past the last index start back over at 1
     if (this.getTotalHosts() === nextIndex) {
       nextIndex = 0
     }
-    this.activeHostIndex = nextIndex
+    this.setActiveHostIndex(nextIndex)
   }
 
   /**
@@ -165,6 +237,8 @@ export default class HttpRequest {
    * @param {String} options.uri The uri for the request which can be a relative path to use
    * the currently active host or a full i.e. http://localhost:4001/db/query which is used
    * literally
+   * @param {String} options.useMaster When true the request will use the master host, the
+   * first host in this.hosts, this is ideal for write operations to skip the redirect
    * @returns {Object} A request-promise result when stream is false and a request object
    * with stream support when stream is true
    */
@@ -180,12 +254,13 @@ export default class HttpRequest {
       query,
       stream = false,
       timeout = DEAULT_TIMEOUT,
+      useMaster = false,
     } = options
     let { uri } = options
     if (!uri) {
       throw new Error('The uri option is required')
     }
-    uri = this.uriIsAbsolute(uri) ? uri : `${this.getActiveHost()}/${cleanPath(uri)}`
+    uri = this.uriIsAbsolute(uri) ? uri : `${this.getActiveHost(useMaster)}/${cleanPath(uri)}`
     // If a stream is request use the request library directly
     if (stream) {
       return r({
@@ -238,7 +313,7 @@ export default class HttpRequest {
   /**
    * Perform an HTTP GET request
    * @param {Object} [options={}] The options
-   * @see fetch() for options
+   * @see this.fetch() for options
    */
   async get (options = {}) {
     return this.fetch(assign({}, options, { httpMethod: HTTP_METHOD_GET }))
@@ -247,7 +322,7 @@ export default class HttpRequest {
   /**
    * Perform an HTTP POST request
    * @param {Object} [options={}] The options
-   * @see fetch() for options
+   * @see this.fetch() for options
    */
   async post (options = {}) {
     return this.fetch(assign({}, options, { httpMethod: HTTP_METHOD_POST }))

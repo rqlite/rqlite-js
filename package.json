@@ -4,17 +4,19 @@
   "description": "A client library for RQLite written in Javascript that works in NodeJS or the browser.",
   "main": "lib/index.js",
   "scripts": {
-    "build": "babel es6 --out-dir lib",
+    "build": "babel es6 --out-dir lib --source-maps --ignore es6/**/*.unit.js,es6/**/*.integration.js,es6/test",
+    "build-all": "babel es6 --out-dir lib --source-maps",
     "build-clean": "rm -rf lib",
     "build-release": "npm run build && npm run test-build",
+    "docker-build": "docker-compose -p rqlitejs build",
+    "docker-down": "docker-compose -p rqlitejs down",
+    "docker-logs": "docker-compose -p rqlitejs logs",
+    "docker-run-test": "docker-compose -p rqlitejs run test",
+    "docker-stop": "docker-compose -p rqlitejs stop",
     "lint": "eslint es6/**/*.js",
     "release": "npm run lint && npm run build && npm run test-build && standard-version",
-    "start-rqlite": "docker run --name rqlite-js -d -p 4001:4001 -p4002:4002 rqlite/rqlite",
-    "stop-rqlite": "docker stop rqlite-js",
-    "down-rqlite": "docker stop rqlite-js",
-    "rm-rqlite": "docker rm rqlite-js",
     "test": "mocha --require @babel/register es6/test/unit/index.unit.js es6/**/*.unit.js",
-    "test-integrations": "mocha --require @babel/register --timeout 10000 es6/**/*.integration.js",
+    "test-integrations": "mocha --require @babel/register --timeout 10000 lib/**/*.integration.js",
     "test-build": "mocha lib/test/unit/index.unit.js lib/**/*.unit.js",
     "test-build-integrations": "mocha --timeout 10000 lib/**/*.integration.js",
     "prepublishOnly": "npm run lint && npm run build && npm run test-build"
@@ -26,8 +28,7 @@
   "keywords": [
     "rqlite",
     "client",
-    "nodejs",
-    "browser"
+    "nodejs"
   ],
   "author": "Justin Morant",
   "license": "ISC",
@@ -48,7 +49,6 @@
     "bluebird": "^3.5.5",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
-    "del": "^3.0.0",
     "eslint": "^5.3.0",
     "eslint-config-airbnb-base": "^13.2.0",
     "eslint-plugin-babel": "^5.3.0",
@@ -60,7 +60,6 @@
     "standard-version": "^6.0.1"
   },
   "dependencies": {
-    "agentkeepalive": "^4.0.2",
     "lodash": "^4.17.14",
     "request": "^2.88.0",
     "request-promise": "^4.2.4"

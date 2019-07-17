@@ -3,6 +3,7 @@
  * as query and execute
  * @module api/data
  */
+import assign from 'lodash/assign'
 import isArray from 'lodash/isArray'
 import ApiClient from '../client'
 import { DataResults } from '../results'
@@ -69,7 +70,9 @@ export default class DataApiClient extends ApiClient {
    * @param {Object} [options={}] RQLite api options
    */
   async select (sql, options = {}) {
-    return this.query(sql, options)
+    const result = await this.query(sql, options)
+    this.setNextActiveHostIndex()
+    return result
   }
 
   /**
@@ -78,7 +81,7 @@ export default class DataApiClient extends ApiClient {
    * @param {Object} [options={}] RQLite api options
    */
   async update (sql, options = {}) {
-    return this.execute(sql, options)
+    return this.execute(sql, assign({}, { useMaster: true }, options))
   }
 
   /**
@@ -87,7 +90,7 @@ export default class DataApiClient extends ApiClient {
    * @param {Object} [options={}] RQLite api options
    */
   async insert (sql, options = {}) {
-    return this.execute(sql, options)
+    return this.execute(sql, assign({}, { useMaster: true }, options))
   }
 
   /**
@@ -96,7 +99,7 @@ export default class DataApiClient extends ApiClient {
    * @param {Object} [options={}] RQLite api options
    */
   async delete (sql, options = {}) {
-    return this.execute(sql, options)
+    return this.execute(sql, assign({}, { useMaster: true }, options))
   }
 
   /**
@@ -105,7 +108,7 @@ export default class DataApiClient extends ApiClient {
    * @param {Object} [options={}] RQLite api options
    */
   async createTable (sql, options = {}) {
-    return this.execute(sql, options)
+    return this.execute(sql, assign({}, { useMaster: true }, options))
   }
 
   /**
@@ -114,6 +117,6 @@ export default class DataApiClient extends ApiClient {
    * @param {Object} [options={}] RQLite api options
    */
   async dropTable (sql, options = {}) {
-    return this.execute(sql, options)
+    return this.execute(sql, assign({}, { useMaster: true }, options))
   }
 }
