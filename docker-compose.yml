@@ -9,33 +9,23 @@ services:
       - rqlite-replicate-0
       - rqlite-replicate-1
   rqlite-master:
-    image: "rqlite/rqlite:4.5.0"
+    build: 
+      context: ./docker/rqlite-master
+      dockerfile: Dockerfile
     healthcheck:
       test: ["CMD", "curl", "http://localhost:4001/status"]
   rqlite-replicate-0:
-    image: "rqlite/rqlite:4.5.0"
-    entrypoint:
-      - rqlited
-      - -http-addr
-      - 0.0.0.0:4001
-      - -raft-addr
-      - 0.0.0.0:4002
-      - /rqlite/file/data
-      - -join http://rqlite-master:4001
+    build: 
+      context: ./docker/rqlite-replicate-0
+      dockerfile: Dockerfile
     depends_on:
       - rqlite-master
     healthcheck:
       test: ["CMD", "curl", "http://localhost:4001/status"]
   rqlite-replicate-1:
-    image: "rqlite/rqlite:4.5.0"
-    entrypoint:
-      - rqlited
-      - -http-addr
-      - 0.0.0.0:4001
-      - -raft-addr
-      - 0.0.0.0:4002
-      - /rqlite/file/data
-      - -join http://rqlite-master:4001
+    build: 
+      context: ./docker/rqlite-replicate-1
+      dockerfile: Dockerfile
     depends_on:
       - rqlite-master
     healthcheck:
