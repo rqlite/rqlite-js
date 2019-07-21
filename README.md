@@ -1,83 +1,74 @@
 # rqlite-js &middot; [![npm version](https://img.shields.io/npm/v/rqlite-js.svg?style=flat)](https://www.npmjs.com/package/rqlite-js) &middot; [![Build Status](https://travis-ci.org/rqlite/rqlite-js.svg?branch=master)](https://travis-ci.org/rqlite/rqlite-js) &middot; [![Google Group](https://img.shields.io/badge/Google%20Group--blue.svg)](https://groups.google.com/group/rqlite)
-A promise based client library for [rqlite](https://github.com/rqlite/rqlite), the lightweight, distribubted database built on SQLite, that will work in the browser and in NodeJS.  This package is designed to provide a javascript interface that communicates with rqlite API endpoints.  Please note that there is no code in this package for writing SQL queries.  There are other Javascript SQL generator libraries such as [sequel](https://www.npmjs.com/package/sequel) which can be used to create the SQLite query strings.  You are welcome to use one of those libraries or write your own SQL queries directly in your code.
+A promise based client library for [rqlite](https://github.com/rqlite/rqlite), the lightweight, distribubted database built on SQLite.  This package is designed to provide a javascript classes with apis that line up with RQLite API endpoints.  Please note that there is no code in this package for writing SQL queries.  There are other Javascript SQL generator libraries such as [sequel](https://www.npmjs.com/package/sequel) which can be used to create the SQLite query strings.  You are welcome to use one of those libraries or write your own SQL queries directly in your code.
 
-## DATA API
-The data API will allow you to access the basic CRUD operations of rqlite such as `SELECT`, `INSERT`, `UPDATE`, `DELETE`, `CREATE TABLE` and `DROP TABLE`.  To begin using the data API methods you will first want to use the connect function in [lib/api/data/client](lib/api/data/client) which returns a promise.  When the connection is successful the promise will resolve with an data API object.
+## DataApiClient
+The data API client will allow you to access the basic CRUD operations of rqlite such as `SELECT`, `INSERT`, `UPDATE`, `DELETE`, `CREATE TABLE` and `DROP TABLE`.  All data methods will return DataResults which is an array of DataResult instances.  The DataResult instances are designed to abstract working with the response body from RQLite endpoints.  If you want to work with the raw HTTP response instead of using the DataResults the options accepts a raw options which can be set to true.  This is covered in the examples below.
 
-### DATA API Methods
-The follow methods are available on the data API object including their function signatures.
+### DataApiClient Methods
+The follow methods are available on the data API class including their function signatures.
 
-* api.select(sql, options) - `SELECT` based SQL statments
-* api.insert(sql, options) - `INSERT` based SQL statments
-* api.update(sql, options) - `UPDATE` based SQL statments
-* api.delete(sql, options) - `DELETE` based SQL statments
-* api.table.create(sql, options) - `CREATE TABLE` based SQL statments
-* api.table.drop(sql, options) - `DROP TABLE` based SQL statments
+* DataApiClient.select(sql, options) - `SELECT` based SQL statments
+* DataApiClient.insert(sql, options) - `INSERT` based SQL statments
+* DataApiClient.update(sql, options) - `UPDATE` based SQL statments
+* DataApiClient.delete(sql, options) - `DELETE` based SQL statments
+* DataApiClient.createTable(sql, options) - `CREATE TABLE` based SQL statments
+* DataApiClient.dropTable(sql, options) - `DROP TABLE` based SQL statments
+* DataApiClient.execute(sql, options) - Any sql statment not covered be the class nethods can be passed directly to execute
 
 ## DATA API Usage
 
 ### CREATE TABLE Example
-The code sample shows how would connect to a rqlite server and create a table.
+The code sample shows how you would connect to a rqlite server and create a table.
 
 ```javascript
-import connect from 'rqlite-js/lib/api/data/client'
-import {getError, toPlainJs} from 'rqlite-js/lib/api/results'
+import { DataApiClient } from 'rqlite-js'
 
+const dataApiClient = new DataApiClient('http://localhost:4001')
 try {
-  const api = await connect('http://localhost:4001')
-  try {
-    // You can create your own raw SQL query or use another SQL generator library of your liking.
-    const sql = 'CREATE TABLE foo (id integer not null primary key, name text)'
-    const res = await api.table.create(sql)
-    // We are given back the entire response object if anything is needed, otherwise
-    // the response body has our rqlite data.
-    const results = res.body.results
-    // Check the results for an error to make sure we the SQL query did
-    // not generate an error while executing.
-    const error = getError(results)
-    if (error) {
-      console.error('rqlite results contained an error.', error)
-      return
-    }
-    // We are successful and have results to use from our SQL query.
-    console.log('Checkout the rqlite results.', results)
-    console.log('Checkout the rqlite results as plain Js object for app use.', toPlainJs(results))
-  } catch (err) {
-    console.error('The HTTP client got an HTTP error, there must be something else going on.', err)
+  // You can create your own raw SQL query or use another SQL generator library of your liking.
+  const sql = 'CREATE TABLE foo (id integer not null primary key, name text)'
+  const dataResults = await dataApiClient.createTable(sql)
+  // Check the results for an error to make sure we the SQL query did
+  // not generate an error while executing.
+  if (dataResults.hasError()) {
+    const error = dataResults.getFirstError()
+    console.error(error, 'rqlite create tables results contained an error.')
+    return
   }
-} catch (err) {
-  console.error('The rqlite-js connect function threw an error.', err)
+  // We are successful and have results to use from our SQL query.
+  console.log(dataResults.toString(), 'Checkout the rqlite results as a JSON string.')
+  console.log(dataResults.toArray(), 'Checkout the rqlite results as plain javascript array for app use.')
+} catch (e) {
+  console.error(e, 'The HTTP client got an HTTP error, there must be something else going on.')
 }
 ```
 
-### Chained QUERY Example
+### Multiple QUERY Example
 The code sample shows how would connect to a rqlite server insert a row then select the row.
 
 ```javascript
-import connect from 'rqlite-js/lib/api/data/client'
-import {getError, toPlainJs} from 'rqlite-js/lib/api/results'
+import { DataApiClient } from 'rqlite-js'
 
-const api = await connect('http://localhost:4001')
+const dataApiClient = new DataApiClient('http://localhost:4001')
 // Insert a row into the table foo we create above in the CREATE TABLE example.
 // The values for sql can be a string or an array if you want to execute multiple
 // SQL queries on the server.
-const sql = 'INSERT INTO foo(name) VALUES(\"fiona\")'
-const resInsert = await api.insert(sql)
-if (getError(resInsert.body.results)) {
-  console.error('rqlite results contained an error.', error)
+let dataResults = await dataApiClient.insert('INSERT INTO foo(name) VALUES(\"fiona\")')
+if (dataResults.hasError()) {
+  const error = dataResults.getFirstError()
+  console.error(error, 'rqlite insert results contained an error.')
   return
 }
-const id = resInsert.body.results[0].last_insert_id
-const sql = `SELECT name FROM foo WHERE id="${id}"`
-const res = await api.select(sql)
-const results = res.body.results
-const error = getError(results)
-if (error) {
-  console.error('rqlite results contained an error.', error)
+const id = dataResults.get(0).getLastInsertId()
+const rowsAffected = dataResults.get(0).getRowsAffected()
+dataResults = await dataApiClient.select(`SELECT name FROM foo WHERE id="${id}"`)
+if (dataResults.hasError()) {
+  const error = dataResults.getFirstError()
+  console.error(error, 'rqlite select results contained an error.')
   return
 }
-console.log('The value for the name field which should equal fiona', results[0].values[0])
-console.log('rqlite results are great, but I just want to work with the data', toPlainJs(results))
+console.log(dataResults.get(0).toString(), 'The value for the name field which should equal fiona')
+console.log(dataResults.get(0).toObject(), 'rqlite results are great, but I just want to work with the data')
 ```
 
 ### Using transactions Example

@@ -3,6 +3,7 @@ services:
   test:
     build: .
     environment: 
+      # RQLITE_HOSTS: http://rqlite-master:4001,http://rqlite-replicate-0,http://rqlite-replicate-1:4001
       RQLITE_HOSTS: http://rqlite-master:4001
     depends_on:
       - rqlite-master

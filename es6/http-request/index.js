@@ -219,6 +219,8 @@ export default class HttpRequest {
   /**
    * Perform an HTTP request using the provided options
    * @param {Object} [options={}] Options for the HTTP client
+   * @param {Object} [options.activeHostIndex] A manually provde active host index
+   * or falls back to select logic honoring useMaster
    * @param {Object} [options.auth] A object for user authentication
    * i.e. { username: 'test', password: "password" }
    * @param {Object} [options.body] The body of the HTTP request
@@ -256,11 +258,13 @@ export default class HttpRequest {
       timeout = DEAULT_TIMEOUT,
       useMaster = false,
     } = options
+    // Honor the supplied activeHostIndex or get the active host
+    const { activeHostIndex = this.getActiveHost(useMaster) } = options
     let { uri } = options
     if (!uri) {
       throw new Error('The uri option is required')
     }
-    uri = this.uriIsAbsolute(uri) ? uri : `${this.getActiveHost(useMaster)}/${cleanPath(uri)}`
+    uri = this.uriIsAbsolute(uri) ? uri : `${activeHostIndex}/${cleanPath(uri)}`
     // If a stream is request use the request library directly
     if (stream) {
       return r({

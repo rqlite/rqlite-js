@@ -1,19 +1,66 @@
 import { assert } from 'chai'
-import { getUrl, checkRqliteServerReady } from '../../test/integrations'
-import DataApiClient, { PATH_EXECUTE, PATH_QUERY } from '.'
+import join from 'lodash/join'
+import get from 'lodash/get'
+import { delay } from 'bluebird'
+import { PATH_EXECUTE, PATH_QUERY } from './api/data'
+import { PATH_LOAD, PATH_BACKUP } from './api/backup'
+import { PATH_STATUS } from './api/status'
+// eslint-disable-next-line import/named
+import { DataApiClient, BackupApiClient, StatusApiClient } from '.'
 
-const HOST = getUrl()
+/**
+ * The RQLite host for integration tests, which can be changed
+ * using the RQLITE_URL environment variable or defaults to
+ * http://localhost:4001
+ * @type {String} The RQLite host address
+ */
+const HOST = process.env.RQLITE_HOSTS || 'http://localhost:4001'
 
-describe('api data client', () => {
-  const dataApiClient = new DataApiClient(HOST)
-
-  async function cleanUp () {
-    await dataApiClient.dropTable('DROP TABLE IF EXISTS foo')
+describe('api status client', () => {
+  const statusApiClient = new StatusApiClient(HOST)
+  /**
+   * Before beginning test check the status endpoint for a response from
+   * RQLite server
+   * @param {Number} attempt The current attempt
+   * @param {Number} wait The amount of time to wait
+   * @param {Number} maxAttempts The maximum number of attempts before
+   * throw the current error
+   */
+  async function checkRqliteServerReady (attempt = 0, wait = 500, maxAttempts = 10) {
+    try {
+      const results = await statusApiClient.statusAllHosts()
+      return results
+    } catch (e) {
+      if (attempt < maxAttempts) {
+        await delay(wait)
+        return checkRqliteServerReady(attempt + 1)
+      }
+      throw e
+    }
   }
 
   before(() => checkRqliteServerReady())
-  before(cleanUp)
-  after(cleanUp)
+  describe('should get status response', () => {
+    it(`should call ${HOST}${PATH_STATUS} and create table named foo`, async () => {
+      const sql = 'CREATE TABLE foo (id integer not null primary key, name text)'
+      const { body } = await statusApiClient.status(sql)
+      assert.isObject(body, 'response body is object')
+      assert.property(body, 'build')
+      assert.property(body, 'http')
+      // assert.property(body, 'last_backup')
+      assert.property(body, 'node')
+      assert.property(body, 'runtime')
+      assert.property(body, 'store')
+    })
+  })
+})
+
+describe('api data client', () => {
+  const dataApiClient = new DataApiClient(HOST)
+  // eslint-disable-next-line prefer-arrow-callback
+  after(async function cleanUpApiDataClientTests () {
+    await dataApiClient.dropTable('DROP TABLE IF EXISTS foo')
+  })
   describe('create table', () => {
     it(`should call ${HOST}${PATH_EXECUTE} and create table named foo`, async () => {
       const sql = 'CREATE TABLE foo (id integer not null primary key, name text)'
@@ -118,6 +165,73 @@ describe('api data client', () => {
       const dataResult = dataResults.get(0)
       assert.isDefined(dataResult, 'dataResult')
       assert.equal(dataResult.getRowsAffected(), 1, 'row_affected')
+    })
+  })
+})
+
+describe('api backups client', () => {
+  const backupApiClient = new BackupApiClient(HOST)
+  const dataApiClient = new DataApiClient(HOST)
+  /**
+   * Capture the stream data and resolve a promise with the parsed JSON
+   * @returns {Stream} The stream
+   */
+  function handleRequestSteamAsPromise (request) {
+    return new Promise(async (resolve, reject) => {
+      let result = Buffer.alloc(0)
+      request
+        .on('data', (data) => {
+          result = Buffer.concat([result, data])
+        })
+        .on('end', () => resolve(result))
+        .on('error', reject)
+    })
+  }
+
+  // eslint-disable-next-line prefer-arrow-callback
+  after(async function cleanUpApiBackupTests () {
+    await dataApiClient.dropTable('DROP TABLE IF EXISTS fooBackups')
+    await dataApiClient.dropTable('DROP TABLE IF EXISTS fooRestore')
+  })
+  describe('backup database', () => {
+    it(`should call ${HOST}${PATH_BACKUP} and get a SQL backup string`, async () => {
+      const sql = 'CREATE TABLE fooBackups (id integer not null primary key, name text)'
+      let dataResults = await dataApiClient.createTable(sql)
+      assert.isUndefined(dataResults.getFirstError(), 'error')
+      dataResults = await dataApiClient.insert([
+        'INSERT INTO fooBackups(name) VALUES("fiona")',
+        'INSERT INTO fooBackups(name) VALUES("justin")',
+      ], { transaction: true })
+      assert.isUndefined(dataResults.getFirstError(), 'error')
+      const request = await backupApiClient.backup()
+      const stream = await handleRequestSteamAsPromise(request)
+      assert.isString(stream.toString())
+    })
+  })
+  describe('restore database', () => {
+    it(`should call ${HOST}${PATH_LOAD} and send a SQLite backup stream`, async () => {
+      /**
+       * Individual SQL statements to create back up data
+       */
+      const BACKUP_SQL_STATEMENTS = [
+        'CREATE TABLE fooRestore (id integer not null primary key, name text)',
+        'INSERT INTO fooRestore(name) VALUES("fiona")',
+        'INSERT INTO fooRestore(name) VALUES("justin")',
+      ]
+      const sql = Buffer.from(join(BACKUP_SQL_STATEMENTS, ';'))
+      const request = await backupApiClient.load(sql)
+      let results = JSON.parse(await handleRequestSteamAsPromise(request))
+      results = get(results, 'results')
+      assert.notNestedProperty(results, 'results.0.error', 'has an error')
+      const dataResults = await dataApiClient.select('SELECT id, name FROM fooRestore WHERE name="fiona"', { level: 'strong' })
+      const error = dataResults.getFirstError()
+      if (error) {
+        throw error
+      }
+      const dataResult = dataResults.get(0)
+      assert.isDefined(dataResult, 'dataResult')
+      assert.deepEqual(dataResult.get('id'), 1, 'id')
+      assert.deepEqual(dataResult.get('name'), 'fiona', 'name')
     })
   })
 })
