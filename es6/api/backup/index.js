@@ -44,7 +44,7 @@ export default class BackupApiClient extends HttpRequest {
       json: false,
       stream: true,
       uri: PATH_BACKUP,
-      useMaster: true,
+      useLeader: true,
     })
     return stream
   }
@@ -65,7 +65,7 @@ export default class BackupApiClient extends HttpRequest {
       json: false,
       stream: true,
       uri: PATH_LOAD,
-      useMaster: true,
+      useLeader: true,
     })
   }
 }

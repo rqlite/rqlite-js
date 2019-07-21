@@ -31,7 +31,7 @@ export default class StatusApiClient extends ApiClient {
    * @returns {HttpResponse} An HTTP response object
    */
   async status (options = {}) {
-    return super.get(PATH_STATUS, { useMaster: true, ...options })
+    return super.get(PATH_STATUS, { useLeader: true, ...options })
   }
 
   /**

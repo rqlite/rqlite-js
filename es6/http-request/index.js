@@ -116,13 +116,13 @@ export default class HttpRequest {
 
   /**
    * Get the current active host from the hosts array
-   * @param {Boolean} useMaster If true use the first host which is always
+   * @param {Boolean} useLeader If true use the first host which is always
    * the master, this is prefered for write operations
    * @returns {String} The active host
    */
-  getActiveHost (useMaster) {
-    // When useMaster is true we should just use the first host
-    const activeHostIndex = useMaster ? 0 : this.activeHostIndex
+  getActiveHost (useLeader) {
+    // When useLeader is true we should just use the first host
+    const activeHostIndex = useLeader ? 0 : this.activeHostIndex
     return this.getHosts()[activeHostIndex]
   }
 
@@ -211,7 +211,7 @@ export default class HttpRequest {
    * Perform an HTTP request using the provided options
    * @param {Object} [options={}] Options for the HTTP client
    * @param {Object} [options.activeHostIndex] A manually provde active host index
-   * or falls back to select logic honoring useMaster
+   * or falls back to select logic honoring useLeader
    * @param {Object} [options.auth] A object for user authentication
    * i.e. { username: 'test', password: "password" }
    * @param {Object} [options.body] The body of the HTTP request
@@ -230,7 +230,7 @@ export default class HttpRequest {
    * @param {String} options.uri The uri for the request which can be a relative path to use
    * the currently active host or a full i.e. http://localhost:4001/db/query which is used
    * literally
-   * @param {String} options.useMaster When true the request will use the master host, the
+   * @param {String} options.useLeader When true the request will use the master host, the
    * first host in this.hosts, this is ideal for write operations to skip the redirect
    * @returns {Object} A request-promise result when stream is false and a request object
    * with stream support when stream is true
@@ -247,10 +247,10 @@ export default class HttpRequest {
       query,
       stream = false,
       timeout = DEAULT_TIMEOUT,
-      useMaster = false,
+      useLeader = false,
     } = options
     // Honor the supplied activeHostIndex or get the active host
-    const { activeHostIndex = this.getActiveHost(useMaster) } = options
+    const { activeHostIndex = this.getActiveHost(useLeader) } = options
     let { uri } = options
     if (!uri) {
       throw new Error('The uri option is required')

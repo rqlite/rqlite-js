@@ -43,12 +43,12 @@ export default class ApiClient extends HttpRequest {
    * @param {Object} [options={}] RQLite API options
    */
   async get (path, sql, options = {}) {
-    const { useMaster } = options
+    const { useLeader } = options
     if (!path) {
       throw new Error('The path argument is required')
     }
     return super.get({
-      useMaster,
+      useLeader,
       uri: path,
       httpMethod: HTTP_METHOD_GET,
       query: { ...createQuery(options), q: sql },
@@ -62,12 +62,12 @@ export default class ApiClient extends HttpRequest {
    * @param {Object} [options={}] RQLite API options
    */
   async post (path, sql, options = {}) {
-    const { useMaster } = options
+    const { useLeader } = options
     if (!path) {
       throw new Error('The path argument is required')
     }
     return super.post({
-      useMaster,
+      useLeader,
       uri: path,
       httpMethod: HTTP_METHOD_POST,
       query: createQuery(options),

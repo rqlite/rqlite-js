@@ -63,21 +63,21 @@ export default class DataApiClient extends ApiClient {
    */
   async query (sql, options = {}) {
     const { level } = options
-    let { useMaster } = options
+    let { useLeader } = options
     // Weak and strong consistency will be redirect to the master anyway
     // so skip the redirect HTTP response and got right to the master
     if (level !== CONSISTENCY_LEVEL_NONE) {
-      useMaster = true
+      useLeader = true
     }
     let response
     if (Array.isArray(sql)) {
-      response = await super.post(PATH_QUERY, sql, { ...options, useMaster })
+      response = await super.post(PATH_QUERY, sql, { ...options, useLeader })
     } else {
-      response = await super.get(PATH_QUERY, sql, { ...options, useMaster })
+      response = await super.get(PATH_QUERY, sql, { ...options, useLeader })
     }
     // If round robin is true try and balance selects across hosts when
     // the master node is not queried directly
-    if (!useMaster) {
+    if (!useLeader) {
       this.setNextActiveHostIndex()
     }
     return handleResponse(response, options)
