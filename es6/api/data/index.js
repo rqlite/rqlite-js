@@ -3,8 +3,6 @@
  * as query and execute
  * @module api/data
  */
-import assign from 'lodash/assign'
-import isArray from 'lodash/isArray'
 import ApiClient from '../client'
 import { DataResults } from '../results'
 
@@ -17,6 +15,24 @@ export const PATH_QUERY = '/db/query'
  * The RQLite execute api path
  */
 export const PATH_EXECUTE = '/db/execute'
+
+/**
+ * Read query consistency level none which means
+ * any node can respond
+ */
+export const CONSISTENCY_LEVEL_NONE = 'none'
+
+/**
+ * Read query consistency strong which must come from
+ * the master node
+ */
+export const CONSISTENCY_LEVEL_STRONG = 'strong'
+
+/**
+ * Read query consistency weak which must come from
+ * the master node
+ */
+export const CONSISTENCY_LEVEL_WEAK = 'weak'
 
 /**
  * Send an RQLite query API request to the RQLite server
@@ -46,11 +62,24 @@ export default class DataApiClient extends ApiClient {
    * RQLite response
    */
   async query (sql, options = {}) {
-    if (isArray(sql)) {
-      const response = await super.post(PATH_QUERY, sql, options)
-      return handleResponse(response, options)
+    const { level } = options
+    let { useMaster } = options
+    // Weak and strong consistency will be redirect to the master anyway
+    // so skip the redirect HTTP response and got right to the master
+    if (level !== CONSISTENCY_LEVEL_NONE) {
+      useMaster = true
     }
-    const response = await super.get(PATH_QUERY, sql, options)
+    let response
+    if (Array.isArray(sql)) {
+      response = await super.post(PATH_QUERY, sql, { ...options, useMaster })
+    } else {
+      response = await super.get(PATH_QUERY, sql, { ...options, useMaster })
+    }
+    // If round robin is true try and balance selects across hosts when
+    // the master node is not queried directly
+    if (!useMaster) {
+      this.setNextActiveHostIndex()
+    }
     return handleResponse(response, options)
   }
 
@@ -62,61 +91,5 @@ export default class DataApiClient extends ApiClient {
   async execute (sql, options = {}) {
     const response = await super.post(PATH_EXECUTE, sql, options)
     return handleResponse(response, options)
-  }
-
-  /**
-   * Send a select SQL statement to the RQLite server
-   * @param {String} sql The SQL string to excute on the server
-   * @param {Object} [options={}] RQLite api options
-   */
-  async select (sql, options = {}) {
-    const result = await this.query(sql, options)
-    this.setNextActiveHostIndex()
-    return result
-  }
-
-  /**
-   * Send an update SQL statement to the RQLite server
-   * @param {String} sql The SQL string to excute on the server
-   * @param {Object} [options={}] RQLite api options
-   */
-  async update (sql, options = {}) {
-    return this.execute(sql, assign({}, { useMaster: true }, options))
-  }
-
-  /**
-   * Send an insert SQL statement to the RQLite server
-   * @param {String} sql The SQL string to excute on the server
-   * @param {Object} [options={}] RQLite api options
-   */
-  async insert (sql, options = {}) {
-    return this.execute(sql, assign({}, { useMaster: true }, options))
-  }
-
-  /**
-   * Send a delete SQL statement to the RQLite server
-   * @param {String} sql The SQL string to excute on the server
-   * @param {Object} [options={}] RQLite api options
-   */
-  async delete (sql, options = {}) {
-    return this.execute(sql, assign({}, { useMaster: true }, options))
-  }
-
-  /**
-   * Send a create table SQL statement to the RQLite server
-   * @param {String} sql The SQL string to excute on the server
-   * @param {Object} [options={}] RQLite api options
-   */
-  async createTable (sql, options = {}) {
-    return this.execute(sql, assign({}, { useMaster: true }, options))
-  }
-
-  /**
-   * Send a drop table SQL statement to the RQLite server
-   * @param {String} sql The SQL string to excute on the server
-   * @param {Object} [options={}] RQLite api options
-   */
-  async dropTable (sql, options = {}) {
-    return this.execute(sql, assign({}, { useMaster: true }, options))
   }
 }

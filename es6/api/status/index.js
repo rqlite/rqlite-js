@@ -2,9 +2,6 @@
  * Status api client to perform RQLite status and diagnostics operations
  * @module api/status
  */
-import assign from 'lodash/assign'
-import get from 'lodash/get'
-import map from 'lodash/map'
 import ApiClient from '../client'
 
 /**
@@ -34,7 +31,7 @@ export default class StatusApiClient extends ApiClient {
    * @returns {HttpResponse} An HTTP response object
    */
   async status (options = {}) {
-    return super.get(PATH_STATUS, assign({}, { useMaster: true }, options))
+    return super.get(PATH_STATUS, { useMaster: true, ...options })
   }
 
   /**
@@ -48,9 +45,9 @@ export default class StatusApiClient extends ApiClient {
   async statusAllHosts (options = {}) {
     const hosts = this.getHosts()
     // Get the status for all of the hosts
-    const promises = map(hosts, async (_host, activeHostIndex) => {
-      const response = await this.status(assign({}, options, { activeHostIndex }))
-      return { response, host: get(hosts, activeHostIndex) }
+    const promises = hosts.map(async (_host, activeHostIndex) => {
+      const response = await this.status({ ...options, activeHostIndex })
+      return { response, host: hosts[activeHostIndex] }
     })
     return Promise.all(promises)
   }

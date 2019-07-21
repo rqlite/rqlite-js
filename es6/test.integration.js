@@ -1,6 +1,4 @@
 import { assert } from 'chai'
-import join from 'lodash/join'
-import get from 'lodash/get'
 import { PATH_EXECUTE, PATH_QUERY } from './api/data'
 import { PATH_LOAD, PATH_BACKUP } from './api/backup'
 import { PATH_STATUS } from './api/status'
@@ -57,12 +55,12 @@ describe('api data client', () => {
   const dataApiClient = new DataApiClient(HOST)
   // eslint-disable-next-line prefer-arrow-callback
   after(async function cleanUpApiDataClientTests () {
-    await dataApiClient.dropTable('DROP TABLE IF EXISTS foo')
+    await dataApiClient.execute('DROP TABLE IF EXISTS foo')
   })
   describe('create table', () => {
     it(`should call ${HOST}${PATH_EXECUTE} and create table named foo`, async () => {
       const sql = 'CREATE TABLE foo (id integer not null primary key, name text)'
-      const dataResults = await dataApiClient.createTable(sql)
+      const dataResults = await dataApiClient.execute(sql)
       assert.isUndefined(dataResults.getFirstError(), 'error')
       const results = dataResults.getResults()
       assert.lengthOf(results, 1)
@@ -71,7 +69,7 @@ describe('api data client', () => {
   describe('insert one row', () => {
     it(`should call ${HOST}${PATH_EXECUTE} and insert a record with the name fiona`, async () => {
       const sql = 'INSERT INTO foo(name) VALUES("fiona")'
-      const dataResults = await dataApiClient.insert(sql)
+      const dataResults = await dataApiClient.execute(sql)
       assert.isUndefined(dataResults.getFirstError(), 'error')
       const dataResult = dataResults.get(0)
       assert.isDefined(dataResult, 'dataResult')
@@ -80,7 +78,7 @@ describe('api data client', () => {
     })
     it(`should call ${HOST}${PATH_QUERY} and select a record with the name fiona`, async () => {
       const sql = 'SELECT name FROM foo WHERE name="fiona"'
-      const dataResults = await dataApiClient.select(sql)
+      const dataResults = await dataApiClient.query(sql)
       assert.isUndefined(dataResults.getFirstError(), 'error')
       const dataResult = dataResults.get(0)
       assert.isDefined(dataResult, 'dataResult')
@@ -90,7 +88,7 @@ describe('api data client', () => {
   describe('update one row', () => {
     it(`should call ${HOST}${PATH_EXECUTE} and update the record with the name fiona to the name justin`, async () => {
       const sql = 'UPDATE foo SET name="justin" WHERE name="fiona"'
-      const dataResults = await dataApiClient.update(sql)
+      const dataResults = await dataApiClient.execute(sql)
       assert.isUndefined(dataResults.getFirstError(), 'error')
       const dataResult = dataResults.get(0)
       assert.isDefined(dataResult, 'dataResult')
@@ -98,7 +96,7 @@ describe('api data client', () => {
     })
     it(`should call ${HOST}${PATH_QUERY} and select a record with the name justin`, async () => {
       const sql = 'SELECT name FROM foo WHERE name="justin"'
-      const dataResults = await dataApiClient.select(sql)
+      const dataResults = await dataApiClient.query(sql)
       assert.isUndefined(dataResults.getFirstError(), 'error')
       const dataResult = dataResults.get(0)
       assert.isDefined(dataResult, 'dataResult')
@@ -108,7 +106,7 @@ describe('api data client', () => {
   describe('delete one row', () => {
     it(`should call ${HOST}${PATH_EXECUTE} and delete a record with the name justin`, async () => {
       const sql = 'DELETE FROM foo WHERE name="justin"'
-      const dataResults = await dataApiClient.delete(sql)
+      const dataResults = await dataApiClient.execute(sql)
       assert.isUndefined(dataResults.getFirstError(), 'error')
       const dataResult = dataResults.get(0)
       assert.isDefined(dataResult, 'dataResult')
@@ -116,7 +114,7 @@ describe('api data client', () => {
     })
     it(`should call ${HOST}${PATH_QUERY} and select a count of foo item that has a result of zero`, async () => {
       const sql = 'SELECT COUNT(id) AS idCount FROM foo'
-      const dataResults = await dataApiClient.select(sql)
+      const dataResults = await dataApiClient.query(sql)
       assert.isUndefined(dataResults.getFirstError(), 'error')
       const dataResult = dataResults.get(0)
       assert.isDefined(dataResult, 'dataResult')
@@ -129,7 +127,7 @@ describe('api data client', () => {
         'INSERT INTO foo(name) VALUES("fiona")',
         'INSERT INTO foo(name) VALUES("justin")',
       ]
-      const dataResults = await dataApiClient.insert(sql, { transaction: true })
+      const dataResults = await dataApiClient.execute(sql, { transaction: true })
       assert.isUndefined(dataResults.getFirstError(), 'error')
       const dataResult = dataResults.get(0)
       assert.isDefined(dataResult, 'dataResult')
@@ -138,7 +136,7 @@ describe('api data client', () => {
     })
     it(`should call ${HOST}${PATH_QUERY} and select a count of foo items that has a result of two`, async () => {
       const sql = 'SELECT COUNT(id) AS idCount FROM foo WHERE name IN("fiona", "justin")'
-      const dataResults = await dataApiClient.select(sql)
+      const dataResults = await dataApiClient.query(sql)
       assert.isUndefined(dataResults.getFirstError(), 'error')
       const dataResult = dataResults.get(0)
       assert.isDefined(dataResult, 'dataResult')
@@ -149,7 +147,7 @@ describe('api data client', () => {
         'SELECT name FROM foo WHERE name="fiona"',
         'SELECT name FROM foo WHERE name="justin"',
       ]
-      const dataResults = await dataApiClient.select(sql)
+      const dataResults = await dataApiClient.query(sql)
       assert.isUndefined(dataResults.getFirstError(), 'error')
       assert.equal(dataResults.get(0).get('name'), 'fiona', 'item 0 name')
       assert.equal(dataResults.get(1).get('name'), 'justin', 'item 1 name')
@@ -158,7 +156,7 @@ describe('api data client', () => {
   describe('drop the table', () => {
     it(`should call ${HOST}${PATH_EXECUTE} and drop the table foo`, async () => {
       const sql = 'DROP TABLE foo'
-      const dataResults = await dataApiClient.dropTable(sql)
+      const dataResults = await dataApiClient.execute(sql)
       assert.isUndefined(dataResults.getFirstError(), 'error')
       const dataResult = dataResults.get(0)
       assert.isDefined(dataResult, 'dataResult')
@@ -188,15 +186,15 @@ describe('api backups client', () => {
 
   // eslint-disable-next-line prefer-arrow-callback
   after(async function cleanUpApiBackupTests () {
-    await dataApiClient.dropTable('DROP TABLE IF EXISTS fooBackups')
-    await dataApiClient.dropTable('DROP TABLE IF EXISTS fooRestore')
+    await dataApiClient.execute('DROP TABLE IF EXISTS fooBackups')
+    await dataApiClient.execute('DROP TABLE IF EXISTS fooRestore')
   })
   describe('backup database', () => {
     it(`should call ${HOST}${PATH_BACKUP} and get a SQL backup string`, async () => {
       const sql = 'CREATE TABLE fooBackups (id integer not null primary key, name text)'
-      let dataResults = await dataApiClient.createTable(sql)
+      let dataResults = await dataApiClient.execute(sql)
       assert.isUndefined(dataResults.getFirstError(), 'error')
-      dataResults = await dataApiClient.insert([
+      dataResults = await dataApiClient.execute([
         'INSERT INTO fooBackups(name) VALUES("fiona")',
         'INSERT INTO fooBackups(name) VALUES("justin")',
       ], { transaction: true })
@@ -216,12 +214,11 @@ describe('api backups client', () => {
         'INSERT INTO fooRestore(name) VALUES("fiona")',
         'INSERT INTO fooRestore(name) VALUES("justin")',
       ]
-      const sql = Buffer.from(join(BACKUP_SQL_STATEMENTS, ';'))
+      const sql = Buffer.from(BACKUP_SQL_STATEMENTS.join(';'))
       const request = await backupApiClient.load(sql)
-      let results = JSON.parse(await handleRequestSteamAsPromise(request))
-      results = get(results, 'results')
+      const { results } = JSON.parse(await handleRequestSteamAsPromise(request))
       assert.notNestedProperty(results, 'results.0.error', 'has an error')
-      const dataResults = await dataApiClient.select('SELECT id, name FROM fooRestore WHERE name="fiona"', { level: 'strong' })
+      const dataResults = await dataApiClient.query('SELECT id, name FROM fooRestore WHERE name="fiona"', { level: 'strong' })
       const error = dataResults.getFirstError()
       if (error) {
         throw error

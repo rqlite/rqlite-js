@@ -2,10 +2,6 @@
  * Base API client for RQLite which abstracts the HTTP calls
  * @module api/client
  */
-import omitBy from 'lodash/omitBy'
-import isUndefined from 'lodash/isUndefined'
-import isArray from 'lodash/isArray'
-import assign from 'lodash/assign'
 import HttpRequest from '../../http-request'
 import { HTTP_METHOD_GET, HTTP_METHOD_POST } from '../../http-request/http-methods'
 
@@ -23,8 +19,17 @@ import { HTTP_METHOD_GET, HTTP_METHOD_POST } from '../../http-request/http-metho
  */
 export function createQuery (options = {}) {
   const { level, pretty, timings, atomic, transaction } = options
-  // Create the API query and remove any undefined values.
-  return omitBy({ level, pretty, timings, atomic, transaction }, isUndefined)
+
+  // Remove all undefined values
+  const query = { level, pretty, timings, atomic, transaction }
+  return Object.entries(query).reduce((acc, entry) => {
+    const [key, val] = entry
+    // Only take defined values
+    if (typeof val !== 'undefined') {
+      acc[key] = val
+    }
+    return acc
+  }, {})
 }
 
 /**
@@ -46,7 +51,7 @@ export default class ApiClient extends HttpRequest {
       useMaster,
       uri: path,
       httpMethod: HTTP_METHOD_GET,
-      query: assign({}, createQuery(options), { q: sql }),
+      query: { ...createQuery(options), q: sql },
     })
   }
 
@@ -66,7 +71,7 @@ export default class ApiClient extends HttpRequest {
       uri: path,
       httpMethod: HTTP_METHOD_POST,
       query: createQuery(options),
-      body: isArray(sql) ? sql : [sql],
+      body: Array.isArray(sql) ? sql : [sql],
     })
   }
 }

@@ -14,7 +14,7 @@ describe('api data results', () => {
       assert.throws(() => new DataResult(), 'The result argument is required to be an object')
     })
     it('should throw an error when a valuesIndex argument is provided a letter', () => {
-      assert.throws(() => new DataResult({}, 'a'), 'The valuesIndex argument is required to be a a finite number when provided')
+      assert.throws(() => new DataResult({}, 'a'), 'The valuesIndex argument is required to be a finite number when provided')
     })
     it('should create a plain object', () => {
       const result = {

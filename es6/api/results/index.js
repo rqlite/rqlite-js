@@ -1,16 +1,7 @@
-import cloneDeep from 'lodash/cloneDeep'
-import concat from 'lodash/concat'
-import get from 'lodash/get'
-import find from 'lodash/find'
-import has from 'lodash/has'
-import isFinite from 'lodash/isFinite'
-import isObject from 'lodash/isObject'
-import isUndefined from 'lodash/isUndefined'
-import keys from 'lodash/keys'
-import map from 'lodash/map'
-import reduce from 'lodash/reduce'
-import values from 'lodash/values'
-import zipObject from 'lodash/zipObject'
+/**
+ * Features for handle RQLite data api responses for success and errors
+ * @module api/results
+ */
 
 /**
  * A class that represents one data result from an RQLite query or execute
@@ -52,21 +43,25 @@ export class DataResult {
    * @param {Array} [valuesIndex] The index to get the values from the result
    */
   constructor (result, valuesIndex) {
-    if (!isObject(result)) {
+    if (typeof result !== 'object') {
       throw new Error('The result argument is required to be an object')
     }
-    if (!isUndefined(valuesIndex) && !isFinite(valuesIndex)) {
-      throw new Error('The valuesIndex argument is required to be a a finite number when provided')
+    if (typeof valuesIndex !== 'undefined' && !Number.isFinite(valuesIndex)) {
+      throw new Error('The valuesIndex argument is required to be a finite number when provided')
     }
-    this.time = get(result, 'time')
-    this.rowsAffected = get(result, 'rows_affected')
-    this.lastInsertId = get(result, 'last_insert_id')
+    this.time = result.time
+    this.rowsAffected = result.rows_affected
+    this.lastInsertId = result.last_insert_id
     // Map the values array to an object where columns are the properties
-    if (isFinite(valuesIndex)) {
-      const columns = get(result, 'columns')
-      const resultValues = get(result, ['values', valuesIndex])
+    if (Number.isFinite(valuesIndex)) {
+      const { columns } = result
+      const resultValues = result.values[valuesIndex]
       if (resultValues) {
-        this.data = zipObject(columns, resultValues)
+        this.data = resultValues.reduce((acc, val, i) => {
+          const col = columns[i]
+          acc[col] = val
+          return acc
+        }, {})
       }
     }
   }
@@ -76,7 +71,7 @@ export class DataResult {
    * @returns {*} The value of the property or undefined
    */
   get (property) {
-    return get(this.data, property)
+    return this.data[property]
   }
 
   /**
@@ -108,7 +103,8 @@ export class DataResult {
    * @returns {Object} The data as an object
    */
   toObject () {
-    return cloneDeep(this.data)
+    // Clone deep
+    return JSON.parse(JSON.stringify(this.data))
   }
 
   /**
@@ -116,7 +112,7 @@ export class DataResult {
    * @returns {Array}
    */
   toArray () {
-    return values(this.data)
+    return Object.values(this.data)
   }
 
   /**
@@ -124,7 +120,7 @@ export class DataResult {
    * @returns {String[]}
    */
   toColumnsArray () {
-    return keys(this.data)
+    return Object.keys(this.data)
   }
 
   /**
@@ -169,6 +165,12 @@ export class DataResults {
   time = 0
 
   /**
+   * The results which is an empty arry to start
+   * @type {DataResult[]}
+   */
+  results = []
+
+  /**
    * The data result list constructor
    * @param {Array} data The data object sent from a RQLite API response
    * @param {Number} time The time the API response took to complete
@@ -182,26 +184,27 @@ export class DataResults {
    * @param {Object} data Api data
    */
   setApiData (data) {
-    if (!isObject(data)) {
+    if (typeof data !== 'object') {
       throw new Error('The data argument is required to be an object')
     }
-    if (!has(data, 'results')) {
+    if (!data.results) {
       throw new Error('The data object is required to have a results property')
     }
-    this.time = get(data, 'time', 0)
-    this.results = reduce(get(data, 'results', []), (acc, result) => {
+    this.time = data.time || 0
+    const { results = [] } = data
+    this.results = results.reduce((acc, result) => {
       // If there is an error property this is an error
-      if (isObject(result) && has(result, 'error')) {
-        return concat(acc, new DataResultError(get(result, 'error')))
+      if (typeof result === 'object' && result.error) {
+        return acc.concat(new DataResultError(result.error))
       }
-      const vals = get(result, 'values')
+      const { values: vals } = result
       // We don't have values so this is a single result row
       if (!vals) {
-        return concat(acc, new DataResult(result))
+        return acc.concat(new DataResult(result))
       }
       // Map the values to DataResult instances
-      const dataResults = map(vals, (_v, valuesIndex) => new DataResult(result, valuesIndex))
-      return concat(acc, dataResults)
+      const dataResults = vals.map((_v, valuesIndex) => new DataResult(result, valuesIndex))
+      return acc.concat(dataResults)
     }, [])
   }
 
@@ -218,7 +221,7 @@ export class DataResults {
    * @returns {DataResultError|undefined}
    */
   getFirstError () {
-    return find(this.results, v => v instanceof DataResultError)
+    return this.results.find(v => v instanceof DataResultError)
   }
 
   /**
@@ -234,7 +237,7 @@ export class DataResults {
    * @returns {DataResult|DataResultError|undefined}
    */
   get (index) {
-    return get(this.results, index)
+    return this.results[index]
   }
 
   /**
@@ -250,7 +253,7 @@ export class DataResults {
    * @returns {Object[]} The data as an array or objects
    */
   toArray () {
-    return map(this.results, result => result.toObject())
+    return this.results.map(result => result.toObject())
   }
 
   /**
@@ -259,7 +262,7 @@ export class DataResults {
    * @returns {String} A JSON string
    */
   toString () {
-    const list = map(this.results, result => result.toString())
+    const list = this.results.map(result => result.toString())
     return JSON.stringify(list)
   }
 }

@@ -82,3 +82,9 @@ CHANGELOG.md
 
 # Tap test results
 tap
+
+# unit tests
+*.unit.js
+
+# integration tests
+*.integration.js

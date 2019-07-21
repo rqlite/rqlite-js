@@ -2,17 +2,8 @@
  * Plain HTTP client to be used when creating RQLite specific API HTTP clients
  * @module http-request
  */
-import assign from 'lodash/assign'
-import isArray from 'lodash/isArray'
-import isBoolean from 'lodash/isBoolean'
-import isFinite from 'lodash/isFinite'
-import map from 'lodash/map'
-import replace from 'lodash/replace'
-import size from 'lodash/size'
-import split from 'lodash/split'
 import rp from 'request-promise'
 import r from 'request'
-import { isUndefined } from 'util'
 import {
   HTTP_METHOD_GET,
   HTTP_METHOD_POST,
@@ -39,7 +30,7 @@ export const DEAULT_RETRY_DELAY = 30000
  */
 export function createDefaultHeaders (headers = {}) {
   const { Accept = CONTENT_TYPE_APPLICATION_JSON } = headers
-  return assign({}, headers, { Accept })
+  return { ...headers, Accept }
 }
 
 /**
@@ -48,7 +39,7 @@ export function createDefaultHeaders (headers = {}) {
  * @returns {String} The clean path
  */
 function cleanPath (path) {
-  return replace(path, /^\//, '')
+  return String(path).replace(/^\//, '')
 }
 
 /**
@@ -98,7 +89,7 @@ export default class HttpRequest {
       throw new Error('At least one host must be provided')
     }
     const { activeHostRoundRobin = true } = options
-    if (!isUndefined(activeHostRoundRobin)) {
+    if (typeof activeHostRoundRobin !== 'undefined') {
       this.setActiveHostRoundRobin(activeHostRoundRobin)
     }
   }
@@ -110,9 +101,9 @@ export default class HttpRequest {
    * host will be tried first when there are multiple hosts
    */
   setHosts (hosts) {
-    this.hosts = !isArray(hosts) ? split(hosts, ',') : hosts
+    this.hosts = !Array.isArray(hosts) ? String(hosts).split(',') : hosts
     // Remove trailing slashed from hosts
-    this.hosts = map(this.hosts, host => replace(host, /\/$/, ''))
+    this.hosts = this.hosts.map(host => host.replace(/\/$/, ''))
   }
 
   /**
@@ -140,7 +131,7 @@ export default class HttpRequest {
    * @param {Number} activeHostIndex The index
    */
   setActiveHostIndex (activeHostIndex) {
-    if (!isFinite(activeHostIndex)) {
+    if (!Number.isFinite(activeHostIndex)) {
       throw new Error('The activeHostIndex should be a finite number')
     }
     const totalHosts = this.getTotalHosts()
@@ -149,7 +140,7 @@ export default class HttpRequest {
       this.activeHostIndex = 0
     } else if (activeHostIndex >= totalHosts) {
       // Don't allow an index greater then the length of the hosts
-      this.activeHostIndex = size(activeHostIndex) - 1
+      this.activeHostIndex = totalHosts - 1
     } else {
       this.activeHostIndex = activeHostIndex
     }
@@ -169,7 +160,7 @@ export default class HttpRequest {
    * perform a round robin
    */
   setActiveHostRoundRobin (activeHostRoundRobin) {
-    if (!isBoolean(activeHostRoundRobin)) {
+    if (typeof activeHostRoundRobin !== 'boolean') {
       throw new Error('The activeHostRoundRobin argument must be boolean')
     }
     this.activeHostRoundRobin = activeHostRoundRobin
@@ -189,7 +180,7 @@ export default class HttpRequest {
    */
   setNextActiveHostIndex () {
     // Don't bother if we only have one host
-    if (this.activeHostRoundRobin && size(this.getHosts()) === 0) {
+    if (this.activeHostRoundRobin && this.getHosts().length === 0) {
       return
     }
     let nextIndex = this.activeHostIndex + 1
@@ -205,7 +196,7 @@ export default class HttpRequest {
    * @returns {Number} The total number of hosts
    */
   getTotalHosts () {
-    return size(this.getHosts())
+    return this.getHosts().length
   }
 
   /**
@@ -275,7 +266,7 @@ export default class HttpRequest {
         followAllRedirects: true,
         followOriginalHttpMethod: true,
         followRedirect: true,
-        headers: assign({}, createDefaultHeaders(headers)),
+        headers: createDefaultHeaders(headers),
         json,
         method: httpMethod,
         qs: query,
@@ -291,7 +282,7 @@ export default class HttpRequest {
       followRedirect: false,
       forever,
       gzip,
-      headers: assign({}, createDefaultHeaders(headers)),
+      headers: createDefaultHeaders(headers),
       json,
       method: httpMethod,
       qs: query,
@@ -305,7 +296,7 @@ export default class HttpRequest {
           const { location: redirectUri } = responseHeaders
           this.uri = redirectUri
           this.qs = undefined
-          return rp(assign({}, requestPromiseOptions, { uri: redirectUri }))
+          return rp({ ...requestPromiseOptions, uri: redirectUri })
         }
         return resolveWithFullResponse ? response : responseBody
       },
@@ -320,7 +311,7 @@ export default class HttpRequest {
    * @see this.fetch() for options
    */
   async get (options = {}) {
-    return this.fetch(assign({}, options, { httpMethod: HTTP_METHOD_GET }))
+    return this.fetch({ ...options, httpMethod: HTTP_METHOD_GET })
   }
 
   /**
@@ -329,6 +320,6 @@ export default class HttpRequest {
    * @see this.fetch() for options
    */
   async post (options = {}) {
-    return this.fetch(assign({}, options, { httpMethod: HTTP_METHOD_POST }))
+    return this.fetch({ ...options, httpMethod: HTTP_METHOD_POST })
   }
 }
