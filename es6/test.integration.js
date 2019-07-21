@@ -1,7 +1,6 @@
 import { assert } from 'chai'
 import join from 'lodash/join'
 import get from 'lodash/get'
-import { delay } from 'bluebird'
 import { PATH_EXECUTE, PATH_QUERY } from './api/data'
 import { PATH_LOAD, PATH_BACKUP } from './api/backup'
 import { PATH_STATUS } from './api/status'
@@ -28,11 +27,10 @@ describe('api status client', () => {
    */
   async function checkRqliteServerReady (attempt = 0, wait = 500, maxAttempts = 10) {
     try {
-      const results = await statusApiClient.statusAllHosts()
-      return results
+      return await statusApiClient.statusAllHosts()
     } catch (e) {
       if (attempt < maxAttempts) {
-        await delay(wait)
+        await new Promise(resolve => setTimeout(resolve, wait))
         return checkRqliteServerReady(attempt + 1)
       }
       throw e

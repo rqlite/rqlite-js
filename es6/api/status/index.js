@@ -2,9 +2,9 @@
  * Status api client to perform RQLite status and diagnostics operations
  * @module api/status
  */
-import get from 'lodash/get'
 import assign from 'lodash/assign'
-import { map as mapPromise } from 'bluebird'
+import get from 'lodash/get'
+import map from 'lodash/map'
 import ApiClient from '../client'
 
 /**
@@ -48,9 +48,10 @@ export default class StatusApiClient extends ApiClient {
   async statusAllHosts (options = {}) {
     const hosts = this.getHosts()
     // Get the status for all of the hosts
-    return mapPromise(hosts, async (_host, activeHostIndex) => {
+    const promises = map(hosts, async (_host, activeHostIndex) => {
       const response = await this.status(assign({}, options, { activeHostIndex }))
       return { response, host: get(hosts, activeHostIndex) }
     })
+    return Promise.all(promises)
   }
 }

@@ -1,5 +1,4 @@
 import { assert } from 'chai'
-import { Promise } from 'bluebird'
 import { backupSuccess, BACKUP_SUCCESS_RESPONSE } from '../../test/backups/backup-nock'
 import { restoreSuccess, RESTORE_SUCCESS_RESPONSE } from '../../test/backups/restore-nock'
 import BackupApiClient, { PATH_BACKUP, PATH_LOAD } from '.'

@@ -1,5 +1,4 @@
 import { assert } from 'chai'
-import { Promise } from 'bluebird'
 import { stringify as stringifyQuery } from 'qs'
 import { querySuccess, queryRedirectSuccess, QUERY_SUCCESS_RESPONSE } from '../test/api-data-query-nock'
 import { executeSuccess, executeRedirectSuccess, EXECUTE_SUCCESS_RESPONSE } from '../test/api-data-execute-nock'
