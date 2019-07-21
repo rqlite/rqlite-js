@@ -4,10 +4,10 @@ A promise based client library for [rqlite](https://github.com/rqlite/rqlite), t
 ## Features
 * Automatically follow 301 redirects from replicates to leader node
 * Round robin of Query statements across leader and all replicates for query api requests
-* Keepalive provided by forever agent as implement by the request and request-promise libraries
+* HTTP Keepalive provided by forever agent as implemented by the [request](https://www.npmjs.com/package/request) and [request-promise](https://www.npmjs.com/package/request-promise) libraries
 
 ## DataApiClient
-The data API client will allow you to access the data API endpoints of rqlite sucha as `query` and `execute`.  All data methods will return a DataResults instance which is an array of DataResult instances.  The DataResult instances are designed to abstract working with the response body from RQLite endpoints.  If you want to work with the raw HTTP response instead of using the DataResults the options accept a raw options which can be set to true.  This is covered in the examples below.
+The data API client will allow you to access the [data API endpoints](https://github.com/rqlite/rqlite/blob/master/DOC/DATA_API.md) of RQLite such as `query` and `execute`.  All data methods will return a DataResults instance which is an array of DataResult instances.  The DataResult instances are designed to abstract working with the response body from RQLite data endpoints.  If you want to work with the raw HTTP response instead of using the DataResults the options accept a raw options which can be set to true.  This is covered in the examples below.
 
 ### DataApiClient Methods
 The follow methods are available on the DataApiClient including their method signatures.  Both the query and execute methods return a DataResults instance which provides methods for handling the RQLite response body states. In the case of a query there will only ever be one result in the DataResults.
@@ -38,6 +38,12 @@ try {
   // We are successful and have results to use from our SQL query.
   console.log(dataResults.toString(), 'Checkout the rqlite results as a JSON string.')
   console.log(dataResults.toArray(), 'Checkout the rqlite results as plain javascript array for app use.')
+  console.log(dataResults.get(0).toString(), 'Checkout just the first rqlite result as a JSON string.')
+
+  // Lets get the same query as a raw HTTP response
+  const { statusCode, body } = await dataApiClient.execute(sql, { raw: true })
+  console.log(body, 'HTTP reponse body.')
+  console.log(statusCode, 'HTTP response code.')
 } catch (e) {
   console.error(e, 'The HTTP client got an HTTP error, there must be something else going on.')
 }
@@ -61,15 +67,31 @@ try {
     return
   }
   const id = dataResults.get(0).getLastInsertId()
-  const rowsAffected = dataResults.get(0).getRowsAffected()
+  console.log(id, 'The id of the inserted row')
   dataResults = await dataApiClient.query(`SELECT name FROM foo WHERE id="${id}"`)
   if (dataResults.hasError()) {
     const error = dataResults.getFirstError()
     console.error(error, 'rqlite select results contained an error.')
     return
   }
-  console.log(dataResults.get(0).toString(), 'The value for the name field which should equal fiona')
-  console.log(dataResults.get(0).toObject(), 'rqlite results are great, but I just want to work with the data')
+  console.log(dataResults.get(0).get('name'), 'The value for the name field which should equal fiona')
+  console.log(dataResults.get(0).toObject(), 'rqlitejs results are great, but I just want to work with a plain js object maybe to send back in my api')
+  console.log(dataResults.get(0).get('id'), 'This is just the id of the first result.')
+  dataResults = await dataApiClient.execute(`UPDATE foo SET name="justin" WHERE name="fiona"`)
+  if (dataResults.hasError()) {
+    const error = dataResults.getFirstError()
+    console.error(error, 'rqlite select results contained an error.')
+    return
+  }
+  const rowsAffected = dataResults.get(0).getRowsAffected()
+  console.log(rowsAffected, 'The number of rows updated for each update query which should be 1 for the first row')
+  dataResults = await dataApiClient.query(`SELECT name FROM foo WHERE id="${id}"`)
+  if (dataResults.hasError()) {
+    const error = dataResults.getFirstError()
+    console.error(error, 'rqlite select results contained an error.')
+    return
+  }
+  console.log(dataResults.get(0).get('name'), 'The value for the name field which should now equal justin')
 } catch (e) {
   console.error(e, 'The HTTP client got an HTTP error, there must be something else going on.')
 }
@@ -88,7 +110,7 @@ try {
   // SQL queries on the server.
   const sql = [
     'INSERT INTO foo(name) VALUES(\"fiona\")',
-    'INSERT INTO bar(name) VALUES(\"test\")'
+    'INSERT INTO bar(name) VALUES(\"test\")',
   ]
   const dataResults = await dataApiClient.execute(sql, { transaction: true })
   if (dataResults.hasError()) {
@@ -113,7 +135,7 @@ const dataApiClient = new DataApiClient('http://localhost:4001')
 try {
   const sql = [
     'SELECT name FROM foo WHERE id="1"',
-    'SELECT id FROM bar WHERE name="test"'
+    'SELECT id FROM bar WHERE name="test"',
   ]
   const dataResults = await dataApiClient.query(sql, { level: 'strong' })
   if (dataResults.hasError()) {
@@ -142,7 +164,7 @@ try {
   // Notice how we just added the username and password to the URL
   const sql = [
     'SELECT name FROM foo WHERE id="1"',
-    'SELECT id FROM bar WHERE name="test"'
+    'SELECT id FROM bar WHERE name="test"',
   ]
   const dataResults = await dataApiClient.query(sql, { auth: { user, pass }, level: 'strong' })
   if (dataResults.hasError()) {
