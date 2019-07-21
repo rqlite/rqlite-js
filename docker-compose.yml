@@ -7,27 +7,28 @@ services:
       RQLITE_HOSTS: http://rqlite-master:4001
     depends_on:
       - rqlite-master
-      - rqlite-replicate-0
-      - rqlite-replicate-1
+      # - rqlite-replicate-0
+      # - rqlite-replicate-1
   rqlite-master:
     build: 
       context: ./docker/rqlite-master
       dockerfile: Dockerfile
     healthcheck:
       test: ["CMD", "curl", "http://localhost:4001/status"]
-  rqlite-replicate-0:
-    build: 
-      context: ./docker/rqlite-replicate-0
-      dockerfile: Dockerfile
-    depends_on:
-      - rqlite-master
-    healthcheck:
-      test: ["CMD", "curl", "http://localhost:4001/status"]
-  rqlite-replicate-1:
-    build: 
-      context: ./docker/rqlite-replicate-1
-      dockerfile: Dockerfile
-    depends_on:
-      - rqlite-master
-    healthcheck:
-      test: ["CMD", "curl", "http://localhost:4001/status"]
+  # Commenting out replicates since they can't get a heartbeat in docker compose
+  # rqlite-replicate-0:
+  #   build: 
+  #     context: ./docker/rqlite-replicate-0
+  #     dockerfile: Dockerfile
+  #   depends_on:
+  #     - rqlite-master
+  #   healthcheck:
+  #     test: ["CMD", "curl", "http://localhost:4001/status"]
+  # rqlite-replicate-1:
+  #   build: 
+  #     context: ./docker/rqlite-replicate-1
+  #     dockerfile: Dockerfile
+  #   depends_on:
+  #     - rqlite-master
+  #   healthcheck:
+  #     test: ["CMD", "curl", "http://localhost:4001/status"]
