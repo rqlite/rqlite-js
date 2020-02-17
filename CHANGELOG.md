@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.1.0](https://github.com/rqlite/rqlite-js/compare/v1.0.0...v1.1.0) (2020-02-17)
+
+
+### Features
+
+* **packages:** Updating babel to 7.8 and integration tests to node 12 ([f2e333f](https://github.com/rqlite/rqlite-js/commit/f2e333f))
+
+
+
 ## [1.0.0](https://github.com/rqlite/rqlite-js/compare/v0.1.3...v1.0.0) (2019-07-22)
 
 
