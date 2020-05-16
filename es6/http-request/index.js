@@ -2,8 +2,7 @@
  * Plain HTTP client to be used when creating RQLite specific API HTTP clients
  * @module http-request
  */
-import rp from 'request-promise'
-import r from 'request'
+import axios from 'axios'
 import {
   HTTP_METHOD_GET,
   HTTP_METHOD_POST,
@@ -215,14 +214,9 @@ export default class HttpRequest {
    * @param {Object} [options.auth] A object for user authentication
    * i.e. { username: 'test', password: "password" }
    * @param {Object} [options.body] The body of the HTTP request
-   * @param {Boolean} [options.forever=true] When true use the forever keepalive agent
-   * @param {Boolean|Function} [options.gzip=true] If true add accept deflate headers and
-   * uncompress the response body
    * @param {Object} [options.headers={}] HTTP headers to send with the request
    * @param {String} [options.httpMethod=HTTP_METHOD_GET] The HTTP method for the request
    * i.e. GET or POST
-   * @param {Boolean} [options.json=true] When true automatically parse JSON in the response body
-   * and stringify the request body
    * @param {Object} [options.query] An object with the query to send with the HTTP request
    * @param {Boolean} [options.stream=false] When true the returned value is a request object with
    * stream support instead of a request-promise result
@@ -239,15 +233,15 @@ export default class HttpRequest {
     const {
       auth,
       body,
-      forever = true,
-      gzip = true,
       headers = {},
       httpMethod = HTTP_METHOD_GET,
-      json = true,
       query,
       stream = false,
       timeout = DEAULT_TIMEOUT,
       useLeader = false,
+      retries = 5,
+      maxRedirects = 10,
+      attempt = 0,
     } = options
     // Honor the supplied activeHostIndex or get the active host
     const { activeHostIndex = this.getActiveHost(useLeader) } = options
@@ -256,53 +250,43 @@ export default class HttpRequest {
       throw new Error('The uri option is required')
     }
     uri = this.uriIsAbsolute(uri) ? uri : `${activeHostIndex}/${cleanPath(uri)}`
-    // If a stream is request use the request library directly
-    if (stream) {
-      return r({
-        auth,
-        body,
-        forever,
-        gzip,
-        followAllRedirects: true,
-        followOriginalHttpMethod: true,
-        followRedirect: true,
+    try {
+      const response = await axios({
+        url: uri,
+        auth: auth && typeof auth === 'object' ? {
+          username: auth.user || auth.username,
+          password: auth.pass || auth.password,
+        } : undefined,
+        data: body,
+        maxRedirects: 0, // Handle redirects manually to allow reposting data
         headers: createDefaultHeaders(headers),
-        json,
+        responseType: stream ? 'stream' : 'json',
         method: httpMethod,
-        qs: query,
+        params: query,
         timeout,
-        uri,
       })
-    }
-    const requestPromiseOptions = {
-      auth,
-      body,
-      followAllRedirects: false,
-      followOriginalHttpMethod: false,
-      followRedirect: false,
-      forever,
-      gzip,
-      headers: createDefaultHeaders(headers),
-      json,
-      method: httpMethod,
-      qs: query,
-      resolveWithFullResponse: true,
-      simple: false,
-      timeout,
-      transform (responseBody, response, resolveWithFullResponse) {
-        // Handle 301 and 302 redirects
-        const { statusCode: responseStatusCode, headers: responseHeaders = {} } = response
-        if (responseStatusCode === 301 || responseStatusCode === 302) {
-          const { location: redirectUri } = responseHeaders
-          this.uri = redirectUri
-          this.qs = undefined
-          return rp({ ...requestPromiseOptions, uri: redirectUri })
+      if (stream) {
+        return response.data
+      }
+      return {
+        body: response.data,
+        status: response.status,
+      }
+    } catch (e) {
+      const { response = {} } = e
+      const { status: responseStatus, headers: responseHeaders = {} } = response
+      // Check if the error was a redirect
+      if (responseStatus === 301 || responseStatus === 302) {
+        const location = typeof responseHeaders === 'object' ? responseHeaders.location : undefined
+        // If we are not at the max redirect try again and have a location try again
+        if (attempt < maxRedirects && location) {
+          return this.fetch({ ...options, uri: location, attempt: attempt + 1 })
         }
-        return resolveWithFullResponse ? response : responseBody
-      },
-      uri,
+      } else if (attempt < retries) {
+        return this.fetch({ ...options, attempt: attempt + 1 })
+      }
+      throw e
     }
-    return rp(requestPromiseOptions)
   }
 
   /**

@@ -15,7 +15,7 @@ const auth = {
 /**
  * Capture the stream data and resolve a promise with the parsed JSON
  */
-function handleRequestSteamAsPromise (request) {
+function handleRequestStreamAsPromise (request) {
   return new Promise(async (resolve, reject) => {
     let json = Buffer.from('')
     request
@@ -54,7 +54,7 @@ describe('http-request', () => {
         url,
         path,
         query,
-        redirectLocation: `${urlRedirectDestination}${path}?${stringifyQuery(query)}`,
+        redirectLocation: `${urlRedirectDestination}${path}`,
       })
       const scope = querySuccess({ url: urlRedirectDestination, path, query })
       const res = await httpRequest.get({ uri: path, query })
@@ -79,7 +79,7 @@ describe('http-request', () => {
       const query = { test: '123' }
       const scope = querySuccess({ url, path, query })
       const request = await httpRequest.get({ uri: path, query, stream: true })
-      const result = await handleRequestSteamAsPromise(request)
+      const result = await handleRequestStreamAsPromise(request)
       assert.isTrue(scope.isDone(), 'http request captured by nock')
       assert.deepEqual(result, QUERY_SUCCESS_RESPONSE)
     })
@@ -93,11 +93,11 @@ describe('http-request', () => {
         url,
         path,
         query,
-        redirectLocation: `${urlRedirectDestination}${path}?${stringifyQuery(query)}`,
+        redirectLocation: `${urlRedirectDestination}${path}`,
       })
       const scope = querySuccess({ url: urlRedirectDestination, path, query })
       const request = await httpRequest.get({ uri: path, query, stream: true })
-      const result = await handleRequestSteamAsPromise(request)
+      const result = await handleRequestStreamAsPromise(request)
       assert.isTrue(scopeRedirect.isDone(), 'http redirect request captured by nock')
       assert.isTrue(scope.isDone(), 'http request captured by nock')
       assert.deepEqual(result, QUERY_SUCCESS_RESPONSE)
@@ -109,7 +109,7 @@ describe('http-request', () => {
       const query = { test: '123' }
       const scope = querySuccess({ url, path, auth, query })
       const request = await httpRequest.get({ uri: path, query, stream: true })
-      const result = await handleRequestSteamAsPromise(request)
+      const result = await handleRequestStreamAsPromise(request)
       assert.isTrue(scope.isDone(), 'http request captured by nock')
       assert.deepEqual(result, QUERY_SUCCESS_RESPONSE)
     })
@@ -120,7 +120,7 @@ describe('http-request', () => {
       const httpRequest = new HttpRequest(url)
       const path = '/test'
       const body = ['INSERT INTO foo(name) VALUES("fiona")']
-      const scope = executeSuccess({ url, path })
+      const scope = executeSuccess({ url, path, body })
       const res = await httpRequest.post({ uri: path, body })
       assert.isTrue(scope.isDone(), 'http request captured by nock')
       assert.deepEqual(res.body, EXECUTE_SUCCESS_RESPONSE)
@@ -135,6 +135,7 @@ describe('http-request', () => {
         url,
         path,
         redirectLocation: `${urlRedirectDestination}${path}`,
+        body,
       })
       const scope = executeSuccess({ url: urlRedirectDestination, path })
       const res = await httpRequest.post({ uri: path, body })
@@ -159,7 +160,7 @@ describe('http-request', () => {
       const body = ['INSERT INTO foo(name) VALUES("fiona")']
       const scope = executeSuccess({ url, path })
       const request = await httpRequest.post({ uri: path, body, stream: true })
-      const result = await handleRequestSteamAsPromise(request)
+      const result = await handleRequestStreamAsPromise(request)
       assert.isTrue(scope.isDone(), 'http request captured by nock')
       assert.deepEqual(result, EXECUTE_SUCCESS_RESPONSE)
     })
@@ -170,7 +171,7 @@ describe('http-request', () => {
       const body = ['INSERT INTO foo(name) VALUES("fiona")']
       const scope = executeSuccess({ url, path, auth })
       const request = await httpRequest.post({ auth, uri: path, body, stream: true })
-      const result = await handleRequestSteamAsPromise(request)
+      const result = await handleRequestStreamAsPromise(request)
       assert.isTrue(scope.isDone(), 'http request captured by nock')
       assert.deepEqual(result, EXECUTE_SUCCESS_RESPONSE)
     })

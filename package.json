@@ -59,6 +59,7 @@
     "standard-version": "^6.0.1"
   },
   "dependencies": {
+    "axios": "^0.19.2",
     "request": "^2.88.2",
     "request-promise": "^4.2.5"
   }
