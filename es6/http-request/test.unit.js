@@ -1,9 +1,9 @@
 import { assert } from 'chai'
+import { Agent as HttpAgent } from 'http'
+import { Agent as HttpsAgent } from 'https'
 import { querySuccess, queryRedirectSuccess, QUERY_SUCCESS_RESPONSE } from '../test/api-data-query-nock'
 import { executeSuccess, executeRedirectSuccess, EXECUTE_SUCCESS_RESPONSE } from '../test/api-data-execute-nock'
 import { CONTENT_TYPE_APPLICATION_JSON } from './content-types'
-import { Agent as HttpAgent } from 'http'
-import { Agent as HttpsAgent } from 'https'
 import HttpRequest, { createDefaultHeaders } from '.'
 
 const username = 'TestUsername'
