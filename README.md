@@ -3,8 +3,9 @@ A promise based client library for [rqlite](https://github.com/rqlite/rqlite), t
 
 ## Features
 * Automatically follow 301 redirects from replicates to leader node
-* Round robin of Query statements across leader and all replicates for query api requests
-* HTTP Keepalive provided by forever agent as implemented by the [request](https://www.npmjs.com/package/request) and [request-promise](https://www.npmjs.com/package/request-promise) libraries
+* Round robin load balancing of leader node and all replicate nodes for query api requests
+* HTTP Keepalive support through http and https agents when initializing clients or on individual requests see [Client options](#client-options)
+* Unit and integration tests for contributors
 
 ## DataApiClient
 The data API client will allow you to access the [data API endpoints](https://github.com/rqlite/rqlite/blob/master/DOC/DATA_API.md) of RQLite such as `query` and `execute`.  All data methods will return a DataResults instance which is an array of DataResult instances.  The DataResult instances are designed to abstract working with the response body from RQLite data endpoints.  If you want to work with the raw HTTP response instead of using the DataResults the options accept a raw options which can be set to true.  This is covered in the examples below.
@@ -158,14 +159,14 @@ import { DataApiClient } from 'rqlite-js'
 // You can initialize the client with auth in the URL instead of using the options
 const dataApiClient = new DataApiClient('http://localhost:4001')
 try {
-  const user = 'rqliteUsername'
-  const pass = 'rqlitePassword'
+  const username = 'rqliteUsername'
+  const password = 'rqlitePassword'
   // Notice how we just added the username and password to the URL
   const sql = [
     'SELECT name FROM foo WHERE id="1"',
     'SELECT id FROM bar WHERE name="test"',
   ]
-  const dataResults = await dataApiClient.query(sql, { auth: { user, pass }, level: 'strong' })
+  const dataResults = await dataApiClient.query(sql, { auth: { username, password }, level: 'strong' })
   if (dataResults.hasError()) {
     const error = dataResults.getFirstError()
     console.error(error, 'rqlite insert results contained an error.')
@@ -184,7 +185,7 @@ Multiple hosts can be provided using the construtor for the data api client. For
 ```javascript
 import { DataApiClient } from 'rqlite-js'
 import http from 'http'
-import https from 'https'
+import https from 'https's
 
 // Hosts can be an array or a string that is comma seperated e.g. 'http://localhost:4001,http://localhost:4002,http://localhost:4003'
 const dataApiClient = new DataApiClient(['http://localhost:4001', 'http://localhost:4002', 'http://localhost:4003'], {
