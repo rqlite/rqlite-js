@@ -1,4 +1,6 @@
 import { assert } from 'chai'
+import http from 'http'
+import https from 'https'
 import { PATH_EXECUTE, PATH_QUERY } from './api/data'
 import { PATH_LOAD, PATH_BACKUP } from './api/backup'
 import { PATH_STATUS } from './api/status'
@@ -35,7 +37,7 @@ describe('api status client', () => {
     }
   }
 
-  before(() => checkRqliteServerReady())
+  before('check RQLite Server ready', () => checkRqliteServerReady())
   describe('should get status response', () => {
     it(`should call ${HOST}${PATH_STATUS} and create table named foo`, async () => {
       const sql = 'CREATE TABLE foo (id integer not null primary key, name text)'
@@ -52,9 +54,12 @@ describe('api status client', () => {
 })
 
 describe('api data client', () => {
-  const dataApiClient = new DataApiClient(HOST)
+  const dataApiClient = new DataApiClient(HOST, {
+    httpAgent: new http.Agent({ keepAlive: true }),
+    httpsAgent: new https.Agent({ keepAlive: true }),
+  })
   // eslint-disable-next-line prefer-arrow-callback
-  after(async function cleanUpApiDataClientTests () {
+  after('clean up data', async function cleanUpApiDataClientTests () {
     await dataApiClient.execute('DROP TABLE IF EXISTS foo')
   })
   describe('create table', () => {
@@ -185,7 +190,7 @@ describe('api backups client', () => {
   }
 
   // eslint-disable-next-line prefer-arrow-callback
-  after(async function cleanUpApiBackupTests () {
+  after('clean up backup data', async function cleanUpApiBackupTests () {
     await dataApiClient.execute('DROP TABLE IF EXISTS fooBackups')
     await dataApiClient.execute('DROP TABLE IF EXISTS fooRestore')
   })
