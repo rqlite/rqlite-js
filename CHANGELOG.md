@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.0.0](https://github.com/rqlite/rqlite-js/compare/v1.1.0...v2.0.0) (2020-05-17)
+
+
+### Bug Fixes
+
+* **docs:** Updated README with latest client options ([39fe667](https://github.com/rqlite/rqlite-js/commit/39fe667))
+* **keep-alive:** Adding keepalive support, remove request from packages and update read me ([129e545](https://github.com/rqlite/rqlite-js/commit/129e545))
+* **lint:** Fixing linting error in unit tests ([10b44bc](https://github.com/rqlite/rqlite-js/commit/10b44bc))
+
+
+### Features
+
+* **http-client:** Changing http client from request-promise to axios ([8ae5aa2](https://github.com/rqlite/rqlite-js/commit/8ae5aa2))
+* **tests:** Adding 100 rows to integration test ([2c17d9e](https://github.com/rqlite/rqlite-js/commit/2c17d9e))
+* **tests:** Adding keepalive agent to integration tests ([e52fa7d](https://github.com/rqlite/rqlite-js/commit/e52fa7d))
+
+
+
 ## [1.1.0](https://github.com/rqlite/rqlite-js/compare/v1.0.0...v1.1.0) (2020-02-17)
 
 
