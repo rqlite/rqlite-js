@@ -8,7 +8,7 @@ const HOST = 'http://www.rqlite.com:4001'
 /**
  * Capture the stream data and resolve a promise with the parsed JSON
  */
-function handleRequestSteamAsPromise (request) {
+function handleRequestStreamAsPromise (request) {
   return new Promise(async (resolve, reject) => {
     let result = Buffer.from('')
     request
@@ -26,7 +26,7 @@ describe('api backup', () => {
       const backupApiClient = new BackupApiClient(HOST)
       const scope = backupSuccess({ url: HOST, path: PATH_BACKUP })
       const request = await backupApiClient.backup()
-      const result = await handleRequestSteamAsPromise(request)
+      const result = await handleRequestStreamAsPromise(request)
       assert.isTrue(scope.isDone(), 'http request captured by nock')
       assert.equal(result, BACKUP_SUCCESS_RESPONSE)
     })
@@ -36,7 +36,7 @@ describe('api backup', () => {
       const backupApiClient = new BackupApiClient(HOST)
       const scope = restoreSuccess({ url: HOST, path: PATH_LOAD, body: BACKUP_SUCCESS_RESPONSE })
       const request = await backupApiClient.load(BACKUP_SUCCESS_RESPONSE)
-      const result = await handleRequestSteamAsPromise(request)
+      const result = await handleRequestStreamAsPromise(request)
       assert.isTrue(scope.isDone(), 'http request captured by nock')
       assert.deepEqual(JSON.parse(result.toString()), RESTORE_SUCCESS_RESPONSE)
     })

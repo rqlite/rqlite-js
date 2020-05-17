@@ -1,8 +1,9 @@
 import { assert } from 'chai'
-import { stringify as stringifyQuery } from 'qs'
 import { querySuccess, queryRedirectSuccess, QUERY_SUCCESS_RESPONSE } from '../test/api-data-query-nock'
 import { executeSuccess, executeRedirectSuccess, EXECUTE_SUCCESS_RESPONSE } from '../test/api-data-execute-nock'
 import { CONTENT_TYPE_APPLICATION_JSON } from './content-types'
+import { Agent as HttpAgent } from 'http'
+import { Agent as HttpsAgent } from 'https'
 import HttpRequest, { createDefaultHeaders } from '.'
 
 const username = 'TestUsername'
@@ -34,6 +35,18 @@ describe('http-request', () => {
     })
   })
   describe('Function: get()', () => {
+    it('should set and get an http agent', async () => {
+      const url = 'http://www.rqlite.com:4001'
+      const httpAgent = new HttpAgent()
+      const httpRequest = new HttpRequest(url, { httpAgent })
+      assert.equal(httpRequest.getHttpAgent(), httpAgent, 'http agent is set on http request')
+    })
+    it('should set and get an https agent', async () => {
+      const url = 'http://www.rqlite.com:4001'
+      const httpsAgent = new HttpsAgent()
+      const httpRequest = new HttpRequest(url, { httpsAgent })
+      assert.equal(httpRequest.getHttpsAgent(), httpsAgent, 'https agent is set on http request')
+    })
     it('should perform a HTTP GET request with a query', async () => {
       const url = 'http://www.rqlite.com:4001'
       const httpRequest = new HttpRequest(url)

@@ -156,7 +156,6 @@ Authentication can be passed either inline in the URL or via the httpOptions aut
 import { DataApiClient } from 'rqlite-js'
 
 // You can initialize the client with auth in the URL instead of using the options
-// const host = `http://${user}:${pass}@localhost:4001`
 const dataApiClient = new DataApiClient('http://localhost:4001')
 try {
   const user = 'rqliteUsername'
@@ -177,6 +176,21 @@ try {
 } catch (e) {
   console.error(e, 'The HTTP client got an HTTP error, there must be something else going on.')
 }
+```
+
+### Client options
+Multiple hosts can be provided using the construtor for the data api client. For greater performance when making http requests it is often useful to provide an http and https agent to the client through options.
+
+```javascript
+import { DataApiClient } from 'rqlite-js'
+import http from 'http'
+import https from 'https'
+
+// Hosts can be an array or a string that is comma seperated e.g. 'http://localhost:4001,http://localhost:4002,http://localhost:4003'
+const dataApiClient = new DataApiClient(['http://localhost:4001', 'http://localhost:4002', 'http://localhost:4003'], {
+  httpAgent: new http.Agent({ keepAlive: true }),
+  httpsAgent: new https.Agent({ keepAlive: true }),
+})
 ```
 
 ## Testing

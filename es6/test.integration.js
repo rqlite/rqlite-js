@@ -172,7 +172,7 @@ describe('api backups client', () => {
    * Capture the stream data and resolve a promise with the parsed JSON
    * @returns {Stream} The stream
    */
-  function handleRequestSteamAsPromise (request) {
+  function handleRequestStreamAsPromise (request) {
     return new Promise(async (resolve, reject) => {
       let result = Buffer.alloc(0)
       request
@@ -200,7 +200,7 @@ describe('api backups client', () => {
       ], { transaction: true })
       assert.isUndefined(dataResults.getFirstError(), 'error')
       const request = await backupApiClient.backup()
-      const stream = await handleRequestSteamAsPromise(request)
+      const stream = await handleRequestStreamAsPromise(request)
       assert.isString(stream.toString())
     })
   })
@@ -216,7 +216,7 @@ describe('api backups client', () => {
       ]
       const sql = Buffer.from(BACKUP_SQL_STATEMENTS.join(';'))
       const request = await backupApiClient.load(sql)
-      const { results } = JSON.parse(await handleRequestSteamAsPromise(request))
+      const { results } = JSON.parse(await handleRequestStreamAsPromise(request))
       assert.notNestedProperty(results, 'results.0.error', 'has an error')
       const dataResults = await dataApiClient.query('SELECT id, name FROM fooRestore WHERE name="fiona"', { level: 'strong' })
       const error = dataResults.getFirstError()

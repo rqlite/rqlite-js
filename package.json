@@ -55,12 +55,10 @@
     "eslint-plugin-mocha": "^5.3.0",
     "mocha": "^6.2.2",
     "nock": "^10.0.6",
-    "qs": "^6.9.1",
     "standard-version": "^6.0.1"
   },
   "dependencies": {
     "axios": "^0.19.2",
-    "request": "^2.88.2",
-    "request-promise": "^4.2.5"
+    "qs": "^6.9.1"
   }
 }
