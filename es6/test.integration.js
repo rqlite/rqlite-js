@@ -15,8 +15,11 @@ import { DataApiClient, BackupApiClient, StatusApiClient } from '.'
  */
 const HOST = process.env.RQLITE_HOSTS || 'http://localhost:4001'
 
+const httpAgent = new http.Agent({ keepAlive: true })
+const httpsAgent = new https.Agent({ keepAlive: true })
+
 describe('api status client', () => {
-  const statusApiClient = new StatusApiClient(HOST)
+  const statusApiClient = new StatusApiClient(HOST, { httpAgent, httpsAgent })
   /**
    * Before beginning test check the status endpoint for a response from
    * RQLite server
@@ -54,10 +57,7 @@ describe('api status client', () => {
 })
 
 describe('api data client', () => {
-  const dataApiClient = new DataApiClient(HOST, {
-    httpAgent: new http.Agent({ keepAlive: true }),
-    httpsAgent: new https.Agent({ keepAlive: true }),
-  })
+  const dataApiClient = new DataApiClient(HOST, { httpAgent, httpsAgent })
   // eslint-disable-next-line prefer-arrow-callback
   after('clean up data', async function cleanUpApiDataClientTests () {
     await dataApiClient.execute('DROP TABLE IF EXISTS foo')
@@ -127,35 +127,34 @@ describe('api data client', () => {
     })
   })
   describe('insert multiple rows', () => {
+    const total = 100
+    const dataList = Array(total).fill(0)
     it(`should call ${HOST}${PATH_EXECUTE} and insert a record with the name fiona and justin using a transaction`, async () => {
-      const sql = [
-        'INSERT INTO foo(name) VALUES("fiona")',
-        'INSERT INTO foo(name) VALUES("justin")',
-      ]
+      const sql = dataList.map((_v, i) => `INSERT INTO foo(name) VALUES("justin-${i}")`)
       const dataResults = await dataApiClient.execute(sql, { transaction: true })
       assert.isUndefined(dataResults.getFirstError(), 'error')
-      const dataResult = dataResults.get(0)
-      assert.isDefined(dataResult, 'dataResult')
-      assert.equal(dataResult.getRowsAffected(), 1, 'row_affected')
-      assert.equal(dataResult.getLastInsertId(), 1, 'last_insert_id')
+      dataList.forEach((_v, i) => {
+        const dataResult = dataResults.get(i)
+        assert.isDefined(dataResult, 'dataResult')
+        assert.equal(dataResult.getRowsAffected(), 1, 'row_affected')
+        assert.equal(dataResult.getLastInsertId(), i + 1, 'last_insert_id')
+      })
     })
     it(`should call ${HOST}${PATH_QUERY} and select a count of foo items that has a result of two`, async () => {
-      const sql = 'SELECT COUNT(id) AS idCount FROM foo WHERE name IN("fiona", "justin")'
+      const sql = 'SELECT COUNT(*) AS total FROM foo WHERE name like("justin-%")'
       const dataResults = await dataApiClient.query(sql)
       assert.isUndefined(dataResults.getFirstError(), 'error')
       const dataResult = dataResults.get(0)
       assert.isDefined(dataResult, 'dataResult')
-      assert.equal(dataResult.get('idCount'), 2, 'idCount')
+      assert.equal(dataResult.get('total'), total, 'total')
     })
     it(`should call ${HOST}${PATH_QUERY} and select an array of records with the name fiona then justin`, async () => {
-      const sql = [
-        'SELECT name FROM foo WHERE name="fiona"',
-        'SELECT name FROM foo WHERE name="justin"',
-      ]
+      const sql = dataList.map((_v, i) => `SELECT name FROM foo WHERE name="justin-${i}"`)
       const dataResults = await dataApiClient.query(sql)
       assert.isUndefined(dataResults.getFirstError(), 'error')
-      assert.equal(dataResults.get(0).get('name'), 'fiona', 'item 0 name')
-      assert.equal(dataResults.get(1).get('name'), 'justin', 'item 1 name')
+      dataList.forEach((_v, i) => {
+        assert.equal(dataResults.get(i).get('name'), `justin-${i}`, `item ${i} name`)
+      })
     })
   })
   describe('drop the table', () => {
@@ -171,8 +170,8 @@ describe('api data client', () => {
 })
 
 describe('api backups client', () => {
-  const backupApiClient = new BackupApiClient(HOST)
-  const dataApiClient = new DataApiClient(HOST)
+  const backupApiClient = new BackupApiClient(HOST, { httpAgent, httpsAgent })
+  const dataApiClient = new DataApiClient(HOST, { httpAgent, httpsAgent })
   /**
    * Capture the stream data and resolve a promise with the parsed JSON
    * @returns {Stream} The stream
