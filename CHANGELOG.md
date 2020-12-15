@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.1.0](https://github.com/rqlite/rqlite-js/compare/v2.0.0...v2.1.0) (2020-12-15)
+
+
+### Features
+
+* **updates:** Updating axios, qs, and standard version plus adding leader host index handling ([11021ec](https://github.com/rqlite/rqlite-js/commit/11021ec824f1b0f15e810ce33acdf85f0df4041b))
+
 ## [2.0.0](https://github.com/rqlite/rqlite-js/compare/v1.1.0...v2.0.0) (2020-05-17)
 
 
