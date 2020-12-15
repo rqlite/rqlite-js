@@ -29,6 +29,23 @@ function handleRequestStreamAsPromise (request) {
 }
 
 describe('http-request', () => {
+  describe('construtor()', () => {
+    it('should throw an error if no hosts are provided', () => {
+      assert.throws(() => new HttpRequest(''), 'At least one host must be provided')
+    })
+    it('should set the hosts when provided as a string', () => {
+      const host1 = 'http://www.rqlite.com:4001'
+      const host2 = 'http://www.rqlite.com:4002'
+      const request = new HttpRequest(`${host1}, ${host2}`)
+      assert.deepEqual(request.getHosts(), [host1, host2])
+    })
+    it('should set the hosts provided as an array', () => {
+      const host1 = 'http://www.rqlite.com:4001'
+      const host2 = 'http://www.rqlite.com:4002'
+      const request = new HttpRequest([host1, host2])
+      assert.deepEqual(request.getHosts(), [host1, host2])
+    })
+  })
   describe('Function: createDefaultHeaders()', () => {
     it(`should add the Accept header with a value of ${CONTENT_TYPE_APPLICATION_JSON}`, () => {
       assert.deepEqual({ Accept: CONTENT_TYPE_APPLICATION_JSON }, createDefaultHeaders())
@@ -155,6 +172,43 @@ describe('http-request', () => {
       assert.isTrue(scopeRedirect.isDone(), 'http redirect request captured by nock')
       assert.isTrue(scope.isDone(), 'http request captured by nock')
       assert.deepEqual(res.body, EXECUTE_SUCCESS_RESPONSE)
+    })
+    it(`should send a HTTP POST request including ${CONTENT_TYPE_APPLICATION_JSON} body and follow redirects when useLeader is true plus redirect host is not in host list`, async () => {
+      const url = 'http://www.rqlite.com:4001'
+      const urlRedirectDestination = 'http://www.rqlite.com:4002'
+      const httpRequest = new HttpRequest(url)
+      const path = '/test'
+      const body = ['INSERT INTO foo(name) VALUES("fiona")']
+      const scopeRedirect = executeRedirectSuccess({
+        url,
+        path,
+        redirectLocation: `${urlRedirectDestination}${path}`,
+        body,
+      })
+      const scope = executeSuccess({ url: urlRedirectDestination, path })
+      const res = await httpRequest.post({ uri: path, body, useLeader: true })
+      assert.isTrue(scopeRedirect.isDone(), 'http redirect request captured by nock')
+      assert.isTrue(scope.isDone(), 'http request captured by nock')
+      assert.deepEqual(res.body, EXECUTE_SUCCESS_RESPONSE)
+    })
+    it(`should send a HTTP POST request including ${CONTENT_TYPE_APPLICATION_JSON} body and follow redirects when useLeader is true plus redirect host is in host list`, async () => {
+      const url = 'http://www.rqlite.com:4001'
+      const urlRedirectDestination = 'http://www.rqlite.com:4002'
+      const path = '/test'
+      const httpRequest = new HttpRequest(`${url},${urlRedirectDestination}${path}`)
+      const body = ['INSERT INTO foo(name) VALUES("fiona")']
+      const scopeRedirect = executeRedirectSuccess({
+        url,
+        path,
+        redirectLocation: `${urlRedirectDestination}${path}`,
+        body,
+      })
+      const scope = executeSuccess({ url: urlRedirectDestination, path })
+      const res = await httpRequest.post({ uri: path, body, useLeader: true })
+      assert.isTrue(scopeRedirect.isDone(), 'http redirect request captured by nock')
+      assert.isTrue(scope.isDone(), 'http request captured by nock')
+      assert.deepEqual(res.body, EXECUTE_SUCCESS_RESPONSE)
+      assert.equal(httpRequest.getLeaderHostIndex(), 1, 'leader host index matches redirect')
     })
     it(`should send a HTTP POST request including ${CONTENT_TYPE_APPLICATION_JSON} body with basic auth`, async () => {
       const url = 'http://www.rqlite.com:4001'
