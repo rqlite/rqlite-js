@@ -4,6 +4,7 @@
  */
 import axios from 'axios'
 import { stringify as stringifyQuery } from 'qs'
+import { parse as parseUrl } from 'url'
 import {
   HTTP_METHOD_GET,
   HTTP_METHOD_POST,
@@ -40,6 +41,19 @@ export function createDefaultHeaders (headers = {}) {
  */
 function cleanPath (path) {
   return String(path).replace(/^\//, '')
+}
+
+/**
+ * Returns the next wait interval, in milliseconds, using an exponential
+ * backoff algorithm.
+ * @param {Number} attempt The retry attempt
+ * @returns {Number} The time to wait in milliseconds
+ */
+function getWaitTimeExponential (attempt = 0) {
+  if (attempt === 0) {
+    return 0
+  }
+  return (2 ** attempt) * 100
 }
 
 /**
@@ -83,6 +97,12 @@ export default class HttpRequest {
    * @type {import('https').Agent} The https agent if it is set
    */
   httpsAgent
+
+  /**
+   * The host list index of the leader node
+   * @type {Number}
+   */
+  leaderHostIndex = 0
 
   /**
    * Construtor for HttpRequest
@@ -154,8 +174,14 @@ export default class HttpRequest {
    */
   setHosts (hosts) {
     this.hosts = !Array.isArray(hosts) ? String(hosts).split(',') : hosts
-    // Remove trailing slashed from hosts
-    this.hosts = this.hosts.map(host => host.replace(/\/$/, ''))
+    this.hosts = this.hosts.reduce((acc, v) => {
+      // Remove trailing slashed from hosts
+      const host = String(v).trim().replace(/\/$/, '')
+      if (!host) {
+        return acc
+      }
+      return acc.concat(host)
+    }, [])
   }
 
   /**
@@ -167,6 +193,20 @@ export default class HttpRequest {
   }
 
   /**
+   * Given a host string find the index of that host in the hosts
+   * @param {String} host A host to find in hosts
+   * @returns {Number} The found host index or -1 if not found
+   */
+  findHostIndex (host) {
+    const parsedHostToFind = parseUrl(host)
+    return this.getHosts().findIndex((v) => {
+      const parsedHost = parseUrl(v)
+      // Find a host where all the parsed fields match the requested host
+      return ['hostname', 'protocol', 'port', 'path'].every(field => parsedHostToFind[field] === parsedHost[field])
+    })
+  }
+
+  /**
    * Get the current active host from the hosts array
    * @param {Boolean} useLeader If true use the first host which is always
    * the master, this is prefered for write operations
@@ -174,13 +214,14 @@ export default class HttpRequest {
    */
   getActiveHost (useLeader) {
     // When useLeader is true we should just use the first host
-    const activeHostIndex = useLeader ? 0 : this.activeHostIndex
+    const activeHostIndex = useLeader ? this.getLeaderHostIndex() : this.getActiveHostIndex()
     return this.getHosts()[activeHostIndex]
   }
 
   /**
    * Set the active host index with check based on this.hosts
    * @param {Number} activeHostIndex The index
+   * @returns {Number} The active host index
    */
   setActiveHostIndex (activeHostIndex) {
     if (!Number.isFinite(activeHostIndex)) {
@@ -196,6 +237,35 @@ export default class HttpRequest {
     } else {
       this.activeHostIndex = activeHostIndex
     }
+    return this.activeHostIndex
+  }
+
+  /**
+   * Get the host index for the leader node
+   * @returns {Number} The host index for the leader node
+   */
+  getLeaderHostIndex () {
+    return this.leaderHostIndex
+  }
+
+  /**
+   * Set the index in the host array for the leader node
+   * @param {Number} leaderHostIndex The index of the host that is the leader node
+   * @returns {Number} The host index for the leader node
+   */
+  setLeaderHostIndex (leaderHostIndex) {
+    if (!Number.isFinite(leaderHostIndex)) {
+      throw new Error('The leaderHostIndex should be a finite number')
+    }
+    const totalHosts = this.getTotalHosts()
+    if (leaderHostIndex < 0) {
+      this.leaderHostIndex = 0
+    } else if (leaderHostIndex > totalHosts) {
+      this.leaderHostIndex = totalHosts - 1
+    } else {
+      this.leaderHostIndex = leaderHostIndex
+    }
+    return this.leaderHostIndex
   }
 
   /**
@@ -232,12 +302,16 @@ export default class HttpRequest {
    */
   setNextActiveHostIndex () {
     // Don't bother if we only have one host
-    if (this.activeHostRoundRobin && this.getHosts().length === 0) {
+    if (!this.getActiveHostRoundRobin()) {
       return
     }
-    let nextIndex = this.activeHostIndex + 1
+    const totalHosts = this.getTotalHosts()
+    if (this.getActiveHostRoundRobin() && totalHosts <= 1) {
+      return
+    }
+    let nextIndex = this.getActiveHostIndex() + 1
     // If we are past the last index start back over at 1
-    if (this.getTotalHosts() === nextIndex) {
+    if (totalHosts === nextIndex) {
       nextIndex = 0
     }
     this.setActiveHostIndex(nextIndex)
@@ -350,9 +424,20 @@ export default class HttpRequest {
         const location = typeof responseHeaders === 'object' ? responseHeaders.location : undefined
         // If we are not at the max redirect try again and have a location try again
         if (attempt < maxRedirects && location) {
+          // If we were asked to use the leader, but got redirect the leader moved so remember it
+          if (useLeader) {
+            const newLeaderHostIndex = this.findHostIndex(location)
+            // If the redirect exists in the hosts list remember it for next time
+            if (newLeaderHostIndex > -1) {
+              this.setLeaderHostIndex(newLeaderHostIndex)
+            }
+          }
           return this.fetch({ ...options, uri: location, attempt: attempt + 1 })
         }
       } else if (attempt < retries) {
+        const waitTime = getWaitTimeExponential(attempt)
+        const delayPromise = new Promise(resolve => setTimeout(resolve, waitTime))
+        await delayPromise
         return this.fetch({ ...options, attempt: attempt + 1 })
       }
       throw e
