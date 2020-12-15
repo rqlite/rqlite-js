@@ -13,6 +13,12 @@ import {
   CONTENT_TYPE_APPLICATION_JSON,
   // CONTENT_TYPE_APPLICATION_OCTET_STREAM,
 } from './content-types'
+import { ERROR_HTTP_REQUEST_MAX_REDIRECTS } from './errors'
+import {
+  RETRYABLE_ERROR_CODES,
+  RETRYABLE_HTTP_METHODS,
+  RETRYABLE_STATUS_CODES,
+} from './retryable'
 
 /**
  * The default timeout value
@@ -47,13 +53,15 @@ function cleanPath (path) {
  * Returns the next wait interval, in milliseconds, using an exponential
  * backoff algorithm.
  * @param {Number} attempt The retry attempt
+ * @param {Number} base The base of the exponential backoff
+ * @param {Number} pow The exponential power
  * @returns {Number} The time to wait in milliseconds
  */
-function getWaitTimeExponential (attempt = 0) {
+export function getWaitTimeExponential (attempt = 0, base = 100, pow = 2) {
   if (attempt === 0) {
     return 0
   }
-  return (2 ** attempt) * 100
+  return (pow ** attempt) * base
 }
 
 /**
@@ -99,10 +107,34 @@ export default class HttpRequest {
   httpsAgent
 
   /**
-   * The host list index of the leader node
+   * The host list index of the leader node defaults
+   * to the first host
    * @type {Number}
    */
   leaderHostIndex = 0
+
+  /**
+   * Http error codes which are considered retryable
+   * @type {Set}
+   */
+  retryableErrorCodes = RETRYABLE_ERROR_CODES
+
+  /**
+   * Http status codes which are considered retryable
+   * @type {Set}
+   */
+  retryableStatusCodes = RETRYABLE_STATUS_CODES
+
+  /**
+   * Http methods which are considered retryable
+   * @type {Set}
+   */
+  retryableHttpMethods = RETRYABLE_HTTP_METHODS
+
+  /**
+   * The exponential backoff base for retries
+   */
+  exponentailBackoffBase = 100
 
   /**
    * Construtor for HttpRequest
@@ -116,13 +148,26 @@ export default class HttpRequest {
    * keepalive pools using plain HTTP
    * @param {import('https').Agent} [options.httpsAgent] An option http agent, useful
    * for keepalive pools using SSL
+   * @param {Set} [options.retryableErrorCodes] The list of retryable error codes
+   * @param {Set} [options.retryableStatusCodes] The list of retryable http status codes
+   * @param {Set} [options.retryableHttpMethods] The list of retryable http methods
+   * @param {Number} [options.exponentailBackoffBase] The value for exponentail backoff base
+   * for retry exponential backoff
    */
   constructor (hosts, options = {}) {
     this.setHosts(hosts)
     if (this.getTotalHosts() === 0) {
       throw new Error('At least one host must be provided')
     }
-    const { activeHostRoundRobin = true, httpAgent, httpsAgent } = options
+    const {
+      activeHostRoundRobin = true,
+      httpAgent,
+      httpsAgent,
+      retryableErrorCodes,
+      retryableStatusCodes,
+      retryableHttpMethods,
+      exponentailBackoffBase,
+    } = options
     if (typeof activeHostRoundRobin !== 'undefined') {
       this.setActiveHostRoundRobin(activeHostRoundRobin)
     }
@@ -132,6 +177,82 @@ export default class HttpRequest {
     if (typeof httpsAgent !== 'undefined') {
       this.setHttpsAgent(httpsAgent)
     }
+    if (retryableErrorCodes instanceof Set) {
+      this.setRetryableErrorCodes(retryableErrorCodes)
+    }
+    if (retryableStatusCodes instanceof Set) {
+      this.setRetryableStatusCodes(retryableStatusCodes)
+    }
+    if (retryableHttpMethods instanceof Set) {
+      this.setRetryableHttpMethods(retryableHttpMethods)
+    }
+    if (Number.isFinite(exponentailBackoffBase)) {
+      this.setExponentailBackoffBase(exponentailBackoffBase)
+    }
+  }
+
+  /**
+   * Set the exponentail backoff base
+   * @param {Number} exponentailBackoffBase
+   */
+  setExponentailBackoffBase (exponentailBackoffBase) {
+    this.exponentailBackoffBase = exponentailBackoffBase
+  }
+
+  /**
+   * Get the exponentail backoff base
+   * @return {Number} The exponentail backoff base
+   */
+  getExponentailBackoffBase () {
+    return this.exponentailBackoffBase
+  }
+
+  /**
+   * Set the retryable error codes
+   * @param {Set} retryableErrorCodes
+   */
+  setRetryableErrorCodes (retryableErrorCodes) {
+    this.retryableErrorCodes = retryableErrorCodes
+  }
+
+  /**
+   * Get the retryable error codes
+   * @returns {Set}
+   */
+  getRetryableErrorCodes () {
+    return this.retryableErrorCodes
+  }
+
+  /**
+   * Set the retryable status codes
+   * @param {Set} retryableStatusCodes
+   */
+  setRetryableStatusCodes (retryableStatusCodes) {
+    this.retryableStatusCodes = retryableStatusCodes
+  }
+
+  /**
+   * Get the retryable status codes
+   * @returns {Set}
+   */
+  getRetryableStatusCodes () {
+    return this.retryableStatusCodes
+  }
+
+  /**
+   * Set the retryable http methods
+   * @param {Set} retryableHttpMethods
+   */
+  setRetryableHttpMethods (retryableHttpMethods) {
+    this.retryableHttpMethods = retryableHttpMethods
+  }
+
+  /**
+   * Get the retryable http methods
+   * @returns {Set}
+   */
+  getRetryableHttpMethods () {
+    return this.retryableHttpMethods
   }
 
   /**
@@ -297,6 +418,21 @@ export default class HttpRequest {
   }
 
   /**
+   * Get the next active host index
+   * @param {Number} [activeHostIndex] An optional paramater to provide the active host index
+   * @returns {Number} The next active host index which will wrap around to zero
+   */
+  getNextActiveHostIndex (activeHostIndex = this.getActiveHostIndex()) {
+    const totalHosts = this.getTotalHosts()
+    const nextIndex = activeHostIndex + 1
+    // If we are past the last index start back over at 1
+    if (totalHosts === nextIndex) {
+      return 0
+    }
+    return nextIndex
+  }
+
+  /**
    * Set the active host index to the next host using a
    * round robin strategy
    */
@@ -309,12 +445,7 @@ export default class HttpRequest {
     if (this.getActiveHostRoundRobin() && totalHosts <= 1) {
       return
     }
-    let nextIndex = this.getActiveHostIndex() + 1
-    // If we are past the last index start back over at 1
-    if (totalHosts === nextIndex) {
-      nextIndex = 0
-    }
-    this.setActiveHostIndex(nextIndex)
+    this.setActiveHostIndex(this.getNextActiveHostIndex())
   }
 
   /**
@@ -334,9 +465,35 @@ export default class HttpRequest {
   }
 
   /**
+   * Returns true when the HTTP request is retryable
+   * @param {Object} options The options
+   * @param {Number} options.statusCode The HTTP status code
+   * @param {String} options.errorCode The error code
+   * @param {String} options.httpMethod The http method
+   * @returns {Boolean} True if the request is retry able
+   */
+  requestIsRetryable (options = {}) {
+    const {
+      statusCode,
+      errorCode,
+      httpMethod,
+    } = options
+    // Honor strictly the http method
+    if (!this.getRetryableHttpMethods().has(httpMethod)) {
+      return false
+    }
+    if (statusCode && this.getRetryableStatusCodes().has(statusCode)) {
+      return true
+    }
+    if (errorCode && this.getRetryableErrorCodes().has(errorCode)) {
+      return true
+    }
+    return false
+  }
+
+  /**
    * Perform an HTTP request using the provided options
    * @param {Object} [options={}] Options for the HTTP client
-   * @param {String} [options.activeHost] Provide the active host manually e.g. http://localhost:4001
    * @param {Object} [options.auth] A object for user authentication
    * @param {String} [options.auth.username] The username for authentication
    * @param {String} [options.auth.password] The username for authentication
@@ -353,18 +510,22 @@ export default class HttpRequest {
    * literally
    * @param {Boolean} [options.useLeader=false] When true the request will use the master host, the
    * first host in this.hosts, this is ideal for write operations to skip the redirect
-   * @param {Number} [options.retries=0] The number of times to retry the request on any error
-   * @param {Number} [options.maxRedirects=0] The maximum number of HTTP redirects to follow before
+   * @param {Number} [options.retries] The number of retries, defaults to the number of
+   * hosts times 3
+   * @param {Number} [options.maxRedirects=10] The maximum number of HTTP redirects to follow before
    * throwing an error
-   * @param {Number} [options.attempt=0] The current attempt count when retrying or
-   * the number of redirects followed, this value should NOT be passed by runtime code it is used
-   * internal by the fetch function to track call depth
+   * @param {Number} [options.attempt=0] The current attempt count when retrying or redirecting
+   * @param {Number} [options.retryAttempt=0] The current attempt based on retry logic
+   * @param {Number} [options.redirectAttempt=0] The current attempt based on redirect logic
+   * @param {Number} [options.attemptHostIndex] When in a retry state the host index of the last
+   * attempt which is used to get the next host index
    * @param {import('http').Agent} [options.httpAgent] An option http agent, useful for
    * keepalive pools using plain HTTP
    * @param {import('https').Agent} [options.httpsAgent] An option http agent, useful
    * for keepalive pools using SSL
    * @returns {Promise<{status: Number, body: Object|String}>} An object with a status and body
    * property when stream is false and a stream when the stream option is true
+   * @throws {ERROR_HTTP_REQUEST_MAX_REDIRECTS} When the maximum number of redirect has been reached
    */
   async fetch (options = {}) {
     const {
@@ -376,14 +537,19 @@ export default class HttpRequest {
       stream = false,
       timeout = DEAULT_TIMEOUT,
       useLeader = false,
-      retries = 0,
+      retries = this.getTotalHosts() * 3,
       maxRedirects = 10,
       attempt = 0,
+      retryAttempt = 0,
+      redirectAttempt = 0,
+      attemptHostIndex,
+      exponentailBackoffBase = this.getExponentailBackoffBase(),
       httpAgent = this.getHttpAgent(),
       httpsAgent = this.getHttpsAgent(),
     } = options
-    // Honor the supplied activeHost or get the active host
-    const { activeHost = this.getActiveHost(useLeader) } = options
+    // Honor the supplied attemptHostIndex or get the active host
+    const activeHost = Number.isFinite(attemptHostIndex) ? this.getHosts()[attemptHostIndex]
+      : this.getActiveHost(useLeader)
     let { uri } = options
     if (!uri) {
       throw new Error('The uri option is required')
@@ -417,28 +583,55 @@ export default class HttpRequest {
         status: response.status,
       }
     } catch (e) {
-      const { response = {} } = e
+      const { response = {}, code: errorCode } = e
       const { status: responseStatus, headers: responseHeaders = {} } = response
       // Check if the error was a redirect
+      const retryable = this.requestIsRetryable({
+        statusCode: responseStatus,
+        errorCode,
+        httpMethod,
+      })
+      // Save the next active host index and pass it to retry manually
+      let nextAttemptHostIndex = Number.isFinite(attemptHostIndex) ? attemptHostIndex
+        : this.getActiveHostIndex()
+      nextAttemptHostIndex += 1
+      // We go past the last index start from zero
+      if (nextAttemptHostIndex === this.getTotalHosts()) {
+        nextAttemptHostIndex = 0
+      }
+      // First check if this is a redirect error
       if (responseStatus === 301 || responseStatus === 302) {
-        const location = typeof responseHeaders === 'object' ? responseHeaders.location : undefined
-        // If we are not at the max redirect try again and have a location try again
-        if (attempt < maxRedirects && location) {
-          // If we were asked to use the leader, but got redirect the leader moved so remember it
-          if (useLeader) {
-            const newLeaderHostIndex = this.findHostIndex(location)
-            // If the redirect exists in the hosts list remember it for next time
-            if (newLeaderHostIndex > -1) {
-              this.setLeaderHostIndex(newLeaderHostIndex)
-            }
-          }
-          return this.fetch({ ...options, uri: location, attempt: attempt + 1 })
+        // We maxed out on redirect attempts
+        if (redirectAttempt >= maxRedirects) {
+          throw ERROR_HTTP_REQUEST_MAX_REDIRECTS(`The maximum number of redirects ${maxRedirects} has been reached`)
         }
-      } else if (attempt < retries) {
-        const waitTime = getWaitTimeExponential(attempt)
+        const location = typeof responseHeaders === 'object' ? responseHeaders.location : undefined
+        // If we were asked to use the leader, but got redirect the leader moved so remember it
+        if (useLeader) {
+          const newLeaderHostIndex = this.findHostIndex(location)
+          // If the redirect exists in the hosts list remember it for next time
+          if (newLeaderHostIndex > -1) {
+            this.setLeaderHostIndex(newLeaderHostIndex)
+          }
+        }
+        return this.fetch({
+          ...options,
+          uri: location,
+          attempt: attempt + 1,
+          redirectAttempt: redirectAttempt + 1,
+          attemptHostIndex: nextAttemptHostIndex,
+        })
+      }
+      if (retryable && retryAttempt < retries) {
+        const waitTime = getWaitTimeExponential(retryAttempt, exponentailBackoffBase)
         const delayPromise = new Promise(resolve => setTimeout(resolve, waitTime))
         await delayPromise
-        return this.fetch({ ...options, attempt: attempt + 1 })
+        return this.fetch({
+          ...options,
+          attempt: attempt + 1,
+          retryAttempt: retryAttempt + 1,
+          attemptHostIndex: nextAttemptHostIndex,
+        })
       }
       throw e
     }

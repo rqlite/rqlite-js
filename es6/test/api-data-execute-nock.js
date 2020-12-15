@@ -50,6 +50,65 @@ export function executeSuccess (options = {}) {
 }
 
 /**
+ * Creates a nock that represents a failed call to execute endpoint based on status code
+ * @param {Object} [options={}] The options
+ * @param {Object} [options.auth] Optional object for auth
+ * @param {String} [options.path] The path of the request
+ * @param {Object} [options.response={}] The response body
+ * @param {Number} [options.statusCode] The http status code
+ * @param {String} [options.url] The url for the request
+ * @returns {Nock} A query api success mock
+ */
+export function executeFailureHttpStatusCode (options = {}) {
+  const {
+    auth,
+    body,
+    path,
+    response = {},
+    statusCode,
+    url,
+  } = options
+  const scope = nock(url)
+    .matchHeader('Accept', CONTENT_TYPE_APPLICATION_JSON)
+    .matchHeader('Content-Type', CONTENT_TYPE_APPLICATION_JSON)
+    .post(path, body)
+  if (auth) {
+    scope.basicAuth(auth)
+  }
+  return scope.reply(statusCode, response)
+}
+
+/**
+ * Creates a nock that represents a failed call to execute endpoint based on error code
+ * @param {Object} [options={}] The options
+ * @param {Object} [options.auth] Optional object for auth
+ * @param {String} [options.path] The path of the request
+ * @param {String} [options.errorCode] The error code
+ * @param {String} [options.url] The url for the request
+ * @returns {Nock} A query api success mock
+ */
+export function executeFailureErrorCode (options = {}) {
+  const {
+    auth,
+    body,
+    path,
+    errorCode,
+    url,
+  } = options
+  const scope = nock(url)
+    .matchHeader('Accept', CONTENT_TYPE_APPLICATION_JSON)
+    .matchHeader('Content-Type', CONTENT_TYPE_APPLICATION_JSON)
+    .post(path, body)
+  if (auth) {
+    scope.basicAuth(auth)
+  }
+  return scope.replyWithError({
+    message: errorCode,
+    code: errorCode,
+  })
+}
+
+/**
  * Creates a nock that represents a successful call to execute endpoint
  * @param {Object} [options={}] The options
  * @param {Object} [options.auth] Optional object for auth

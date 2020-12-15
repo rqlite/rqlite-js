@@ -185,12 +185,29 @@ Multiple hosts can be provided using the construtor for the data api client. For
 ```javascript
 import { DataApiClient } from 'rqlite-js'
 import http from 'http'
-import https from 'https's
+import https from 'https'
 
 // Hosts can be an array or a string that is comma seperated e.g. 'http://localhost:4001,http://localhost:4002,http://localhost:4003'
 const dataApiClient = new DataApiClient(['http://localhost:4001', 'http://localhost:4002', 'http://localhost:4003'], {
   httpAgent: new http.Agent({ keepAlive: true }),
   httpsAgent: new https.Agent({ keepAlive: true }),
+})
+```
+
+### Retrys
+All http requests are retried with exponential backoff up to the number of hosts times 3. Each retry tries the next host in the rotation. To see the http status codes, error codes and http methods which cause a retry have a look at [es6/http-request/retryable.js](es6/http-request/retryable.js). When creating an instance you can supply your own Set of replacement values or set the retries to 0 to manually disable all retry logic.
+
+```javascript
+import { DataApiClient } from 'rqlite-js'
+import http from 'http'
+import https from 'https'
+
+// Hosts can be an array or a string that is comma seperated e.g. 'http://localhost:4001,http://localhost:4002,http://localhost:4003'
+const dataApiClient = new DataApiClient(['http://localhost:4001', 'http://localhost:4002', 'http://localhost:4003'], {
+  retryableErrorCodes: Set([600]), // Retry HTTP response status code 600
+  retryableStatusCodes: Set(['SPECIAL_ERROR_CODE']), // Retry error.code === SPECIAL_ERROR_CODE
+  retryableHttpMethods: Set(['GET']), // Only retry GET requests
+  maxAttempts: 1, // Manually disable all retry logic
 })
 ```
 
