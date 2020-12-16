@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.4.1](https://github.com/rqlite/rqlite-js/compare/v2.4.0...v2.4.1) (2020-12-16)
+
+
+### Bug Fixes
+
+* **docs:** Fixing README.md http-request contructor retries comment ([493f5f3](https://github.com/rqlite/rqlite-js/commit/493f5f3bf957ec8a603ac380ee75e548598ded5b))
+
 ## [2.4.0](https://github.com/rqlite/rqlite-js/compare/v2.3.0...v2.4.0) (2020-12-16)
 
 
