@@ -207,7 +207,7 @@ const dataApiClient = new DataApiClient(['http://localhost:4001', 'http://localh
   retryableErrorCodes: Set([600]), // Retry HTTP response status code 600
   retryableStatusCodes: Set(['SPECIAL_ERROR_CODE']), // Retry error.code === SPECIAL_ERROR_CODE
   retryableHttpMethods: Set(['GET']), // Only retry GET requests
-  maxAttempts: 1, // Manually disable all retry logic
+  retries: 0, // Manually disable all retry logic
 })
 ```
 
