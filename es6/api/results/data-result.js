@@ -10,8 +10,9 @@
 export default class DataResult {
   /**
    * The time the results query took to complete
+   * @type {Number}
    */
-  time = 0
+  time = 0.0
 
   /**
    * The last insert id
@@ -23,7 +24,7 @@ export default class DataResult {
    * The rows affected
    * @type {Number}
    */
-  rowsAffected
+  rowsAffected = 0
 
   /**
    * An array of DataResult and/or DataResultError instances
@@ -49,8 +50,8 @@ export default class DataResult {
     if (typeof valuesIndex !== 'undefined' && !Number.isFinite(valuesIndex)) {
       throw new Error('The valuesIndex argument is required to be a finite number when provided')
     }
-    this.time = result.time
-    this.rowsAffected = result.rows_affected
+    this.time = parseFloat(result.time || 0.0)
+    this.rowsAffected = parseInt(result.rows_affected || 0, 10)
     this.lastInsertId = result.last_insert_id
     // Map the values array to an object where columns are the properties
     if (Number.isFinite(valuesIndex)) {
@@ -76,7 +77,7 @@ export default class DataResult {
 
   /**
    * Get the time the result took
-   * @param {Number}
+   * @returns {Number} The time the query took
    */
   getTime () {
     return this.time

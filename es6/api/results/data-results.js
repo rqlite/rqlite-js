@@ -12,8 +12,9 @@ export default class DataResults {
   /**
    * The time the results took to return from the
    * RQLite api
+   * @type {Number}
    */
-  time = 0
+  time = 0.0
 
   /**
    * The results which is an empty arry to start
@@ -23,8 +24,9 @@ export default class DataResults {
 
   /**
    * The data result list constructor
-   * @param {Array} data The data object sent from a RQLite API response
-   * @param {Number} time The time the API response took to complete
+   * @param {Object} data The data object sent from a RQLite API response
+   * @param {Number} data.time The time the API response took to complete
+   * @param {Object[{error:String,values:Object}]} data.results The results array
    */
   constructor (data) {
     this.setApiData(data)
@@ -41,7 +43,7 @@ export default class DataResults {
     if (!data.results) {
       throw new Error('The data object is required to have a results property')
     }
-    this.time = data.time || 0
+    this.time = parseFloat(data.time || 0.0)
     const { results = [] } = data
     this.results = results.reduce((acc, result) => {
       // If there is an error property this is an error
@@ -77,7 +79,7 @@ export default class DataResults {
 
   /**
    * Get the time the results took
-   * @param {Number}
+   * @returns {Number} The time the query took
    */
   getTime () {
     return this.time
@@ -113,7 +115,7 @@ export default class DataResults {
    * @returns {String} A JSON string
    */
   toString () {
-    const list = this.results.map((result) => result.toString())
+    const list = this.results.map((result) => result.toObject())
     return JSON.stringify(list)
   }
 }

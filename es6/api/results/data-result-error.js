@@ -8,6 +8,12 @@
  * API call
  */
 export default class DataResultError extends Error {
+  constructor (...args) {
+    super(...args)
+    this.name = this.constructor.name
+    this.code = this.constructor.name
+  }
+
   /**
    * Get the result data error as plain object
    * @returns {Object} The data as an object
