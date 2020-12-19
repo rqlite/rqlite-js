@@ -63,7 +63,7 @@ export default class DataResults {
    * Returns true if an instance of DataResultError exists in the results
    * @returns {Boolean} True if a DataResultError instance exists
    */
-  hasErro () {
+  hasError () {
     return !!this.getFirstError()
   }
 
