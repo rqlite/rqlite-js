@@ -137,11 +137,22 @@ export default class HttpRequest {
   exponentailBackoffBase = 100
 
   /**
+   * Authentication Map
+   * @type {Map}
+   * @property {String} username
+   * @property {String} password
+   */
+  authentication = new Map()
+
+  /**
    * Construtor for HttpRequest
    * @param {String[]|String} hosts An array of RQLite hosts or a string
    * that will be split on "," to create an array of hosts, the first
    * host will be tried first when there are multiple hosts
    * @param {Object} [options={}] Additional options
+   * @param {Object} [options.authentication] Authentication options
+   * @param {String} [options.authentication.username] The host authentication username
+   * @param {String} [options.authentication.password] The host authentication password
    * @param {Boolean} [options.activeHostRoundRobin=true] If true this.setNextActiveHostIndex()
    * will perform a round robin when called
    * @param {import('http').Agent} [options.httpAgent] An option http agent, useful for
@@ -167,7 +178,17 @@ export default class HttpRequest {
       retryableStatusCodes,
       retryableHttpMethods,
       exponentailBackoffBase,
+      authentication,
     } = options
+    if (typeof authentication === 'object') {
+      const { username, password } = authentication
+      if (username) {
+        this.authentication.set('username', username)
+      }
+      if (password) {
+        this.authentication.set('password', password)
+      }
+    }
     if (typeof activeHostRoundRobin !== 'undefined') {
       this.setActiveHostRoundRobin(activeHostRoundRobin)
     }
@@ -188,6 +209,22 @@ export default class HttpRequest {
     }
     if (Number.isFinite(exponentailBackoffBase)) {
       this.setExponentailBackoffBase(exponentailBackoffBase)
+    }
+  }
+
+  /**
+   * Set authentication information
+   * @param {Object} [authentication] Authentication data
+   * @param {String} [authentication.username] The host authentication username
+   * @param {String} [authentication.password] The host authentication password
+   */
+  setAuthentication (authentication = {}) {
+    const { username, password } = authentication
+    if (username) {
+      this.authentication.set('username', username)
+    }
+    if (password) {
+      this.authentication.set('password', password)
     }
   }
 
@@ -529,7 +566,6 @@ export default class HttpRequest {
    */
   async fetch (options = {}) {
     const {
-      auth,
       body,
       headers = {},
       httpMethod = HTTP_METHOD_GET,
@@ -556,12 +592,16 @@ export default class HttpRequest {
     }
     uri = this.uriIsAbsolute(uri) ? uri : `${activeHost}/${cleanPath(uri)}`
     try {
+      let auth
+      if (this.authentication.size) {
+        auth = {
+          username: this.authentication.get('username'),
+          password: this.authentication.get('password'),
+        }
+      }
       const response = await axios({
         url: uri,
-        auth: auth && typeof auth === 'object' ? {
-          username: auth.user || auth.username,
-          password: auth.pass || auth.password,
-        } : undefined,
+        auth,
         data: body,
         maxRedirects: 0, // Handle redirects manually to allow reposting data
         headers: createDefaultHeaders(headers),

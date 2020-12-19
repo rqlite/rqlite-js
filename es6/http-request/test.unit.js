@@ -25,10 +25,10 @@ import HttpRequest, { createDefaultHeaders, getWaitTimeExponential } from '.'
 
 const username = 'TestUsername'
 const password = 'TestPassword'
-const auth = {
+const auth = Object.freeze({
   user: username,
   pass: password,
-}
+})
 
 /**
  * Capture the stream data and resolve a promise with the parsed JSON
@@ -270,8 +270,13 @@ describe('http-request', () => {
       assert.deepEqual(QUERY_SUCCESS_RESPONSE, res.body)
     })
     it('should perform a HTTP GET request with basic authentication', async () => {
-      const url = `http://${username}:${password}@www.rqlite.com:4001`
-      const httpRequest = new HttpRequest(url)
+      const url = 'http://www.rqlite.com:4001'
+      const httpRequest = new HttpRequest(url, {
+        authentication: {
+          username,
+          password,
+        },
+      })
       const path = '/test'
       const query = { test: '123' }
       const scope = querySuccess({ url, path, auth, query })
@@ -310,8 +315,13 @@ describe('http-request', () => {
       assert.deepEqual(result, QUERY_SUCCESS_RESPONSE)
     })
     it('should perform a HTTP GET request with basic authentication when the stream option is true', async () => {
-      const url = `http://${username}:${password}@www.rqlite.com:4001`
-      const httpRequest = new HttpRequest(url)
+      const url = 'http://www.rqlite.com:4001'
+      const httpRequest = new HttpRequest(url, {
+        authentication: {
+          username,
+          password,
+        },
+      })
       const path = '/test'
       const query = { test: '123' }
       const scope = querySuccess({ url, path, auth, query })
@@ -489,11 +499,16 @@ describe('http-request', () => {
     })
     it(`should send a HTTP POST request including ${CONTENT_TYPE_APPLICATION_JSON} body with basic auth`, async () => {
       const url = 'http://www.rqlite.com:4001'
-      const httpRequest = new HttpRequest(url)
+      const httpRequest = new HttpRequest(url, {
+        authentication: {
+          username,
+          password,
+        },
+      })
       const path = '/test'
       const body = ['INSERT INTO foo(name) VALUES("fiona")']
       const scope = executeSuccess({ url, path, auth })
-      const res = await httpRequest.post({ uri: path, body, auth })
+      const res = await httpRequest.post({ uri: path, body })
       assert.isTrue(scope.isDone(), 'http request captured by nock')
       assert.deepEqual(res.body, EXECUTE_SUCCESS_RESPONSE)
     })
@@ -510,11 +525,32 @@ describe('http-request', () => {
     })
     it(`should send a HTTP POST request including ${CONTENT_TYPE_APPLICATION_JSON} body with basic auth when the stream option is true`, async () => {
       const url = 'http://www.rqlite.com:4001'
-      const httpRequest = new HttpRequest(url)
+      const httpRequest = new HttpRequest(url, {
+        authentication: {
+          username,
+          password,
+        },
+      })
       const path = '/test'
       const body = ['INSERT INTO foo(name) VALUES("fiona")']
       const scope = executeSuccess({ url, path, auth })
-      const request = await httpRequest.post({ auth, uri: path, body, stream: true })
+      const request = await httpRequest.post({ uri: path, body, stream: true })
+      const result = await handleRequestStreamAsPromise(request)
+      assert.isTrue(scope.isDone(), 'http request captured by nock')
+      assert.deepEqual(result, EXECUTE_SUCCESS_RESPONSE)
+    })
+    it(`should send a HTTP POST request including ${CONTENT_TYPE_APPLICATION_JSON} body with basic auth used in constructor when the stream option is true`, async () => {
+      const url = 'http://www.rqlite.com:4001'
+      const httpRequest = new HttpRequest(url, {
+        authentication: {
+          username,
+          password,
+        },
+      })
+      const path = '/test'
+      const body = ['INSERT INTO foo(name) VALUES("fiona")']
+      const scope = executeSuccess({ url, path, auth })
+      const request = await httpRequest.post({ uri: path, body, stream: true })
       const result = await handleRequestStreamAsPromise(request)
       assert.isTrue(scope.isDone(), 'http request captured by nock')
       assert.deepEqual(result, EXECUTE_SUCCESS_RESPONSE)

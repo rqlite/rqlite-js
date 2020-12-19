@@ -156,8 +156,9 @@ Authentication can be passed either inline in the URL or via the httpOptions aut
 ```javascript
 import { DataApiClient } from 'rqlite-js'
 
-// You can initialize the client with auth in the URL instead of using the options
-const dataApiClient = new DataApiClient('http://localhost:4001')
+const dataApiClient = new DataApiClient('http://localhost:4001', {
+  authentication: { username, password },
+})
 try {
   const username = 'rqliteUsername'
   const password = 'rqlitePassword'
@@ -166,7 +167,7 @@ try {
     'SELECT name FROM foo WHERE id="1"',
     'SELECT id FROM bar WHERE name="test"',
   ]
-  const dataResults = await dataApiClient.query(sql, { auth: { username, password }, level: 'strong' })
+  const dataResults = await dataApiClient.query(sql, { level: 'strong' })
   if (dataResults.hasError()) {
     const error = dataResults.getFirstError()
     console.error(error, 'rqlite insert results contained an error.')
