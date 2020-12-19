@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.5.2](https://github.com/rqlite/rqlite-js/compare/v2.5.1...v2.5.2) (2020-12-19)
+
+
+### Bug Fixes
+
+* **data-result:** Fixing hasError method naming in data results ([9a00a65](https://github.com/rqlite/rqlite-js/commit/9a00a6503af2c78d051bed1d59c72e73481ef779))
+
 ### [2.5.1](https://github.com/rqlite/rqlite-js/compare/v2.5.0...v2.5.1) (2020-12-19)
 
 
