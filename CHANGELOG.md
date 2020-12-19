@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.5.0](https://github.com/rqlite/rqlite-js/compare/v2.4.1...v2.5.0) (2020-12-19)
+
+
+### Features
+
+* **authentication:** Authentication options change for contructor and fixed ([5268194](https://github.com/rqlite/rqlite-js/commit/52681946f04cfd30aa473ad7be9bd71ef2288309))
+
 ### [2.4.1](https://github.com/rqlite/rqlite-js/compare/v2.4.0...v2.4.1) (2020-12-16)
 
 
