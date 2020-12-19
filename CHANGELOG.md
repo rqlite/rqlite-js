@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.5.3](https://github.com/rqlite/rqlite-js/compare/v2.5.2...v2.5.3) (2020-12-19)
+
+
+### Bug Fixes
+
+* **results:** Fixing results methods for toString and adding tests ([c341760](https://github.com/rqlite/rqlite-js/commit/c3417604c25bdfe0ff461736fcd45c83377c50c6))
+
 ### [2.5.2](https://github.com/rqlite/rqlite-js/compare/v2.5.1...v2.5.2) (2020-12-19)
 
 
