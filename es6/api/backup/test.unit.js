@@ -9,7 +9,7 @@ const HOST = 'http://www.rqlite.com:4001'
  * Capture the stream data and resolve a promise with the parsed JSON
  */
 function handleRequestStreamAsPromise (request) {
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     let result = Buffer.from('')
     request
       .on('data', (data) => {

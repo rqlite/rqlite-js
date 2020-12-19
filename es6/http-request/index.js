@@ -159,9 +159,9 @@ export default class HttpRequest {
    * keepalive pools using plain HTTP
    * @param {import('https').Agent} [options.httpsAgent] An option http agent, useful
    * for keepalive pools using SSL
-   * @param {Set} [options.retryableErrorCodes] The list of retryable error codes
-   * @param {Set} [options.retryableStatusCodes] The list of retryable http status codes
-   * @param {Set} [options.retryableHttpMethods] The list of retryable http methods
+   * @param {Set|String[]} [options.retryableErrorCodes] The list of retryable error codes
+   * @param {Set|Number[]} [options.retryableStatusCodes] The list of retryable http status codes
+   * @param {Set|String[]} [options.retryableHttpMethods] The list of retryable http methods
    * @param {Number} [options.exponentailBackoffBase] The value for exponentail backoff base
    * for retry exponential backoff
    */
@@ -198,14 +198,20 @@ export default class HttpRequest {
     if (typeof httpsAgent !== 'undefined') {
       this.setHttpsAgent(httpsAgent)
     }
-    if (retryableErrorCodes instanceof Set) {
-      this.setRetryableErrorCodes(retryableErrorCodes)
+    if (retryableErrorCodes instanceof Set || Array.isArray(retryableErrorCodes)) {
+      this.setRetryableErrorCodes(
+        Array.isArray(retryableErrorCodes) ? Set(retryableErrorCodes) : retryableErrorCodes,
+      )
     }
-    if (retryableStatusCodes instanceof Set) {
-      this.setRetryableStatusCodes(retryableStatusCodes)
+    if (retryableStatusCodes instanceof Set || Array.isArray(retryableStatusCodes)) {
+      this.setRetryableStatusCodes(
+        Array.isArray(retryableStatusCodes) ? Set(retryableStatusCodes) : retryableStatusCodes,
+      )
     }
-    if (retryableHttpMethods instanceof Set) {
-      this.setRetryableHttpMethods(retryableHttpMethods)
+    if (retryableHttpMethods instanceof Set || Array.isArray(retryableHttpMethods)) {
+      this.setRetryableHttpMethods(
+        Array.isArray(retryableHttpMethods) ? Set(retryableHttpMethods) : retryableHttpMethods,
+      )
     }
     if (Number.isFinite(exponentailBackoffBase)) {
       this.setExponentailBackoffBase(exponentailBackoffBase)
@@ -360,7 +366,7 @@ export default class HttpRequest {
     return this.getHosts().findIndex((v) => {
       const parsedHost = parseUrl(v)
       // Find a host where all the parsed fields match the requested host
-      return ['hostname', 'protocol', 'port', 'path'].every(field => parsedHostToFind[field] === parsedHost[field])
+      return ['hostname', 'protocol', 'port', 'path'].every((field) => parsedHostToFind[field] === parsedHost[field])
     })
   }
 
@@ -664,7 +670,7 @@ export default class HttpRequest {
       }
       if (retryable && retryAttempt < retries) {
         const waitTime = getWaitTimeExponential(retryAttempt, exponentailBackoffBase)
-        const delayPromise = new Promise(resolve => setTimeout(resolve, waitTime))
+        const delayPromise = new Promise((resolve) => setTimeout(resolve, waitTime))
         await delayPromise
         return this.fetch({
           ...options,

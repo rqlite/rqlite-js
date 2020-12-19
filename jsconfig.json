@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "module": "commonJS",
     "target": "es6"
   },
   "exclude": [

@@ -34,7 +34,7 @@ const auth = Object.freeze({
  * Capture the stream data and resolve a promise with the parsed JSON
  */
 function handleRequestStreamAsPromise (request) {
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     let json = Buffer.from('')
     request
       .on('data', (data) => {

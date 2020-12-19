@@ -33,7 +33,7 @@ describe('api status client', () => {
       return await statusApiClient.statusAllHosts()
     } catch (e) {
       if (attempt < maxAttempts) {
-        await new Promise(resolve => setTimeout(resolve, wait))
+        await new Promise((resolve) => setTimeout(resolve, wait))
         return checkRqliteServerReady(attempt + 1)
       }
       throw e
@@ -177,7 +177,7 @@ describe('api backups client', () => {
    * @returns {Stream} The stream
    */
   function handleRequestStreamAsPromise (request) {
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       let result = Buffer.alloc(0)
       request
         .on('data', (data) => {

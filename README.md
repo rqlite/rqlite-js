@@ -151,18 +151,17 @@ try {
 }
 ```
 ### Authentication
-Authentication can be passed either inline in the URL or via the httpOptions auth property and object of the form `{user, pass}`.
+Authentication can be set using the authentication property on the DataApiClient options.
 
 ```javascript
 import { DataApiClient } from 'rqlite-js'
 
+const username = 'rqliteUsername'
+const password = 'rqlitePassword'
 const dataApiClient = new DataApiClient('http://localhost:4001', {
   authentication: { username, password },
 })
 try {
-  const username = 'rqliteUsername'
-  const password = 'rqlitePassword'
-  // Notice how we just added the username and password to the URL
   const sql = [
     'SELECT name FROM foo WHERE id="1"',
     'SELECT id FROM bar WHERE name="test"',
@@ -196,7 +195,7 @@ const dataApiClient = new DataApiClient(['http://localhost:4001', 'http://localh
 ```
 
 ### Retrys
-All http requests are retried with exponential backoff up to the number of hosts times 3. Each retry tries the next host in the rotation. To see the http status codes, error codes and http methods which cause a retry have a look at [es6/http-request/retryable.js](es6/http-request/retryable.js). When creating an instance you can supply your own Set of replacement values or set the retries to 0 to manually disable all retry logic.
+All http requests are retried with exponential backoff up to the number of hosts times 3. Each retry tries the next host in the rotation. To see the http status codes, error codes and http methods which cause a retry have a look at [es6/http-request/retryable.js](es6/http-request/retryable.js). When creating an instance you can supply your own Set or Array of replacement values. To manually disable all retry logic provide the contructor an entries properties with the value 0.
 
 ```javascript
 import { DataApiClient } from 'rqlite-js'
