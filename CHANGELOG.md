@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.5.4](https://github.com/rqlite/rqlite-js/compare/v2.5.3...v2.5.4) (2021-05-11)
+
+
+### Bug Fixes
+
+* **updates:** Updating jsdocs and supporting npm library versions ([92e3b94](https://github.com/rqlite/rqlite-js/commit/92e3b94828bd46e94a6d4a47a9d1f4848db38aa3))
+
 ### [2.5.3](https://github.com/rqlite/rqlite-js/compare/v2.5.2...v2.5.3) (2020-12-19)
 
 
