@@ -68,6 +68,7 @@ Dockerfile
 
 # Babel
 .babelrc
+babel.config.json
 
 # Integration testing scripts
 bin

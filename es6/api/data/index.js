@@ -35,11 +35,41 @@ export const CONSISTENCY_LEVEL_STRONG = 'strong'
 export const CONSISTENCY_LEVEL_WEAK = 'weak'
 
 /**
+ * @typedef HttpRequestOptions
+ * @type {import('../../http-request').HttpRequestOptions}
+ */
+
+/**
+ * Data request base options
+ * @typedef DataRequestBaseOptions
+ * @type {Object}
+ * @property {Boolean} [raw] If true return the raw http response from
+ * RQLite response
+ */
+
+/**
+ * Data query request base options
+ * @typedef QueryRequestBaseOptions
+ * @type {Object}
+ * @property {String} level The api consistency level
+ */
+
+/**
+ * Data query request options
+ * @typedef QueryRequestOptions
+ * @type {HttpRequestOptions & DataRequestBaseOptions & QueryRequestBaseOptions}
+ */
+
+/**
+ * Data execute request options
+ * @typedef ExecuteRequestOptions
+ * @type {HttpRequestOptions & DataRequestBaseOptions}
+ */
+
+/**
  * Send an RQLite query API request to the RQLite server
  * @param {String} sql The SQL string to excute on the server
- * @param {Object} [options={}] RQLite api options
- * @param {Object} [options.raw] If true return the raw http resposne from
- * RQLite response
+ * @param {DataRequestBaseOptions} [options={}] RQLite api options
  */
 function handleResponse (response, options = {}) {
   const { raw } = options
@@ -57,9 +87,7 @@ export default class DataApiClient extends ApiClient {
   /**
    * Send an RQLite query API request to the RQLite server
    * @param {String} sql The SQL string to excute on the server
-   * @param {Object} [options={}] RQLite api options
-   * @param {Object} [options.raw] If true return the raw http resposne from
-   * RQLite response
+   * @param {QueryRequestOptions} [options={}] RQLite api options
    */
   async query (sql, options = {}) {
     const { level } = options
@@ -86,7 +114,7 @@ export default class DataApiClient extends ApiClient {
   /**
    * Send an RQLite execute API request to the RQLite server
    * @param {String} sql The SQL string to excute on the server
-   * @param {Object} [options={}] RQLite api options
+   * @param {ExecuteRequestOptions} [options={}] RQLite execute api options
    */
   async execute (sql, options = {}) {
     const response = await super.post(PATH_EXECUTE, sql, options)

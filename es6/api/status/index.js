@@ -38,7 +38,7 @@ export default class StatusApiClient extends ApiClient {
    * Get the RQLite server status for all hosts as an array of object with
    * the host and their status
    * @param {Object} [options={}] RQLite api options
-   * @param {Object} [options.raw] If true return the raw http resposne from
+   * @param {Object} [options.raw] If true return the raw http response from
    * RQLite response
    * @returns {StatusAllHostsResponse[]} An array of http response for the provide hosts
    */

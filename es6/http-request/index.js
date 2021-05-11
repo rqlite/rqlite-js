@@ -21,6 +21,41 @@ import {
 } from './retryable'
 
 /**
+ * RQliteJS HTTP Request options
+ * @typedef HttpRequestOptions
+ * @type {Object}
+ * @property {Object} [auth] A object for user authentication
+ * @property {String} [auth.username] The username for authentication
+ * @property {String} [auth.password] The username for authentication
+ * @property {Object} [body] The body of the HTTP request
+ * @property {Object} [headers={}] HTTP headers to send with the request
+ * @property {String} [httpMethod=HTTP_METHOD_GET] The HTTP method for the request
+ * i.e. GET or POST
+ * @property {Object} [query] An object with the query to send with the HTTP request
+ * @property {Boolean} [stream=false] When true the returned value is a request object with
+ * stream support instead of a request-promise result
+ * @property {Number} [timeout=DEAULT_TIMEOUT] Optional timeout to override default
+ * @property {String} uri The uri for the request which can be a relative path to use
+ * the currently active host or a full i.e. http://localhost:4001/db/query which is used
+ * literally
+ * @property {Boolean} [useLeader=false] When true the request will use the master host, the
+ * first host in this.hosts, this is ideal for write operations to skip the redirect
+ * @property {Number} [retries] The number of retries, defaults to the number of
+ * hosts times 3
+ * @property {Number} [maxRedirects=10] The maximum number of HTTP redirects to follow before
+ * throwing an error
+ * @property {Number} [attempt=0] The current attempt count when retrying or redirecting
+ * @property {Number} [retryAttempt=0] The current attempt based on retry logic
+ * @property {Number} [redirectAttempt=0] The current attempt based on redirect logic
+ * @property {Number} [attemptHostIndex] When in a retry state the host index of the last
+ * attempt which is used to get the next host index
+ * @property {import('http').Agent} [httpAgent] An option http agent, useful for
+ * keepalive pools using plain HTTP
+ * @property {import('https').Agent} [httpsAgent] An option http agent, useful
+ * for keepalive pools using SSL
+ */
+
+/**
  * The default timeout value
  */
 export const DEAULT_TIMEOUT = 30000
@@ -536,36 +571,7 @@ export default class HttpRequest {
 
   /**
    * Perform an HTTP request using the provided options
-   * @param {Object} [options={}] Options for the HTTP client
-   * @param {Object} [options.auth] A object for user authentication
-   * @param {String} [options.auth.username] The username for authentication
-   * @param {String} [options.auth.password] The username for authentication
-   * @param {Object} [options.body] The body of the HTTP request
-   * @param {Object} [options.headers={}] HTTP headers to send with the request
-   * @param {String} [options.httpMethod=HTTP_METHOD_GET] The HTTP method for the request
-   * i.e. GET or POST
-   * @param {Object} [options.query] An object with the query to send with the HTTP request
-   * @param {Boolean} [options.stream=false] When true the returned value is a request object with
-   * stream support instead of a request-promise result
-   * @param {Number} [options.timeout=DEAULT_TIMEOUT] Optional timeout to override default
-   * @param {String} options.uri The uri for the request which can be a relative path to use
-   * the currently active host or a full i.e. http://localhost:4001/db/query which is used
-   * literally
-   * @param {Boolean} [options.useLeader=false] When true the request will use the master host, the
-   * first host in this.hosts, this is ideal for write operations to skip the redirect
-   * @param {Number} [options.retries] The number of retries, defaults to the number of
-   * hosts times 3
-   * @param {Number} [options.maxRedirects=10] The maximum number of HTTP redirects to follow before
-   * throwing an error
-   * @param {Number} [options.attempt=0] The current attempt count when retrying or redirecting
-   * @param {Number} [options.retryAttempt=0] The current attempt based on retry logic
-   * @param {Number} [options.redirectAttempt=0] The current attempt based on redirect logic
-   * @param {Number} [options.attemptHostIndex] When in a retry state the host index of the last
-   * attempt which is used to get the next host index
-   * @param {import('http').Agent} [options.httpAgent] An option http agent, useful for
-   * keepalive pools using plain HTTP
-   * @param {import('https').Agent} [options.httpsAgent] An option http agent, useful
-   * for keepalive pools using SSL
+   * @param {HttpRequestOptions} [options={}] Options for the HTTP client
    * @returns {Promise<{status: Number, body: Object|String}>} An object with a status and body
    * property when stream is false and a stream when the stream option is true
    * @throws {ERROR_HTTP_REQUEST_MAX_REDIRECTS} When the maximum number of redirect has been reached
@@ -685,7 +691,7 @@ export default class HttpRequest {
 
   /**
    * Perform an HTTP GET request
-   * @param {Object} [options={}] The options
+   * @param {HttpRequestOptions} [options={}] The options
    * @see this.fetch() for options
    */
   async get (options = {}) {
@@ -694,7 +700,7 @@ export default class HttpRequest {
 
   /**
    * Perform an HTTP POST request
-   * @param {Object} [options={}] The options
+   * @param {HttpRequestOptions} [options={}] The options
    * @see this.fetch() for options
    */
   async post (options = {}) {

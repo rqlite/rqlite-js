@@ -13,8 +13,8 @@ cache:
     - "node_modules"
 
 before_install:
-  - docker pull rqlite/rqlite:5.5.0
-  - docker run -d -p 4001:4001 -p 4002:4002 --name=rqlite-js rqlite/rqlite:5.5.0
+  - docker pull rqlite/rqlite:5.12.1
+  - docker run -d -p 4001:4001 -p 4002:4002 --name=rqlite-js rqlite/rqlite:5.12.1
 
 script:
   - npm run build-all

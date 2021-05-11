@@ -16,5 +16,5 @@
     "semi": [2, "never"],
     "space-before-function-paren": [2, "always"]
   },
-  "parser": "babel-eslint"
+  "parser": "@babel/eslint-parser"
 }

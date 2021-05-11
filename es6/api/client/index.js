@@ -6,6 +6,11 @@ import HttpRequest from '../../http-request'
 import { HTTP_METHOD_GET, HTTP_METHOD_POST } from '../../http-request/http-methods'
 
 /**
+ * @typedef HttpRequestOptions
+ * @type {import('../../http-request').HttpRequestOptions}
+ */
+
+/**
  * Create the base HTTP query options from RQLite API options
  * @param {Object} [options={}] The RQLite API options
  * @param {String} [options.level] The consistency level
@@ -40,7 +45,8 @@ export default class ApiClient extends HttpRequest {
   /**
    * Perform a RQLite data API get request
    * @param {String} path The path for the request i.e. /db/query
-   * @param {Object} [options={}] RQLite API options
+   * @param {String} sql The SQL query
+   * @param {HttpRequestOptions} [options={}] RQLite API options
    */
   async get (path, sql, options = {}) {
     const { useLeader } = options
@@ -58,8 +64,8 @@ export default class ApiClient extends HttpRequest {
   /**
    * Perform a RQLite data API post request
    * @param {String} path The path for the request i.e. /db/query
-   * @param {String[]|String} path The path for the request i.e. /db/query
-   * @param {Object} [options={}] RQLite API options
+   * @param {String} sql The SQL query
+   * @param {HttpRequestOptions} [options={}] RQLite API options
    */
   async post (path, sql, options = {}) {
     const { useLeader } = options
