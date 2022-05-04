@@ -1,5 +1,5 @@
 import nock from 'nock'
-import { CONTENT_TYPE_APPLICATION_JSON, CONTENT_TYPE_TEXT_PLAIN } from '../../http-request/content-types'
+import { CONTENT_TYPE_APPLICATION_JSON, CONTENT_TYPE_TEXT_PLAIN } from '../../http-request/content-types.mjs'
 
 export const RESTORE_SUCCESS_RESPONSE = {
   results: [

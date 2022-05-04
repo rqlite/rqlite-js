@@ -8,17 +8,17 @@ import { parse as parseUrl } from 'url'
 import {
   HTTP_METHOD_GET,
   HTTP_METHOD_POST,
-} from './http-methods'
+} from './http-methods.mjs'
 import {
   CONTENT_TYPE_APPLICATION_JSON,
   // CONTENT_TYPE_APPLICATION_OCTET_STREAM,
-} from './content-types'
-import { ERROR_HTTP_REQUEST_MAX_REDIRECTS } from './errors'
+} from './content-types.mjs'
+import { ERROR_HTTP_REQUEST_MAX_REDIRECTS } from './errors.mjs'
 import {
   RETRYABLE_ERROR_CODES,
   RETRYABLE_HTTP_METHODS,
   RETRYABLE_STATUS_CODES,
-} from './retryable'
+} from './retryable.mjs'
 
 /**
  * RQliteJS HTTP Request options
@@ -676,7 +676,9 @@ export default class HttpRequest {
       }
       if (retryable && retryAttempt < retries) {
         const waitTime = getWaitTimeExponential(retryAttempt, exponentailBackoffBase)
-        const delayPromise = new Promise((resolve) => setTimeout(resolve, waitTime))
+        const delayPromise = new Promise((resolve) => {
+          setTimeout(resolve, waitTime)
+        })
         await delayPromise
         return this.fetch({
           ...options,

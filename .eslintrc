@@ -5,16 +5,20 @@
   },
   "extends": "airbnb-base",
   "plugins": [
-    "mocha",
-    "babel"
+    "mocha"
   ],
   "rules": {
     "import/no-extraneous-dependencies": ["error", { "devDependencies": true }],
+    "import/extensions": ["error", "ignorePackages", {
+      "mjs": "always"
+    }],
     "mocha/no-exclusive-tests": "error",
     "object-curly-newline": 0,
     "object-curly-spacing": [2, "always"],
     "semi": [2, "never"],
     "space-before-function-paren": [2, "always"]
   },
-  "parser": "@babel/eslint-parser"
+  "parserOptions": {
+    "ecmaVersion": 13
+  }
 }

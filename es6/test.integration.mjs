@@ -1,11 +1,11 @@
 import { assert } from 'chai'
 import http from 'http'
 import https from 'https'
-import { PATH_EXECUTE, PATH_QUERY } from './api/data'
-import { PATH_LOAD, PATH_BACKUP } from './api/backup'
-import { PATH_STATUS } from './api/status'
+import { PATH_EXECUTE, PATH_QUERY } from './api/data/index.mjs'
+import { PATH_LOAD, PATH_BACKUP } from './api/backup/index.mjs'
+import { PATH_STATUS } from './api/status/index.mjs'
 // eslint-disable-next-line import/named
-import { DataApiClient, BackupApiClient, StatusApiClient } from '.'
+import { DataApiClient, BackupApiClient, StatusApiClient } from './index.mjs'
 
 /**
  * The RQLite host for integration tests, which can be changed
@@ -33,7 +33,9 @@ describe('api status client', () => {
       return await statusApiClient.statusAllHosts()
     } catch (e) {
       if (attempt < maxAttempts) {
-        await new Promise((resolve) => setTimeout(resolve, wait))
+        await new Promise((resolve) => {
+          setTimeout(resolve, wait)
+        })
         return checkRqliteServerReady(attempt + 1)
       }
       throw e

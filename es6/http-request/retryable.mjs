@@ -6,7 +6,7 @@ import {
   HTTP_METHOD_PATCH,
   HTTP_METHOD_POST,
   HTTP_METHOD_PUT,
-} from './http-methods'
+} from './http-methods.mjs'
 
 /**
  * Error codes which can be retried

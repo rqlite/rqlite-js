@@ -3,8 +3,8 @@
  * as query and execute
  * @module api/data
  */
-import ApiClient from '../client'
-import { DataResults } from '../results'
+import ApiClient from '../client/index.mjs'
+import { DataResults } from '../results/index.mjs'
 
 /**
  * The RQLite query api path

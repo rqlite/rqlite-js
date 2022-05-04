@@ -2,7 +2,7 @@
  * Status api client to perform RQLite status and diagnostics operations
  * @module api/status
  */
-import ApiClient from '../client'
+import ApiClient from '../client/index.mjs'
 
 /**
  * @typedef {Object} HttpResponse

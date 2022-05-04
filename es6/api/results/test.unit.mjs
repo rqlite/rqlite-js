@@ -1,5 +1,5 @@
 import { assert } from 'chai'
-import { DataResult, DataResultError, DataResults } from '.'
+import { DataResult, DataResultError, DataResults } from './index.mjs'
 
 describe('api data results', () => {
   describe('DataResultError', () => {

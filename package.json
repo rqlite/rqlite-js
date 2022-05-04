@@ -4,7 +4,7 @@
   "description": "A client library for RQLite written in Javascript that works in NodeJS or the browser.",
   "main": "lib/index.js",
   "scripts": {
-    "build": "babel es6 --out-dir lib --source-maps --ignore es6/**/*.unit.js,es6/**/*.integration.js,es6/test",
+    "build": "babel es6 --out-dir lib --source-maps --ignore es6/**/*.unit.mjs,es6/**/*.integration.mjs,es6/test",
     "build-all": "babel es6 --out-dir lib --source-maps",
     "build-clean": "rm -rf lib",
     "build-release": "npm run build && npm run test-build",
@@ -13,10 +13,10 @@
     "docker-logs": "docker-compose -p rqlitejs logs",
     "docker-run-test": "docker-compose -p rqlitejs run test",
     "docker-stop": "docker-compose -p rqlitejs stop",
-    "lint": "eslint es6/**/*.js",
+    "lint": "eslint es6/**/*.mjs",
     "release": "npm run lint && npm run build-all && npm run test-build && standard-version",
-    "test": "mocha --require @babel/register es6/test/unit/index.unit.js es6/**/*.unit.js",
-    "test-integrations": "mocha --require @babel/register --timeout 10000 lib/**/*.integration.js",
+    "test": "mocha es6/test/unit/index.unit.mjs es6/**/*.unit.mjs",
+    "test-integrations": "mocha --timeout 10000 lib/**/*.integration.mjs",
     "test-build": "mocha lib/test/unit/index.unit.js lib/**/*.unit.js",
     "test-build-integrations": "mocha --timeout 30000 lib/**/*.integration.js",
     "prepublishOnly": "npm run lint && npm run build && npm run test-build"
@@ -37,28 +37,19 @@
   },
   "homepage": "https://github.com/rqlite/rqlite-js#readme",
   "devDependencies": {
-    "@babel/cli": "^7.13.16",
-    "@babel/core": "^7.14.0",
-    "@babel/eslint-parser": "^7.13.14",
-    "@babel/plugin-proposal-class-properties": "^7.13.0",
-    "@babel/plugin-transform-runtime": "^7.13.15",
-    "@babel/preset-env": "^7.14.1",
-    "@babel/register": "^7.13.16",
-    "@babel/runtime": "^7.14.0",
-    "babel-plugin-add-module-exports": "^1.0.4",
+    "@swc/cli": "^0.1.57",
+    "@swc/core": "^1.2.175",
     "chai": "^4.3.4",
     "chai-as-promised": "^7.1.1",
-    "eslint": "^7.26.0",
-    "eslint-config-airbnb-base": "^14.2.1",
-    "eslint-plugin-babel": "^5.3.1",
-    "eslint-plugin-import": "^2.22.1",
-    "eslint-plugin-mocha": "^8.1.0",
-    "mocha": "^8.4.0",
-    "nock": "^13.0.11",
+    "eslint": "^8.14.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-mocha": "^10.0.4",
+    "mocha": "^10.0.0",
+    "nock": "^13.2.4",
     "standard-version": "^9.3.0"
   },
   "dependencies": {
-    "axios": "^0.21.1",
-    "qs": "^6.10.1"
+    "axios": "^0.27.2",
+    "qs": "^6.10.3"
   }
 }

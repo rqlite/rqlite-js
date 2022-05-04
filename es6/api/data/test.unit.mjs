@@ -4,9 +4,9 @@ import {
   QUERY_SUCCESS_RESPONSE,
   queryMultipleSuccess,
   QUERY_MULTIPLE_SUCCESS_RESPONSE,
-} from '../../test/api-data-query-nock'
-import { executeSuccess, EXECUTE_SUCCESS_RESPONSE } from '../../test/api-data-execute-nock'
-import DataApiClient, { PATH_QUERY, PATH_EXECUTE } from '.'
+} from '../../test/api-data-query-nock.mjs'
+import { executeSuccess, EXECUTE_SUCCESS_RESPONSE } from '../../test/api-data-execute-nock.mjs'
+import DataApiClient, { PATH_QUERY, PATH_EXECUTE } from './index.mjs'
 
 const HOST = 'http://www.rqlite.com:4001'
 

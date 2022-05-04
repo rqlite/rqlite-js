@@ -2,8 +2,8 @@
  * Base API client for RQLite which abstracts the HTTP calls
  * @module api/client
  */
-import HttpRequest from '../../http-request'
-import { HTTP_METHOD_GET, HTTP_METHOD_POST } from '../../http-request/http-methods'
+import HttpRequest from '../../http-request/index.mjs'
+import { HTTP_METHOD_GET, HTTP_METHOD_POST } from '../../http-request/http-methods.mjs'
 
 /**
  * @typedef HttpRequestOptions

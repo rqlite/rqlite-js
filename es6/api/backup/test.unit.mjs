@@ -1,7 +1,7 @@
 import { assert } from 'chai'
-import { backupSuccess, BACKUP_SUCCESS_RESPONSE } from '../../test/backups/backup-nock'
-import { restoreSuccess, RESTORE_SUCCESS_RESPONSE } from '../../test/backups/restore-nock'
-import BackupApiClient, { PATH_BACKUP, PATH_LOAD } from '.'
+import { backupSuccess, BACKUP_SUCCESS_RESPONSE } from '../../test/backups/backup-nock.mjs'
+import { restoreSuccess, RESTORE_SUCCESS_RESPONSE } from '../../test/backups/restore-nock.mjs'
+import BackupApiClient, { PATH_BACKUP, PATH_LOAD } from './index.mjs'
 
 const HOST = 'http://www.rqlite.com:4001'
 

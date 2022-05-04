@@ -3,7 +3,7 @@
  * @module test/api-data-query-nock
  */
 import nock from 'nock'
-import { CONTENT_TYPE_APPLICATION_JSON } from '../http-request/content-types'
+import { CONTENT_TYPE_APPLICATION_JSON } from '../http-request/content-types.mjs'
 
 /**
  * A nock HTTP request mock

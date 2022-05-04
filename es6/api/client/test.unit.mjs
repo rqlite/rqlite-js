@@ -1,8 +1,8 @@
 import { assert } from 'chai'
-import { PATH_QUERY, PATH_EXECUTE } from '../data'
-import { querySuccess, QUERY_SUCCESS_RESPONSE } from '../../test/api-data-query-nock'
-import { executeSuccess, EXECUTE_SUCCESS_RESPONSE } from '../../test/api-data-execute-nock'
-import ApiClient, { createQuery } from '.'
+import { PATH_QUERY, PATH_EXECUTE } from '../data/index.mjs'
+import { querySuccess, QUERY_SUCCESS_RESPONSE } from '../../test/api-data-query-nock.mjs'
+import { executeSuccess, EXECUTE_SUCCESS_RESPONSE } from '../../test/api-data-execute-nock.mjs'
+import ApiClient, { createQuery } from './index.mjs'
 
 const HOST = 'http://www.rqlite.com:4001'
 

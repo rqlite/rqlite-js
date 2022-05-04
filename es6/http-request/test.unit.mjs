@@ -7,21 +7,21 @@ import {
   queryFailureErrorCode,
   queryRedirectSuccess,
   QUERY_SUCCESS_RESPONSE,
-} from '../test/api-data-query-nock'
+} from '../test/api-data-query-nock.mjs'
 import {
   executeSuccess,
   executeFailureHttpStatusCode,
   executeFailureErrorCode,
   executeRedirectSuccess,
   EXECUTE_SUCCESS_RESPONSE,
-} from '../test/api-data-execute-nock'
-import { CONTENT_TYPE_APPLICATION_JSON } from './content-types'
+} from '../test/api-data-execute-nock.mjs'
+import { CONTENT_TYPE_APPLICATION_JSON } from './content-types.mjs'
 import {
   RETRYABLE_ERROR_CODES,
   RETRYABLE_HTTP_METHODS,
   RETRYABLE_STATUS_CODES,
-} from './retryable'
-import HttpRequest, { createDefaultHeaders, getWaitTimeExponential } from '.'
+} from './retryable.mjs'
+import HttpRequest, { createDefaultHeaders, getWaitTimeExponential } from './index.mjs'
 
 const username = 'TestUsername'
 const password = 'TestPassword'

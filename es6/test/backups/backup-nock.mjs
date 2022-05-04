@@ -1,5 +1,5 @@
 import nock from 'nock'
-import { CONTENT_TYPE_APPLICATION_OCTET_STREAM } from '../../http-request/content-types'
+import { CONTENT_TYPE_APPLICATION_OCTET_STREAM } from '../../http-request/content-types.mjs'
 
 export const BACKUP_SUCCESS_RESPONSE = [
   'CREATE TABLE foo (id integer not null primary key, name text);',

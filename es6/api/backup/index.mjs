@@ -2,8 +2,8 @@
  * Backup api client to perform RQLite back and load operations
  * @module api/backup
  */
-import HttpRequest from '../../http-request'
-import { CONTENT_TYPE_APPLICATION_OCTET_STREAM, CONTENT_TYPE_TEXT_PLAIN } from '../../http-request/content-types'
+import HttpRequest from '../../http-request/index.mjs'
+import { CONTENT_TYPE_APPLICATION_OCTET_STREAM, CONTENT_TYPE_TEXT_PLAIN } from '../../http-request/content-types.mjs'
 
 /**
  * The RQLite load api path
