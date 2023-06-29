@@ -2,7 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-### [2.5.5](https://github.com/rqlite/rqlite-js/compare/v2.5.4...v2.5.5) (2022-05-04)
+### [2.5.5](https://github.com/rqlite/rqlite-js/compare/v2.5.4...v2.5.5) (2023-06-29)
+
+
+### Bug Fixes
+
+* **nodejs-jrqlitejs:** Updating integration test nodes to 18.16.1 and rqlite to 7.21.1 ([aca42d5](https://github.com/rqlite/rqlite-js/commit/aca42d5a8b63f4d1c6b8d4d499219c51aa9e24e0))
 
 ### [2.5.4](https://github.com/rqlite/rqlite-js/compare/v2.5.3...v2.5.4) (2021-05-11)
 
