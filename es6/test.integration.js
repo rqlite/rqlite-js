@@ -33,7 +33,11 @@ describe('api status client', () => {
       return await statusApiClient.statusAllHosts()
     } catch (e) {
       if (attempt < maxAttempts) {
-        await new Promise((resolve) => setTimeout(resolve, wait))
+        await new Promise((resolve) => {
+          setTimeout(() => {
+            resolve(undefined)
+          }, wait)
+        })
         return checkRqliteServerReady(attempt + 1)
       }
       throw e

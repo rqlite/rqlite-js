@@ -1,4 +1,4 @@
-FROM node:14.15.1
+FROM node:18.16.1
 WORKDIR /test
 COPY package.json /test
 COPY .npmrc /test

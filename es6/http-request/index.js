@@ -89,14 +89,14 @@ function cleanPath (path) {
  * backoff algorithm.
  * @param {Number} attempt The retry attempt
  * @param {Number} base The base of the exponential backoff
- * @param {Number} pow The exponential power
+ * @param {Number} exponent The exponential power
  * @returns {Number} The time to wait in milliseconds
  */
-export function getWaitTimeExponential (attempt = 0, base = 100, pow = 2) {
+export function getWaitTimeExponential (attempt = 0, base = 100, exponent = 2) {
   if (attempt === 0) {
     return 0
   }
-  return (pow ** attempt) * base
+  return (exponent ** attempt) * base
 }
 
 /**
@@ -172,6 +172,11 @@ export default class HttpRequest {
   exponentailBackoffBase = 100
 
   /**
+   * The exponent to increase backoff each try
+   */
+  exponentailBackoffExponent = 1.1
+
+  /**
    * Authentication Map
    * @type {Map}
    * @property {String} username
@@ -199,6 +204,7 @@ export default class HttpRequest {
    * @param {Set|String[]} [options.retryableHttpMethods] The list of retryable http methods
    * @param {Number} [options.exponentailBackoffBase] The value for exponentail backoff base
    * for retry exponential backoff
+   * @param {Number} [options.exponentailBackoffExponent] Exponent to increase backoff each try
    */
   constructor (hosts, options = {}) {
     this.setHosts(hosts)
@@ -212,6 +218,7 @@ export default class HttpRequest {
       retryableErrorCodes,
       retryableStatusCodes,
       retryableHttpMethods,
+      exponentailBackoffExponent,
       exponentailBackoffBase,
       authentication,
     } = options
@@ -251,6 +258,9 @@ export default class HttpRequest {
     if (Number.isFinite(exponentailBackoffBase)) {
       this.setExponentailBackoffBase(exponentailBackoffBase)
     }
+    if (Number.isFinite(exponentailBackoffExponent)) {
+      this.setExponentailBackoffExponent(exponentailBackoffExponent)
+    }
   }
 
   /**
@@ -283,6 +293,22 @@ export default class HttpRequest {
    */
   getExponentailBackoffBase () {
     return this.exponentailBackoffBase
+  }
+
+  /**
+   * Set the exponentail backoff exponent
+   * @param {Number} exponentailBackoffExponent
+   */
+  setExponentailBackoffExponent (exponentailBackoffExponent) {
+    this.exponentailBackoffExponent = exponentailBackoffExponent
+  }
+
+  /**
+   * Get the exponentail backoff exponent
+   * @return {Number} The exponentail backoff exponent
+   */
+  getExponentailBackoffExponent () {
+    return this.exponentailBackoffExponent
   }
 
   /**
@@ -591,6 +617,7 @@ export default class HttpRequest {
       retryAttempt = 0,
       redirectAttempt = 0,
       attemptHostIndex,
+      exponentailBackoffExponent = this.getExponentailBackoffExponent(),
       exponentailBackoffBase = this.getExponentailBackoffBase(),
       httpAgent = this.getHttpAgent(),
       httpsAgent = this.getHttpsAgent(),
@@ -675,9 +702,16 @@ export default class HttpRequest {
         })
       }
       if (retryable && retryAttempt < retries) {
-        const waitTime = getWaitTimeExponential(retryAttempt, exponentailBackoffBase)
-        const delayPromise = new Promise((resolve) => setTimeout(resolve, waitTime))
-        await delayPromise
+        const waitTime = getWaitTimeExponential(
+          retryAttempt,
+          exponentailBackoffBase,
+          exponentailBackoffExponent,
+        )
+        await new Promise((resolve) => {
+          setTimeout(() => {
+            resolve(undefined)
+          }, waitTime)
+        })
         return this.fetch({
           ...options,
           attempt: attempt + 1,
