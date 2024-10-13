@@ -29,6 +29,12 @@ export const CONSISTENCY_LEVEL_NONE = 'none'
 export const CONSISTENCY_LEVEL_STRONG = 'strong'
 
 /**
+ * Read query consistency linearizable which must come from
+ * the master node
+ */
+export const CONSISTENCY_LEVEL_LINEARIZABLE = 'linearizable'
+
+/**
  * Read query consistency weak which must come from
  * the master node
  */
