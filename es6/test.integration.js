@@ -1,10 +1,10 @@
 import { assert } from 'chai'
 import http from 'http'
 import https from 'https'
+import retryAsPromise from 'retry-as-promised'
 import { PATH_EXECUTE, PATH_QUERY } from './api/data'
 import { PATH_LOAD, PATH_BACKUP } from './api/backup'
 import { PATH_STATUS } from './api/status'
-// eslint-disable-next-line import/named
 import { DataApiClient, BackupApiClient, StatusApiClient } from '.'
 
 /**
@@ -23,32 +23,29 @@ describe('api status client', () => {
   /**
    * Before beginning test check the status endpoint for a response from
    * RQLite server
-   * @param {Number} attempt The current attempt
-   * @param {Number} wait The amount of time to wait
-   * @param {Number} maxAttempts The maximum number of attempts before
+   * @param {Number} backoffBase The amount of time to wait
+   * @param {Number} max The maximum number of attempts before
    * throw the current error
    */
-  async function checkRqliteServerReady (attempt = 0, wait = 500, maxAttempts = 10) {
-    try {
-      return await statusApiClient.statusAllHosts()
-    } catch (e) {
-      if (attempt < maxAttempts) {
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(undefined)
-          }, wait)
-        })
-        return checkRqliteServerReady(attempt + 1)
+  async function checkRqliteServerReady (backoffBase = 500, max = 10) {  
+    return await retryAsPromise(async () => {
+      const status = await statusApiClient.statusAllHosts()
+      const ready = status.map(v => v.response?.body?.store.ready).every(v => v === true)
+      if (!ready) {
+        throw new Error('All stores are not ready')
       }
-      throw e
-    }
+      return status
+    }, {
+      backoffBase,
+      max,
+    })
   }
 
   before('check RQLite Server ready', () => checkRqliteServerReady())
   describe('should get status response', () => {
     it(`should call ${HOST}${PATH_STATUS} and create table named foo`, async () => {
-      const sql = 'CREATE TABLE foo (id integer not null primary key, name text)'
-      const { body } = await statusApiClient.status(sql)
+      const { body } = await statusApiClient.status()
+      console.log({ body })
       assert.isObject(body, 'response body is object')
       assert.property(body, 'build')
       assert.property(body, 'http')
@@ -219,13 +216,13 @@ describe('api backups client', () => {
        */
       const BACKUP_SQL_STATEMENTS = [
         'CREATE TABLE fooRestore (id integer not null primary key, name text)',
-        'INSERT INTO fooRestore(name) VALUES("fiona")',
-        'INSERT INTO fooRestore(name) VALUES("justin")',
+        'INSERT INTO fooRestore(name) VALUES ("fiona")',
+        'INSERT INTO fooRestore(name) VALUES ("justin")',
       ]
       const sql = Buffer.from(BACKUP_SQL_STATEMENTS.join(';'))
       const request = await backupApiClient.load(sql)
       const { results } = JSON.parse(await handleRequestStreamAsPromise(request))
-      assert.notNestedProperty(results, 'results.0.error', 'has an error')
+      assert.nestedPropertyVal(results, '[0].rows_affected', 1, 'results of last SQL statment is 1 row')
       const dataResults = await dataApiClient.query('SELECT id, name FROM fooRestore WHERE name="fiona"', { level: 'strong' })
       const error = dataResults.getFirstError()
       if (error) {
