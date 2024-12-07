@@ -45,7 +45,6 @@ describe('api status client', () => {
   describe('should get status response', () => {
     it(`should call ${HOST}${PATH_STATUS} and create table named foo`, async () => {
       const { body } = await statusApiClient.status()
-      console.log({ body })
       assert.isObject(body, 'response body is object')
       assert.property(body, 'build')
       assert.property(body, 'http')

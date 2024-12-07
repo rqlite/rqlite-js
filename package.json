@@ -3,7 +3,6 @@
   "version": "2.5.6",
   "description": "A client library for RQLite written in Javascript that works in NodeJS or the browser.",
   "main": "lib/index.js",
-  "type": "commonjs",
   "scripts": {
     "build": "babel es6 --out-dir lib --source-maps --ignore es6/**/*.unit.js,es6/**/*.integration.js,es6/test",
     "build-all": "babel es6 --out-dir lib --source-maps",
