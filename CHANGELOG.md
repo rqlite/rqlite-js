@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.5.7](https://github.com/rqlite/rqlite-js/compare/v2.5.6...v2.5.7) (2024-12-07)
+
+
+### Bug Fixes
+
+* **lint:** Fixing lint errors and remove package.json type ([a9aa998](https://github.com/rqlite/rqlite-js/commit/a9aa9987d479f761a3ac0ecba77c1670d15194a7))
+* **packages:** Updated packages.json npm versions to latest minor and fixed integration tests ([604368e](https://github.com/rqlite/rqlite-js/commit/604368e2976955efe161903676cac19924031a3b))
+
 ### [2.5.6](https://github.com/rqlite/rqlite-js/compare/v2.5.4...v2.5.6) (2023-06-29)
 
 
