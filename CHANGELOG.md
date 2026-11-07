@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) and [release-please](https://github.com/googleapis/release-please) for commit and release guidelines.
 
+## [2.6.0](https://github.com/rqlite/rqlite-js/compare/v2.5.7...v2.6.0) (2026-11-07)
+
+
+### Features
+
+* modernize client for rqlite 10.x and harden npm release path ([3671dfa](https://github.com/rqlite/rqlite-js/commit/3671dfa45a89f55567b3dbdaa349900198f50223))
+
 ### [2.5.7](https://github.com/rqlite/rqlite-js/compare/v2.5.6...v2.5.7) (2024-12-07)
 
 
