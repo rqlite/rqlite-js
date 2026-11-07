@@ -1,35 +1,59 @@
 {
   "name": "rqlite-js",
   "version": "2.6.0",
-  "description": "A client library for RQLite written in Javascript that works in NodeJS or the browser.",
-  "main": "lib/index.js",
+  "description": "A client library for RQLite written in TypeScript that works in NodeJS or the browser.",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      },
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
   "engines": {
-    "node": ">=18"
+    "node": ">=20.19"
   },
   "files": [
-    "lib",
+    "dist",
+    "src",
+    "!src/**/*.test.ts",
+    "!src/**/*.integration.test.ts",
+    "!src/test/**",
+    "docs/MIGRATION-v2-to-v3.md",
     "LICENSE",
     "README.md"
   ],
+  "sideEffects": false,
   "scripts": {
-    "build": "babel es6 --out-dir lib --source-maps --ignore es6/**/*.unit.js,es6/**/*.integration.js,es6/test",
-    "build-all": "babel es6 --out-dir lib --source-maps",
-    "build-clean": "rm -rf lib",
+    "build": "tsdown",
+    "build-all": "tsdown",
+    "build-clean": "rm -rf dist",
     "build-release": "npm run build && npm run test-build",
     "docker-build": "docker compose -p rqlitejs build",
     "docker-down": "docker compose -p rqlitejs down",
     "docker-logs": "docker compose -p rqlitejs logs",
     "docker-run-test": "docker compose -p rqlitejs run --rm test",
     "docker-stop": "docker compose -p rqlitejs stop",
-    "lint": "eslint es6/**/*.js",
-    "type-check": "tsc -p jsconfig.json --noEmit",
-    "verify": "npm run lint && npm run type-check && npm test && npm run build-all && npm run test-build",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint src",
+    "type-check": "tsc -p tsconfig.json --noEmit",
+    "verify": "npm run lint && npm run type-check && npm test && npm run build && npm run test-build && npm run check-pack",
     "verify:integrations": "npm run docker-build && npm run docker-run-test",
     "release": "npm run verify",
-    "test": "mocha --require @babel/register es6/test/unit/index.unit.js es6/**/*.unit.js",
-    "test-integrations": "mocha --require @babel/register --timeout 10000 es6/**/*.integration.js",
-    "test-build": "mocha lib/test/unit/index.unit.js lib/**/*.unit.js",
-    "test-build-integrations": "mocha --timeout 30000 lib/**/*.integration.js",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest --config jest.config.cjs --testPathIgnorePatterns=integration",
+    "test-integrations": "NODE_OPTIONS=--experimental-vm-modules jest --config jest.config.cjs --testPathPatterns=integration --runInBand --testTimeout=30000",
+    "test-build": "NODE_OPTIONS=--experimental-vm-modules jest --config jest.config.cjs --testPathIgnorePatterns=integration",
+    "test-build-integrations": "NODE_OPTIONS=--experimental-vm-modules jest --config jest.config.cjs --testPathPatterns=integration --runInBand --testTimeout=30000",
+    "check-pack": "npm pack --dry-run && publint && attw --pack . --profile node16",
     "prepublishOnly": "npm run lint && npm run type-check && npm run build && npm run test-build"
   },
   "repository": {
@@ -39,7 +63,8 @@
   "keywords": [
     "rqlite",
     "client",
-    "nodejs"
+    "nodejs",
+    "typescript"
   ],
   "author": "Justin Morant",
   "license": "ISC",
@@ -47,30 +72,26 @@
     "url": "https://github.com/rqlite/rqlite-js/issues"
   },
   "homepage": "https://github.com/rqlite/rqlite-js#readme",
+  "dependencies": {},
   "devDependencies": {
-    "@babel/cli": "^7.29.7",
-    "@babel/core": "^7.29.13",
-    "@babel/eslint-parser": "^7.29.13",
-    "@babel/plugin-transform-runtime": "^7.29.7",
-    "@babel/preset-env": "^7.29.7",
-    "@babel/register": "^7.29.13",
-    "@babel/runtime": "^7.29.13",
+    "@arethetypeswrong/cli": "^0.18.2",
+    "@swc/core": "^1.13.5",
+    "@swc/jest": "^0.2.39",
+    "@types/jest": "^30.0.0",
     "@types/node": "^22.20.5",
-    "babel-plugin-add-module-exports": "^1.0.4",
-    "chai": "^4.5.0",
-    "chai-as-promised": "^7.1.2",
+    "@typescript-eslint/eslint-plugin": "^8.46.1",
+    "@typescript-eslint/parser": "^8.46.1",
     "eslint": "^8.57.1",
-    "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-plugin-babel": "^5.3.1",
+    "eslint-import-resolver-typescript": "^4.4.5",
     "eslint-plugin-import": "^2.32.0",
-    "eslint-plugin-mocha": "^10.5.0",
-    "mocha": "^10.8.2",
-    "nock": "^13.5.6",
-    "retry-as-promised": "^7.1.1",
+    "eslint-plugin-jest": "^28.14.0",
+    "jest": "^30.2.0",
+    "nock": "^14.0.10",
+    "publint": "^0.3.14",
+    "tsdown": "^0.15.12",
     "typescript": "^5.9.3"
   },
-  "dependencies": {
-    "axios": "^1.21.0",
-    "qs": "^6.17.1"
+  "allowScripts": {
+    "@swc/core@1.16.22": true
   }
 }

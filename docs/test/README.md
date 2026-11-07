@@ -1,6 +1,6 @@
 # Tests
 
-The rqlite-js library has both unit tests and integration tests. Unit tests have the `unit.js` extension and integration tests end with `integration.js`.
+Unit tests are Jest files colocated as `src/**/*.test.ts`. Live-server smoke tests are `src/**/*.integration.test.ts`.
 
 ## Quality gate
 
@@ -11,20 +11,18 @@ npm run verify
 npm run verify:integrations
 ```
 
-`verify` runs lint, type-check, ES6 unit tests, Babel build, and compiled `lib/` unit tests. `verify:integrations` builds Docker images and runs integrations against **rqlite 10.6.6**.
+`verify` runs lint, type-check, unit tests, tsdown build, and pack checks (`publint` / `attw`). `verify:integrations` builds Docker images and runs integrations against **rqlite 10.6.6**.
 
 ## Unit tests
-
-Development unit tests (ES6 + `@babel/register`):
 
 ```console
 npm run test
 ```
 
-Compiled output unit tests (what consumers get):
+After build (same Jest suite; confirms nothing regressed post-compile):
 
 ```console
-npm run build-all
+npm run build
 npm run test-build
 ```
 
@@ -38,4 +36,4 @@ npm run verify:integrations
 ./bin/docker-test-integrations.sh
 ```
 
-This builds the Node test image and an rqlite server container, runs `test-build-integrations` against the live server, then tears containers down.
+The Docker test image uses Node 24, runs `tsdown`, then Jest integration tests against the rqlite container.
