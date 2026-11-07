@@ -220,7 +220,7 @@ See [Backup and restore](https://rqlite.io/docs/guides/backup/).
 
 ## Releases
 
-Versions and `CHANGELOG.md` are managed with [release-please](https://github.com/googleapis/release-please). Merging the release PR creates a GitHub Release; the publish workflow re-runs the full test suite (including Docker integrations) then publishes via [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/) (OIDC — no long-lived `NPM_TOKEN`).
+Versions and `CHANGELOG.md` are managed with [release-please](https://github.com/googleapis/release-please). Merging the release PR creates a GitHub Release; the publish workflow re-runs the full test suite (including Docker integrations) then runs [`npm stage publish`](https://docs.npmjs.com/staged-publishing/) via [trusted publishing](https://docs.npmjs.com/trusted-publishers/) (OIDC). A maintainer must then approve the staged version with 2FA on npmjs.com (or `npm stage approve <id>`) before it goes live.
 
 **Local quality gate (required before commit/push/publish):**
 
