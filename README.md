@@ -2,7 +2,7 @@
 
 A promise-based client library for [rqlite](https://rqlite.io), the lightweight, distributed database built on SQLite. Clients mirror the HTTP API endpoints (`/db/query`, `/db/execute`, `/db/backup`, `/status`). This package does not generate SQL—use your own SQL strings or another SQL builder.
 
-**Requirements:** Node.js `>= 18`. CI tests Node 18–24 on `ubuntu-latest`; Docker integrations use Node 24. Tested against **rqlite 10.x** (Docker image `rqlite/rqlite:10.6.6`).
+**Requirements:** Node.js `>= 18`. CI tests Node 18–24 on `ubuntu-26.04`; Docker integrations use Node 24. Tested against **rqlite 10.x** (Docker image `rqlite/rqlite:10.6.6`).
 
 See the official docs:
 
