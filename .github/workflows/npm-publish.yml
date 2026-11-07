@@ -3,6 +3,12 @@ name: npm-publish
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Git ref to stage (tag or branch)
+        required: true
+        default: v2.6.0
 
 permissions:
   contents: read
@@ -13,6 +19,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || github.event.release.tag_name || github.ref }}
       - uses: actions/setup-node@v4
         with:
           node-version: 24

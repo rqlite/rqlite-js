@@ -7,6 +7,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  id-token: write
 
 jobs:
   release-please:
@@ -19,3 +20,32 @@ jobs:
         id: release
         with:
           release-type: node
+
+  # release:published does not fire for releases created by GITHUB_TOKEN, so stage
+  # from this workflow when release-please creates a GitHub Release.
+  publish:
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.release-please.outputs.tag_name }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          cache: npm
+      - run: npm ci
+      - name: Full verify (lint, types, unit, build)
+        run: npm run verify
+      - name: Integration tests against rqlite
+        run: |
+          docker compose -p rqlitejs build
+          docker compose -p rqlitejs run --rm test
+          docker compose -p rqlitejs down
+      - name: Stage package on npm
+        run: npm stage publish
