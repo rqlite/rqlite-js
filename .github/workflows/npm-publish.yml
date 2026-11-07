@@ -29,11 +29,8 @@ jobs:
       - run: npm ci
       - name: Full verify (lint, types, unit, build)
         run: npm run verify
-      - name: Integration tests against rqlite
-        run: |
-          docker compose -p rqlitejs build
-          docker compose -p rqlitejs run --rm test
-          docker compose -p rqlitejs down
+      - name: Integration tests against rqlite cluster
+        run: ./bin/rqlite-cluster.sh test
       - name: Stage package on npm
         # Staged publish: CI uploads via OIDC; a maintainer must approve with 2FA
         # (npmjs.com Staged Packages, or `npm stage approve <id>`) before it goes live.

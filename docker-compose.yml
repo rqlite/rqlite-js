@@ -1,38 +1,64 @@
+# Integration stack: 3-node rqlite cluster (automatic bootstrap) + Jest test runner.
+# Nodes communicate on the Compose network only (no host port publishes by default).
+#
+# Lifecycle: ./bin/rqlite-cluster.sh {up|wait|status|logs|test|down|destroy}
+
+name: rqlitejs
+
+x-rqlite-node: &rqlite-node
+  image: rqlite/rqlite:10.6.6
+  healthcheck:
+    test: ["CMD", "wget", "-q", "-O", "-", "http://127.0.0.1:4001/status"]
+    interval: 2s
+    timeout: 5s
+    retries: 30
+    start_period: 5s
+
 services:
+  rqlite-node-1:
+    <<: *rqlite-node
+    hostname: rqlite-node-1
+    command:
+      - -node-id=node-1
+      - -http-addr=0.0.0.0:4001
+      - -http-adv-addr=rqlite-node-1:4001
+      - -raft-addr=0.0.0.0:4002
+      - -raft-adv-addr=rqlite-node-1:4002
+      - -bootstrap-expect=3
+      - -join=rqlite-node-1:4002,rqlite-node-2:4002,rqlite-node-3:4002
+
+  rqlite-node-2:
+    <<: *rqlite-node
+    hostname: rqlite-node-2
+    command:
+      - -node-id=node-2
+      - -http-addr=0.0.0.0:4001
+      - -http-adv-addr=rqlite-node-2:4001
+      - -raft-addr=0.0.0.0:4002
+      - -raft-adv-addr=rqlite-node-2:4002
+      - -bootstrap-expect=3
+      - -join=rqlite-node-1:4002,rqlite-node-2:4002,rqlite-node-3:4002
+
+  rqlite-node-3:
+    <<: *rqlite-node
+    hostname: rqlite-node-3
+    command:
+      - -node-id=node-3
+      - -http-addr=0.0.0.0:4001
+      - -http-adv-addr=rqlite-node-3:4001
+      - -raft-addr=0.0.0.0:4002
+      - -raft-adv-addr=rqlite-node-3:4002
+      - -bootstrap-expect=3
+      - -join=rqlite-node-1:4002,rqlite-node-2:4002,rqlite-node-3:4002
+
   test:
     build: .
     environment:
-      # RQLITE_HOSTS: http://rqlite-master:4001,http://rqlite-replicate-0,http://rqlite-replicate-1:4001
-      RQLITE_HOSTS: http://rqlite-master:4001
+      RQLITE_HOSTS: http://rqlite-node-1:4001,http://rqlite-node-2:4001,http://rqlite-node-3:4001
     depends_on:
-      rqlite-master:
+      rqlite-node-1:
         condition: service_healthy
-      # - rqlite-replicate-0
-      # - rqlite-replicate-1
-  rqlite-master:
-    build:
-      context: ./docker/rqlite-master
-      dockerfile: Dockerfile
-    healthcheck:
-      test: ["CMD", "wget", "-q", "-O", "-", "http://127.0.0.1:4001/status"]
-      interval: 2s
-      timeout: 5s
-      retries: 15
-      start_period: 5s
-  # Commenting out replicates since they can't get a heartbeat in docker compose
-  # rqlite-replicate-0:
-  #   build:
-  #     context: ./docker/rqlite-replicate-0
-  #     dockerfile: Dockerfile
-  #   depends_on:
-  #     - rqlite-master
-  #   healthcheck:
-  #     test: ["CMD", "wget", "-q", "-O", "-", "http://127.0.0.1:4001/status"]
-  # rqlite-replicate-1:
-  #   build:
-  #     context: ./docker/rqlite-replicate-1
-  #     dockerfile: Dockerfile
-  #   depends_on:
-  #     - rqlite-master
-  #   healthcheck:
-  #     test: ["CMD", "wget", "-q", "-O", "-", "http://127.0.0.1:4001/status"]
+      rqlite-node-2:
+        condition: service_healthy
+      rqlite-node-3:
+        condition: service_healthy
