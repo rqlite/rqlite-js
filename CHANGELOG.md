@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) and [release-please](https://github.com/googleapis/release-please) for commit and release guidelines.
 
+## [3.0.0](https://github.com/rqlite/rqlite-js/compare/v2.6.0...v3.0.0) (2026-11-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* Node engines are now >=20.19; the package is dual ESM/CJS from dist/ with no runtime dependencies. See docs/MIGRATION-v2-to-v3.md.
+
+### Features
+
+* rewrite client as TypeScript with zero runtime dependencies ([702f542](https://github.com/rqlite/rqlite-js/commit/702f5427741519e8b1cf417619eb2b676e94e52c))
+
 ## [2.6.0](https://github.com/rqlite/rqlite-js/compare/v2.5.7...v2.6.0) (2026-11-07)
 
 
