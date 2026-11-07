@@ -13,7 +13,6 @@ jobs:
         with:
           node-version: 22
           registry-url: https://registry.npmjs.org
-          cache: npm
       - run: npm install
       - name: Full verify (lint, types, unit, build)
         run: npm run verify
