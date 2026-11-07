@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) and [release-please](https://github.com/googleapis/release-please) for commit and release guidelines.
 
+## [3.0.1](https://github.com/rqlite/rqlite-js/compare/v3.0.0...v3.0.1) (2026-11-07)
+
+
+### Bug Fixes
+
+* **ci:** stage npm publishes via npm-publish.yml only ([e4872ce](https://github.com/rqlite/rqlite-js/commit/e4872cede5d47824f2387cacac9f0bdf6fd8b496))
+* **ci:** stage npm publishes via npm-publish.yml only ([c7693b3](https://github.com/rqlite/rqlite-js/commit/c7693b381e4ba916b4c1e5522e756b75240a0b58))
+
 ## [3.0.0](https://github.com/rqlite/rqlite-js/compare/v2.6.0...v3.0.0) (2026-11-07)
 
 
