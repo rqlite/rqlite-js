@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) and [release-please](https://github.com/googleapis/release-please) for commit and release guidelines.
 
+## [3.0.2](https://github.com/rqlite/rqlite-js/compare/v3.0.1...v3.0.2) (2026-11-07)
+
+
+### Bug Fixes
+
+* align package.json license with MIT LICENSE file ([524039d](https://github.com/rqlite/rqlite-js/commit/524039dbb2e0e349a505a02e84fc2fc99cef4a3f))
+
 ## [3.0.1](https://github.com/rqlite/rqlite-js/compare/v3.0.0...v3.0.1) (2026-11-07)
 
 
