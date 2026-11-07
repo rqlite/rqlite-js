@@ -1,6 +1,6 @@
 {
   "name": "rqlite-js",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "A client library for RQLite written in TypeScript that works in NodeJS or the browser.",
   "type": "module",
   "main": "./dist/index.cjs",
