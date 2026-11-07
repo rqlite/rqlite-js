@@ -1,5 +1,6 @@
 import nock from 'nock'
 import { CONTENT_TYPE_APPLICATION_JSON, CONTENT_TYPE_TEXT_PLAIN } from '../../http-request/content-types'
+import { HTTP_HEADER_ACCEPT, HTTP_HEADER_CONTENT_TYPE } from '../../http-request/http-headers'
 
 export const RESTORE_SUCCESS_RESPONSE = {
   results: [
@@ -18,8 +19,8 @@ export function restoreSuccess (options) {
     url, path, auth, response = RESTORE_SUCCESS_RESPONSE, body,
   } = options
   const scope = nock(url)
-    .matchHeader('Accept', CONTENT_TYPE_APPLICATION_JSON)
-    .matchHeader('Content-Type', CONTENT_TYPE_TEXT_PLAIN)
+    .matchHeader(HTTP_HEADER_ACCEPT, CONTENT_TYPE_APPLICATION_JSON)
+    .matchHeader(HTTP_HEADER_CONTENT_TYPE, CONTENT_TYPE_TEXT_PLAIN)
     .post(path, body)
   if (auth) {
     scope.basicAuth(auth)

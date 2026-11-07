@@ -1,5 +1,6 @@
 import nock from 'nock'
 import { CONTENT_TYPE_APPLICATION_OCTET_STREAM } from '../../http-request/content-types'
+import { HTTP_HEADER_ACCEPT, HTTP_HEADER_CONTENT_TYPE } from '../../http-request/http-headers'
 
 export const BACKUP_SUCCESS_RESPONSE = [
   'CREATE TABLE foo (id integer not null primary key, name text);',
@@ -16,9 +17,9 @@ export function backupSuccess (options) {
   } = options
   const scope = nock(url)
     .defaultReplyHeaders({
-      'Content-Type': CONTENT_TYPE_APPLICATION_OCTET_STREAM,
+      [HTTP_HEADER_CONTENT_TYPE]: CONTENT_TYPE_APPLICATION_OCTET_STREAM,
     })
-    .matchHeader('Accept', CONTENT_TYPE_APPLICATION_OCTET_STREAM)
+    .matchHeader(HTTP_HEADER_ACCEPT, CONTENT_TYPE_APPLICATION_OCTET_STREAM)
     .get(path)
   if (auth) {
     scope.basicAuth(auth)

@@ -1,17 +1,16 @@
 /**
  * Plain HTTP client to be used when creating RQLite specific API HTTP clients
  * @module http-request
+ * @see https://rqlite.io/docs/api/api/
  */
 import axios from 'axios'
 import { stringify as stringifyQuery } from 'qs'
-import { parse as parseUrl } from 'url'
 import {
   HTTP_METHOD_GET,
   HTTP_METHOD_POST,
 } from './http-methods'
 import {
   CONTENT_TYPE_APPLICATION_JSON,
-  // CONTENT_TYPE_APPLICATION_OCTET_STREAM,
 } from './content-types'
 import { ERROR_HTTP_REQUEST_MAX_REDIRECTS } from './errors'
 import {
@@ -19,6 +18,8 @@ import {
   RETRYABLE_HTTP_METHODS,
   RETRYABLE_STATUS_CODES,
 } from './retryable'
+import { AUTH_PASSWORD, AUTH_USERNAME } from './auth-keys'
+import { HTTP_HEADER_ACCEPT, HTTP_HEADER_LOCATION } from './http-headers'
 
 /**
  * RQliteJS HTTP Request options
@@ -26,7 +27,7 @@ import {
  * @type {Object}
  * @property {Object} [auth] A object for user authentication
  * @property {String} [auth.username] The username for authentication
- * @property {String} [auth.password] The username for authentication
+ * @property {String} [auth.password] The password for authentication
  * @property {Object} [body] The body of the HTTP request
  * @property {Object} [headers={}] HTTP headers to send with the request
  * @property {String} [httpMethod=HTTP_METHOD_GET] The HTTP method for the request
@@ -35,7 +36,7 @@ import {
  * @property {Boolean} [stream=false] When true the returned value is a request object with
  * stream support instead of a request-promise result
  * @property {Number} [timeout=DEAULT_TIMEOUT] Optional timeout to override default
- * @property {String} uri The uri for the request which can be a relative path to use
+ * @property {String} [uri] The uri for the request which can be a relative path to use
  * the currently active host or a full i.e. http://localhost:4001/db/query which is used
  * literally
  * @property {Boolean} [useLeader=false] When true the request will use the master host, the
@@ -49,6 +50,9 @@ import {
  * @property {Number} [redirectAttempt=0] The current attempt based on redirect logic
  * @property {Number} [attemptHostIndex] When in a retry state the host index of the last
  * attempt which is used to get the next host index
+ * @property {Number} [exponentailBackoffBase] Optional exponential backoff base override
+ * @property {Number} [exponentailBackoffExponent] Optional backoff exponent override
+ * @property {Boolean} [json] Legacy option; axios uses JSON unless stream is true
  * @property {import('http').Agent} [httpAgent] An option http agent, useful for
  * keepalive pools using plain HTTP
  * @property {import('https').Agent} [httpsAgent] An option http agent, useful
@@ -71,8 +75,8 @@ export const DEAULT_RETRY_DELAY = 30000
  * @returns {Object} The headers with defaults applied
  */
 export function createDefaultHeaders (headers = {}) {
-  const { Accept = CONTENT_TYPE_APPLICATION_JSON } = headers
-  return { ...headers, Accept }
+  const accept = headers[HTTP_HEADER_ACCEPT] || CONTENT_TYPE_APPLICATION_JSON
+  return { ...headers, [HTTP_HEADER_ACCEPT]: accept }
 }
 
 /**
@@ -150,19 +154,19 @@ export default class HttpRequest {
 
   /**
    * Http error codes which are considered retryable
-   * @type {Set}
+   * @type {Set<String>}
    */
   retryableErrorCodes = RETRYABLE_ERROR_CODES
 
   /**
    * Http status codes which are considered retryable
-   * @type {Set}
+   * @type {Set<Number>}
    */
   retryableStatusCodes = RETRYABLE_STATUS_CODES
 
   /**
    * Http methods which are considered retryable
-   * @type {Set}
+   * @type {Set<String>}
    */
   retryableHttpMethods = RETRYABLE_HTTP_METHODS
 
@@ -178,9 +182,7 @@ export default class HttpRequest {
 
   /**
    * Authentication Map
-   * @type {Map}
-   * @property {String} username
-   * @property {String} password
+   * @type {Map<String, String>}
    */
   authentication = new Map()
 
@@ -225,10 +227,10 @@ export default class HttpRequest {
     if (typeof authentication === 'object') {
       const { username, password } = authentication
       if (username) {
-        this.authentication.set('username', username)
+        this.authentication.set(AUTH_USERNAME, username)
       }
       if (password) {
-        this.authentication.set('password', password)
+        this.authentication.set(AUTH_PASSWORD, password)
       }
     }
     if (typeof activeHostRoundRobin !== 'undefined') {
@@ -242,17 +244,17 @@ export default class HttpRequest {
     }
     if (retryableErrorCodes instanceof Set || Array.isArray(retryableErrorCodes)) {
       this.setRetryableErrorCodes(
-        Array.isArray(retryableErrorCodes) ? Set(retryableErrorCodes) : retryableErrorCodes,
+        Array.isArray(retryableErrorCodes) ? new Set(retryableErrorCodes) : retryableErrorCodes,
       )
     }
     if (retryableStatusCodes instanceof Set || Array.isArray(retryableStatusCodes)) {
       this.setRetryableStatusCodes(
-        Array.isArray(retryableStatusCodes) ? Set(retryableStatusCodes) : retryableStatusCodes,
+        Array.isArray(retryableStatusCodes) ? new Set(retryableStatusCodes) : retryableStatusCodes,
       )
     }
     if (retryableHttpMethods instanceof Set || Array.isArray(retryableHttpMethods)) {
       this.setRetryableHttpMethods(
-        Array.isArray(retryableHttpMethods) ? Set(retryableHttpMethods) : retryableHttpMethods,
+        Array.isArray(retryableHttpMethods) ? new Set(retryableHttpMethods) : retryableHttpMethods,
       )
     }
     if (Number.isFinite(exponentailBackoffBase)) {
@@ -272,10 +274,10 @@ export default class HttpRequest {
   setAuthentication (authentication = {}) {
     const { username, password } = authentication
     if (username) {
-      this.authentication.set('username', username)
+      this.authentication.set(AUTH_USERNAME, username)
     }
     if (password) {
-      this.authentication.set('password', password)
+      this.authentication.set(AUTH_PASSWORD, password)
     }
   }
 
@@ -289,7 +291,7 @@ export default class HttpRequest {
 
   /**
    * Get the exponentail backoff base
-   * @return {Number} The exponentail backoff base
+   * @returns {Number} The exponentail backoff base
    */
   getExponentailBackoffBase () {
     return this.exponentailBackoffBase
@@ -305,7 +307,7 @@ export default class HttpRequest {
 
   /**
    * Get the exponentail backoff exponent
-   * @return {Number} The exponentail backoff exponent
+   * @returns {Number} The exponentail backoff exponent
    */
   getExponentailBackoffExponent () {
     return this.exponentailBackoffExponent
@@ -313,7 +315,7 @@ export default class HttpRequest {
 
   /**
    * Set the retryable error codes
-   * @param {Set} retryableErrorCodes
+   * @param {Set<String>} retryableErrorCodes
    */
   setRetryableErrorCodes (retryableErrorCodes) {
     this.retryableErrorCodes = retryableErrorCodes
@@ -321,7 +323,7 @@ export default class HttpRequest {
 
   /**
    * Get the retryable error codes
-   * @returns {Set}
+   * @returns {Set<String>}
    */
   getRetryableErrorCodes () {
     return this.retryableErrorCodes
@@ -329,7 +331,7 @@ export default class HttpRequest {
 
   /**
    * Set the retryable status codes
-   * @param {Set} retryableStatusCodes
+   * @param {Set<Number>} retryableStatusCodes
    */
   setRetryableStatusCodes (retryableStatusCodes) {
     this.retryableStatusCodes = retryableStatusCodes
@@ -337,7 +339,7 @@ export default class HttpRequest {
 
   /**
    * Get the retryable status codes
-   * @returns {Set}
+   * @returns {Set<Number>}
    */
   getRetryableStatusCodes () {
     return this.retryableStatusCodes
@@ -345,7 +347,7 @@ export default class HttpRequest {
 
   /**
    * Set the retryable http methods
-   * @param {Set} retryableHttpMethods
+   * @param {Set<String>} retryableHttpMethods
    */
   setRetryableHttpMethods (retryableHttpMethods) {
     this.retryableHttpMethods = retryableHttpMethods
@@ -353,7 +355,7 @@ export default class HttpRequest {
 
   /**
    * Get the retryable http methods
-   * @returns {Set}
+   * @returns {Set<String>}
    */
   getRetryableHttpMethods () {
     return this.retryableHttpMethods
@@ -423,11 +425,22 @@ export default class HttpRequest {
    * @returns {Number} The found host index or -1 if not found
    */
   findHostIndex (host) {
-    const parsedHostToFind = parseUrl(host)
+    let parsedHostToFind
+    try {
+      parsedHostToFind = new URL(host)
+    } catch (e) {
+      return -1
+    }
     return this.getHosts().findIndex((v) => {
-      const parsedHost = parseUrl(v)
-      // Find a host where all the parsed fields match the requested host
-      return ['hostname', 'protocol', 'port', 'path'].every((field) => parsedHostToFind[field] === parsedHost[field])
+      try {
+        const parsedHost = new URL(v)
+        // Find a host where all the parsed fields match the requested host
+        return ['hostname', 'protocol', 'port', 'pathname'].every(
+          (field) => parsedHostToFind[field] === parsedHost[field],
+        )
+      } catch (e) {
+        return false
+      }
     })
   }
 
@@ -570,10 +583,10 @@ export default class HttpRequest {
 
   /**
    * Returns true when the HTTP request is retryable
-   * @param {Object} options The options
-   * @param {Number} options.statusCode The HTTP status code
-   * @param {String} options.errorCode The error code
-   * @param {String} options.httpMethod The http method
+   * @param {Object} [options={}] The options
+   * @param {Number} [options.statusCode] The HTTP status code
+   * @param {String} [options.errorCode] The error code
+   * @param {String} [options.httpMethod] The http method
    * @returns {Boolean} True if the request is retry able
    */
   requestIsRetryable (options = {}) {
@@ -634,8 +647,8 @@ export default class HttpRequest {
       let auth
       if (this.authentication.size) {
         auth = {
-          username: this.authentication.get('username'),
-          password: this.authentication.get('password'),
+          [AUTH_USERNAME]: this.authentication.get(AUTH_USERNAME),
+          [AUTH_PASSWORD]: this.authentication.get(AUTH_PASSWORD),
         }
       }
       const response = await axios({
@@ -682,9 +695,12 @@ export default class HttpRequest {
       if (responseStatus === 301 || responseStatus === 302) {
         // We maxed out on redirect attempts
         if (redirectAttempt >= maxRedirects) {
-          throw ERROR_HTTP_REQUEST_MAX_REDIRECTS(`The maximum number of redirects ${maxRedirects} has been reached`)
+          throw new ERROR_HTTP_REQUEST_MAX_REDIRECTS(`The maximum number of redirects ${maxRedirects} has been reached`)
         }
-        const location = typeof responseHeaders === 'object' ? responseHeaders.location : undefined
+        const location = typeof responseHeaders === 'object'
+          ? (responseHeaders[HTTP_HEADER_LOCATION.toLowerCase()]
+            || responseHeaders[HTTP_HEADER_LOCATION])
+          : undefined
         // If we were asked to use the leader, but got redirect the leader moved so remember it
         if (useLeader) {
           const newLeaderHostIndex = this.findHostIndex(location)
@@ -725,19 +741,23 @@ export default class HttpRequest {
 
   /**
    * Perform an HTTP GET request
-   * @param {HttpRequestOptions} [options={}] The options
-   * @see this.fetch() for options
+   * @param {...*} args HttpRequestOptions, or (path, sql, options) when overridden by ApiClient
+   * @returns {Promise<*>}
+   * @see HttpRequest#fetch
    */
-  async get (options = {}) {
+  async get (...args) {
+    const options = args[0] || {}
     return this.fetch({ ...options, httpMethod: HTTP_METHOD_GET })
   }
 
   /**
    * Perform an HTTP POST request
-   * @param {HttpRequestOptions} [options={}] The options
-   * @see this.fetch() for options
+   * @param {...*} args HttpRequestOptions, or (path, sql, options) when overridden by ApiClient
+   * @returns {Promise<*>}
+   * @see HttpRequest#fetch
    */
-  async post (options = {}) {
+  async post (...args) {
+    const options = args[0] || {}
     return this.fetch({ ...options, httpMethod: HTTP_METHOD_POST })
   }
 }

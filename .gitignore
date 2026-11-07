@@ -11,9 +11,6 @@ pids
 *.seed
 *.pid.lock
 
-# Ignore package.lock
-package-lock.json
-
 # This is the distribution build folder
 lib
 
@@ -64,3 +61,7 @@ typings/
 .env
 
 tap
+
+# Private agent tooling (not published)
+.cursor/
+graphify-out/

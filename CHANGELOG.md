@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+All notable changes to this project will be documented in this file. See [Conventional Commits](https://conventionalcommits.org) and [release-please](https://github.com/googleapis/release-please) for commit and release guidelines.
 
 ### [2.5.7](https://github.com/rqlite/rqlite-js/compare/v2.5.6...v2.5.7) (2024-12-07)
 

@@ -6,14 +6,15 @@ import { PATH_EXECUTE, PATH_QUERY } from './api/data'
 import { PATH_LOAD, PATH_BACKUP } from './api/backup'
 import { PATH_STATUS } from './api/status'
 import { DataApiClient, BackupApiClient, StatusApiClient } from '.'
+import { DEFAULT_RQLITE_HOST, ENV_RQLITE_HOSTS } from './test/env'
 
 /**
  * The RQLite host for integration tests, which can be changed
- * using the RQLITE_URL environment variable or defaults to
+ * using the RQLITE_HOSTS environment variable or defaults to
  * http://localhost:4001
  * @type {String} The RQLite host address
  */
-const HOST = process.env.RQLITE_HOSTS || 'http://localhost:4001'
+const HOST = process.env[ENV_RQLITE_HOSTS] || DEFAULT_RQLITE_HOST
 
 const httpAgent = new http.Agent({ keepAlive: true })
 const httpsAgent = new https.Agent({ keepAlive: true })
@@ -27,10 +28,10 @@ describe('api status client', () => {
    * @param {Number} max The maximum number of attempts before
    * throw the current error
    */
-  async function checkRqliteServerReady (backoffBase = 500, max = 10) {  
-    return await retryAsPromise(async () => {
+  async function checkRqliteServerReady (backoffBase = 500, max = 10) {
+    return retryAsPromise(async () => {
       const status = await statusApiClient.statusAllHosts()
-      const ready = status.map(v => v.response?.body?.store.ready).every(v => v === true)
+      const ready = status.map((v) => v.response?.body?.store?.ready).every((v) => v === true)
       if (!ready) {
         throw new Error('All stores are not ready')
       }
@@ -131,7 +132,7 @@ describe('api data client', () => {
     const dataList = Array(total).fill(0)
     it(`should call ${HOST}${PATH_EXECUTE} and insert a record with the name fiona and justin using a transaction`, async () => {
       const sql = dataList.map((_v, i) => `INSERT INTO foo(name) VALUES("justin-${i}")`)
-      const dataResults = await dataApiClient.execute(sql, { transaction: true })
+      const dataResults = await dataApiClient.execute(sql, { atomic: true })
       assert.isUndefined(dataResults.getFirstError(), 'error')
       dataList.forEach((_v, i) => {
         const dataResult = dataResults.get(i)
@@ -201,7 +202,7 @@ describe('api backups client', () => {
       dataResults = await dataApiClient.execute([
         'INSERT INTO fooBackups(name) VALUES("fiona")',
         'INSERT INTO fooBackups(name) VALUES("justin")',
-      ], { transaction: true })
+      ], { atomic: true })
       assert.isUndefined(dataResults.getFirstError(), 'error')
       const request = await backupApiClient.backup()
       const stream = await handleRequestStreamAsPromise(request)

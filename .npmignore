@@ -73,8 +73,10 @@ babel.config.json
 # Integration testing scripts
 bin
 
-# Build scripts
-travis.yml
+# CI / release tooling
+.github
+.release-please-manifest.json
+release-please-config.json
 
 # VSCode config
 jsconfig
@@ -83,6 +85,10 @@ CHANGELOG.md
 
 # Tap test results
 tap
+
+# Private agent tooling (not published)
+.cursor/
+graphify-out/
 
 # Test help folder
 test

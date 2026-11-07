@@ -1,13 +1,25 @@
 /**
  * Status api client to perform RQLite status and diagnostics operations
  * @module api/status
+ * @see https://rqlite.io/docs/guides/monitoring-rqlite/
  */
 import ApiClient from '../client'
+import { HTTP_METHOD_GET } from '../../http-request/http-methods'
+import { PATH_STATUS } from '../paths'
+
+export { PATH_STATUS } from '../paths'
 
 /**
  * @typedef {Object} HttpResponse
- * @property {Object} Body The HTTP response body parsed by JSON.parse()
- * @property {Number} statusCode The HTTP response code
+ * @property {Object|String} body The HTTP response body
+ * @property {Number} status The HTTP response status code
+ */
+
+/**
+ * @typedef {Object} StatusRequestOptions
+ * @property {Boolean} [raw] If true return the raw http response
+ * @property {Number} [attemptHostIndex] Host index to query (used by statusAllHosts)
+ * @property {Boolean} [useLeader] Prefer the leader host
  */
 
 /**
@@ -17,37 +29,37 @@ import ApiClient from '../client'
  */
 
 /**
- * The RQLite status api path
- */
-export const PATH_STATUS = '/status'
-
-/**
- * Data api client to perform RQLite queries
+ * Data api client to perform RQLite status queries
  */
 export default class StatusApiClient extends ApiClient {
   /**
-   * Get the RQLite server status which defaults to the master host
-   * @param {Object} [options={}] RQLite api options
-   * @returns {HttpResponse} An HTTP response object
+   * Get the RQLite server status which defaults to the leader host
+   * @param {StatusRequestOptions} [options={}] RQLite api options
+   * @returns {Promise<HttpResponse>} An HTTP response object
+   * @see https://rqlite.io/docs/guides/monitoring-rqlite/
    */
   async status (options = {}) {
-    return super.get(PATH_STATUS, { useLeader: true, ...options })
+    return this.fetch({
+      ...options,
+      uri: PATH_STATUS,
+      httpMethod: HTTP_METHOD_GET,
+      useLeader: typeof options.useLeader === 'boolean' ? options.useLeader : true,
+    })
   }
 
   /**
-   * Get the RQLite server status for all hosts as an array of object with
+   * Get the RQLite server status for all hosts as an array of objects with
    * the host and their status
-   * @param {Object} [options={}] RQLite api options
-   * @param {Object} [options.raw] If true return the raw http response from
-   * RQLite response
-   * @returns {StatusAllHostsResponse[]} An array of http response for the provide hosts
+   * @param {StatusRequestOptions} [options={}] RQLite api options
+   * @returns {Promise<StatusAllHostsResponse[]>} An array of http response for the provide hosts
+   * @see https://rqlite.io/docs/guides/monitoring-rqlite/
    */
   async statusAllHosts (options = {}) {
     const hosts = this.getHosts()
     // Get the status for all of the hosts
-    const promises = hosts.map(async (_host, activeHostIndex) => {
-      const response = await this.status({ ...options, activeHostIndex })
-      return { response, host: hosts[activeHostIndex] }
+    const promises = hosts.map(async (_host, attemptHostIndex) => {
+      const response = await this.status({ ...options, useLeader: false, attemptHostIndex })
+      return { response, host: hosts[attemptHostIndex] }
     })
     return Promise.all(promises)
   }
