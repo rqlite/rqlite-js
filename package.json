@@ -74,7 +74,7 @@
     "typescript"
   ],
   "author": "Justin Morant",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/rqlite/rqlite-js/issues"
   },
