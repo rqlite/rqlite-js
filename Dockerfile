@@ -1,4 +1,4 @@
-FROM node:18.16.1
+FROM node:22-bookworm
 WORKDIR /test
 COPY package.json /test
 COPY .npmrc /test

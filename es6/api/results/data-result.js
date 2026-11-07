@@ -1,11 +1,21 @@
 /**
  * Class for handling single RQLite data api result
  * @module api/results/data-result
+ * @see https://rqlite.io/docs/api/api/
+ * @see module:api/results/result-fields
  */
+import {
+  RESULT_FIELD_COLUMNS,
+  RESULT_FIELD_LAST_INSERT_ID,
+  RESULT_FIELD_ROWS_AFFECTED,
+  RESULT_FIELD_TIME,
+  RESULT_FIELD_VALUES,
+} from './result-fields'
 
 /**
  * A class that represents one data result from an RQLite query or execute
  * API call
+ * @see https://rqlite.io/docs/api/api/
  */
 export default class DataResult {
   /**
@@ -16,7 +26,7 @@ export default class DataResult {
 
   /**
    * The last insert id
-   * @type {Number}
+   * @type {Number|undefined}
    */
   lastInsertId
 
@@ -27,21 +37,16 @@ export default class DataResult {
   rowsAffected = 0
 
   /**
-   * An array of DataResult and/or DataResultError instances
-   * @type {Array<DataResult|DataResultError>}
-   */
-  results = []
-
-  /**
    * An object after the columns and values are mapped from
    * an RQLite response
+   * @type {Object}
    */
   data = {}
 
   /**
    * The data result constructor
-   * @param {Array} result An API response individual result
-   * @param {Array} [valuesIndex] The index to get the values from the result
+   * @param {Object} result An API response individual result
+   * @param {Number} [valuesIndex] The index to get the values from the result
    */
   constructor (result, valuesIndex) {
     if (typeof result !== 'object') {
@@ -50,13 +55,13 @@ export default class DataResult {
     if (typeof valuesIndex !== 'undefined' && !Number.isFinite(valuesIndex)) {
       throw new Error('The valuesIndex argument is required to be a finite number when provided')
     }
-    this.time = parseFloat(result.time || 0.0)
-    this.rowsAffected = parseInt(result.rows_affected || 0, 10)
-    this.lastInsertId = result.last_insert_id
+    this.time = parseFloat(result[RESULT_FIELD_TIME] || 0.0)
+    this.rowsAffected = parseInt(result[RESULT_FIELD_ROWS_AFFECTED] || 0, 10)
+    this.lastInsertId = result[RESULT_FIELD_LAST_INSERT_ID]
     // Map the values array to an object where columns are the properties
     if (Number.isFinite(valuesIndex)) {
-      const { columns } = result
-      const resultValues = result.values[valuesIndex]
+      const columns = result[RESULT_FIELD_COLUMNS]
+      const resultValues = result[RESULT_FIELD_VALUES][valuesIndex]
       if (resultValues) {
         this.data = resultValues.reduce((acc, val, i) => {
           const col = columns[i]
@@ -69,6 +74,7 @@ export default class DataResult {
 
   /**
    * Return the value a property or undefined if it does not exist
+   * @param {String} property The property name
    * @returns {*} The value of the property or undefined
    */
   get (property) {
@@ -93,7 +99,7 @@ export default class DataResult {
 
   /**
    * Get the row affected
-   * @returns {Number|undefined}
+   * @returns {Number}
    */
   getRowsAffected () {
     return this.rowsAffected
@@ -110,7 +116,7 @@ export default class DataResult {
 
   /**
    * Map the data values to an array
-   * @returns {Array}
+   * @returns {Array<*>}
    */
   toArray () {
     return Object.values(this.data)

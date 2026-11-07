@@ -1,215 +1,234 @@
-# rqlite-js &middot; [![npm version](https://img.shields.io/npm/v/rqlite-js.svg?style=flat)](https://www.npmjs.com/package/rqlite-js) &middot; [![Build Status](https://travis-ci.org/rqlite/rqlite-js.svg?branch=master)](https://travis-ci.org/rqlite/rqlite-js) &middot; [![Google Group](https://img.shields.io/badge/Google%20Group--blue.svg)](https://groups.google.com/group/rqlite)
-A promise based client library for [rqlite](https://github.com/rqlite/rqlite), the lightweight, distributed database built on SQLite.  This package is designed to provide javascript classes with interfaces that line up with RQLite API endpoints.  Please note that there is no code in this package for writing SQL queries.  There are other Javascript SQL generator libraries such as [sequel](https://www.npmjs.com/package/sequel) which can be used to create the SQLite query strings.  You are welcome to use one of those libraries or write your own SQL queries directly in your code.
+# rqlite-js · [![npm version](https://img.shields.io/npm/v/rqlite-js.svg?style=flat)](https://www.npmjs.com/package/rqlite-js) · [![CI](https://github.com/rqlite/rqlite-js/actions/workflows/ci.yml/badge.svg)](https://github.com/rqlite/rqlite-js/actions/workflows/ci.yml)
+
+A promise-based client library for [rqlite](https://rqlite.io), the lightweight, distributed database built on SQLite. Clients mirror the HTTP API endpoints (`/db/query`, `/db/execute`, `/db/backup`, `/status`). This package does not generate SQL—use your own SQL strings or another SQL builder.
+
+**Requirements:** Node.js `>= 18`. Tested against **rqlite 10.x** (Docker image `rqlite/rqlite:10.6.6`).
+
+See the official docs:
+
+- [Accessing rqlite (HTTP API)](https://rqlite.io/docs/api/api/)
+- [Read consistency](https://rqlite.io/docs/api/read-consistency/)
+- [Backup and restore](https://rqlite.io/docs/guides/backup/)
+- [Monitoring / status](https://rqlite.io/docs/guides/monitoring-rqlite/)
 
 ## Features
-* Automatically follow 301 redirects from replicates to leader node
-* Round robin load balancing of leader node and all replicate nodes for query api requests
-* HTTP Keepalive support through http and https agents when initializing clients or on individual requests see [Client options](#client-options)
-* Unit and integration tests for contributors
+
+- Follow 301/302 redirects from followers to the leader
+- Round-robin host balancing for non-leader reads
+- HTTP keepalive via `http` / `https` agents
+- Unit and Docker integration tests
+
+## Install
+
+```bash
+npm install rqlite-js
+```
+
+## Quick start
+
+```javascript
+import { DataApiClient } from 'rqlite-js'
+
+const dataApiClient = new DataApiClient('http://localhost:4001')
+
+await dataApiClient.execute('CREATE TABLE IF NOT EXISTS foo (id INTEGER NOT NULL PRIMARY KEY, name TEXT)')
+const insert = await dataApiClient.execute('INSERT INTO foo(name) VALUES("fiona")')
+if (insert.hasError()) {
+  throw insert.getFirstError()
+}
+const id = insert.get(0).getLastInsertId()
+const select = await dataApiClient.query(`SELECT id, name FROM foo WHERE id=${id}`)
+console.log(select.get(0).toObject()) // { id: 1, name: 'fiona' }
+```
 
 ## DataApiClient
-The data API client will allow you to access the [data API endpoints](https://github.com/rqlite/rqlite/blob/master/DOC/DATA_API.md) of RQLite such as `query` and `execute`.  All data methods will return a DataResults instance which is an array of DataResult instances.  The DataResult instances are designed to abstract working with the response body from RQLite data endpoints.  If you want to work with the raw HTTP response instead of using the DataResults the options accept a raw options which can be set to true.  This is covered in the examples below.
 
-### DataApiClient Methods
-The follow methods are available on the DataApiClient including their method signatures.  Both the query and execute methods return a DataResults instance which provides methods for handling the RQLite response body states. In the case of a query there will only ever be one result in the DataResults.
+Access the [data API](https://rqlite.io/docs/api/api/) (`query` / `execute`). By default methods return a `DataResults` instance. Pass `{ raw: true }` to get `{ status, body }` instead.
 
-* DataApiClient.query(sql, options) - Single query SQL statments sent via HTTP get (Note, if you pass an array it will call execute internally)
-* DataApiClient.execute(sql, options) - Multiple SQL statments
+### Methods
 
-## DATA API Usage
+- `query(sql, options)` — read via HTTP GET (or POST when `sql` is an array)
+- `execute(sql, options)` — write via HTTP POST (`sql` may be a string or string array)
 
-### CREATE TABLE Example
-The code sample shows how you would connect to a rqlite server and create a table.
+### Create table
 
 ```javascript
 import { DataApiClient } from 'rqlite-js'
 
 const dataApiClient = new DataApiClient('http://localhost:4001')
-try {
-  // You can create your own raw SQL query or use another SQL generator library of your liking.
-  const sql = 'CREATE TABLE foo (id integer not null primary key, name text)'
-  const dataResults = await dataApiClient.execute(sql)
-  // Check the results for an error to make sure we the SQL query did
-  // not generate an error while executing.
-  if (dataResults.hasError()) {
-    const error = dataResults.getFirstError()
-    console.error(error, 'rqlite create tables results contained an error.')
-    return
-  }
-  // We are successful and have results to use from our SQL query.
-  console.log(dataResults.toString(), 'Checkout the rqlite results as a JSON string.')
-  console.log(dataResults.toArray(), 'Checkout the rqlite results as plain javascript array for app use.')
-  console.log(dataResults.get(0).toString(), 'Checkout just the first rqlite result as a JSON string.')
-
-  // Lets get the same query as a raw HTTP response
-  const { statusCode, body } = await dataApiClient.execute(sql, { raw: true })
-  console.log(body, 'HTTP reponse body.')
-  console.log(statusCode, 'HTTP response code.')
-} catch (e) {
-  console.error(e, 'The HTTP client got an HTTP error, there must be something else going on.')
+const dataResults = await dataApiClient.execute(
+  'CREATE TABLE foo (id INTEGER NOT NULL PRIMARY KEY, name TEXT)',
+)
+if (dataResults.hasError()) {
+  console.error(dataResults.getFirstError())
+} else {
+  console.log(dataResults.toArray())
 }
+
+// Raw HTTP response shape from this client:
+const { status, body } = await dataApiClient.execute(
+  'CREATE TABLE IF NOT EXISTS bar (id INTEGER NOT NULL PRIMARY KEY)',
+  { raw: true },
+)
+console.log(status, body)
 ```
 
-### Multiple QUERY Example
-The code sample shows how would connect to a rqlite server insert a row then select the row.
+### Insert, select, update
 
 ```javascript
 import { DataApiClient } from 'rqlite-js'
 
 const dataApiClient = new DataApiClient('http://localhost:4001')
-try {
-  // Insert a row into the table foo we create above in the CREATE TABLE example.
-  // The values for sql can be a string or an array if you want to execute multiple
-  // SQL queries on the server.
-  let dataResults = await dataApiClient.execute('INSERT INTO foo(name) VALUES(\"fiona\")')
-  if (dataResults.hasError()) {
-    const error = dataResults.getFirstError()
-    console.error(error, 'rqlite insert results contained an error.')
-    return
-  }
-  const id = dataResults.get(0).getLastInsertId()
-  console.log(id, 'The id of the inserted row')
-  dataResults = await dataApiClient.query(`SELECT name FROM foo WHERE id="${id}"`)
-  if (dataResults.hasError()) {
-    const error = dataResults.getFirstError()
-    console.error(error, 'rqlite select results contained an error.')
-    return
-  }
-  console.log(dataResults.get(0).get('name'), 'The value for the name field which should equal fiona')
-  console.log(dataResults.get(0).toObject(), 'rqlitejs results are great, but I just want to work with a plain js object maybe to send back in my api')
-  console.log(dataResults.get(0).get('id'), 'This is just the id of the first result.')
-  dataResults = await dataApiClient.execute(`UPDATE foo SET name="justin" WHERE name="fiona"`)
-  if (dataResults.hasError()) {
-    const error = dataResults.getFirstError()
-    console.error(error, 'rqlite select results contained an error.')
-    return
-  }
-  const rowsAffected = dataResults.get(0).getRowsAffected()
-  console.log(rowsAffected, 'The number of rows updated for each update query which should be 1 for the first row')
-  dataResults = await dataApiClient.query(`SELECT name FROM foo WHERE id="${id}"`)
-  if (dataResults.hasError()) {
-    const error = dataResults.getFirstError()
-    console.error(error, 'rqlite select results contained an error.')
-    return
-  }
-  console.log(dataResults.get(0).get('name'), 'The value for the name field which should now equal justin')
-} catch (e) {
-  console.error(e, 'The HTTP client got an HTTP error, there must be something else going on.')
+
+let dataResults = await dataApiClient.execute('INSERT INTO foo(name) VALUES("fiona")')
+if (dataResults.hasError()) {
+  throw dataResults.getFirstError()
 }
+const id = dataResults.get(0).getLastInsertId()
+
+dataResults = await dataApiClient.query(`SELECT id, name FROM foo WHERE id=${id}`)
+console.log(dataResults.get(0).get('name')) // fiona
+console.log(dataResults.get(0).toObject()) // { id: 1, name: 'fiona' }
+
+dataResults = await dataApiClient.execute('UPDATE foo SET name="justin" WHERE name="fiona"')
+console.log(dataResults.get(0).getRowsAffected()) // 1
 ```
 
-### Using transactions Example
-The code sample shows how would connect to a rqlite and run multiple insert queries within a transaction [transactions](https://github.com/rqlite/rqlite/blob/master/DOC/DATA_API.md#transactions).
+### Transactions (rqlite v5+)
+
+Use `{ atomic: true }` for a single transaction ([API docs](https://rqlite.io/docs/api/api/)). Legacy `{ transaction: true }` remains for older rqlite v4 servers.
 
 ```javascript
 import { DataApiClient } from 'rqlite-js'
 
 const dataApiClient = new DataApiClient('http://localhost:4001')
-try {
-  // Insert a row into the table foo we create above in the CREATE TABLE example.
-  // The values for sql can be a string or an array if you want to execute multiple
-  // SQL queries on the server.
-  const sql = [
-    'INSERT INTO foo(name) VALUES(\"fiona\")',
-    'INSERT INTO bar(name) VALUES(\"test\")',
-  ]
-  const dataResults = await dataApiClient.execute(sql, { transaction: true })
-  if (dataResults.hasError()) {
-    const error = dataResults.getFirstError()
-    console.error(error, 'rqlite insert results contained an error.')
-    return
-  }
-  console.log(dataResults.get(0).getLastInsertId(), 'The id for the first insert is in index 0 last_insert_id')
-  console.log(dataResults.get(1).getLastInsertId(), 'The id for the second insert is in index 1 last_insert_id')
-} catch (e) {
-  console.error(e, 'The HTTP client got an HTTP error, there must be something else going on.')
+const sql = [
+  'INSERT INTO foo(name) VALUES("fiona")',
+  'INSERT INTO foo(name) VALUES("justin")',
+]
+const dataResults = await dataApiClient.execute(sql, { atomic: true })
+if (dataResults.hasError()) {
+  throw dataResults.getFirstError()
 }
+console.log(dataResults.get(0).getLastInsertId())
+console.log(dataResults.get(1).getLastInsertId())
 ```
 
-### Multiple QUERY Example With Consistency
-The code sample shows how would connect to a rqlite and run multiple select queries with [strong consistency](https://github.com/rqlite/rqlite/blob/master/DOC/CONSISTENCY.md).
+### Consistency
 
 ```javascript
-import { DataApiClient } from 'rqlite-js'
+import { DataApiClient, CONSISTENCY_LEVEL_STRONG } from 'rqlite-js'
 
 const dataApiClient = new DataApiClient('http://localhost:4001')
-try {
-  const sql = [
-    'SELECT name FROM foo WHERE id="1"',
-    'SELECT id FROM bar WHERE name="test"',
-  ]
-  const dataResults = await dataApiClient.query(sql, { level: 'strong' })
-  if (dataResults.hasError()) {
-    const error = dataResults.getFirstError()
-    console.error(error, 'rqlite insert results contained an error.')
-    return
-  }
-  console.log(dataResults.get(0).toString(), 'The results for the first select are in index 0')
-  console.log(dataResults.get(1).toString(), 'The results for the second select are in index 1')
-} catch (e) {
-  console.error(e, 'The HTTP client got an HTTP error, there must be something else going on.')
+const dataResults = await dataApiClient.query(
+  'SELECT name FROM foo WHERE id=1',
+  { level: CONSISTENCY_LEVEL_STRONG },
+)
+```
+
+See [read consistency](https://rqlite.io/docs/api/read-consistency/) for `none`, `weak`, `strong`, and `linearizable`.
+
+### Errors (`error` and `error_v2`)
+
+Failed statements still use the legacy `error` string. On rqlite v10+, structured `error_v2` is also exposed:
+
+```javascript
+const dataResults = await dataApiClient.execute('INSERT INTO nonsense')
+if (dataResults.hasError()) {
+  const err = dataResults.getFirstError()
+  console.error(err.message)
+  console.error(err.getErrorV2()) // { message, sqlite: { code, extended_code } } when present
+  console.error(err.toObject())
 }
 ```
+
 ### Authentication
-Authentication can be set using the authentication property on the DataApiClient options.
 
 ```javascript
 import { DataApiClient } from 'rqlite-js'
 
-const username = 'rqliteUsername'
-const password = 'rqlitePassword'
 const dataApiClient = new DataApiClient('http://localhost:4001', {
-  authentication: { username, password },
+  authentication: {
+    username: 'rqliteUsername',
+    password: 'rqlitePassword',
+  },
 })
-try {
-  const sql = [
-    'SELECT name FROM foo WHERE id="1"',
-    'SELECT id FROM bar WHERE name="test"',
-  ]
-  const dataResults = await dataApiClient.query(sql, { level: 'strong' })
-  if (dataResults.hasError()) {
-    const error = dataResults.getFirstError()
-    console.error(error, 'rqlite insert results contained an error.')
-    return
-  }
-  console.log(dataResults.get(0).toString(), 'The results for the first select are in index 0')
-  console.log(dataResults.get(1).toString(), 'The results for the second select are in index 1')
-} catch (e) {
-  console.error(e, 'The HTTP client got an HTTP error, there must be something else going on.')
-}
 ```
 
-### Client options
-Multiple hosts can be provided using the construtor for the data api client. For greater performance when making http requests it is often useful to provide an http and https agent to the client through options.
+### Client options (hosts, agents, retries)
 
 ```javascript
-import { DataApiClient } from 'rqlite-js'
 import http from 'http'
 import https from 'https'
+import { DataApiClient } from 'rqlite-js'
 
-// Hosts can be an array or a string that is comma seperated e.g. 'http://localhost:4001,http://localhost:4002,http://localhost:4003'
-const dataApiClient = new DataApiClient(['http://localhost:4001', 'http://localhost:4002', 'http://localhost:4003'], {
-  httpAgent: new http.Agent({ keepAlive: true }),
-  httpsAgent: new https.Agent({ keepAlive: true }),
-})
+const dataApiClient = new DataApiClient(
+  ['http://localhost:4001', 'http://localhost:4002', 'http://localhost:4003'],
+  {
+    httpAgent: new http.Agent({ keepAlive: true }),
+    httpsAgent: new https.Agent({ keepAlive: true }),
+    // Optional retry customization:
+    retryableStatusCodes: new Set([408, 429, 500, 502, 503, 504]),
+    retryableErrorCodes: new Set(['ECONNRESET', 'ETIMEDOUT']),
+    retryableHttpMethods: new Set(['GET', 'POST']),
+    retries: 0, // disable retries
+  },
+)
 ```
 
-### Retrys
-All http requests are retried with exponential backoff up to the number of hosts times 3. Each retry tries the next host in the rotation. To see the http status codes, error codes and http methods which cause a retry have a look at [es6/http-request/retryable.js](es6/http-request/retryable.js). When creating an instance you can supply your own Set or Array of replacement values. To manually disable all retry logic provide the contructor an entries properties with the value 0.
+Hosts may also be a comma-separated string: `'http://localhost:4001,http://localhost:4002'`.
+
+## StatusApiClient
 
 ```javascript
-import { DataApiClient } from 'rqlite-js'
-import http from 'http'
-import https from 'https'
+import { StatusApiClient } from 'rqlite-js'
 
-// Hosts can be an array or a string that is comma seperated e.g. 'http://localhost:4001,http://localhost:4002,http://localhost:4003'
-const dataApiClient = new DataApiClient(['http://localhost:4001', 'http://localhost:4002', 'http://localhost:4003'], {
-  retryableErrorCodes: Set([600]), // Retry HTTP response status code 600
-  retryableStatusCodes: Set(['SPECIAL_ERROR_CODE']), // Retry error.code === SPECIAL_ERROR_CODE
-  retryableHttpMethods: Set(['GET']), // Only retry GET requests
-  retries: 0, // Manually disable all retry logic
+const statusApiClient = new StatusApiClient('http://localhost:4001')
+const { status, body } = await statusApiClient.status()
+console.log(status, body.store?.ready)
+
+// One status call per configured host:
+const all = await statusApiClient.statusAllHosts()
+all.forEach(({ host, response }) => {
+  console.log(host, response.body?.store?.ready)
 })
 ```
 
-## Testing
-Please see the [docs/test/README.md](docs/test/README.md) for more information on testing for use by contributors.
+See [Monitoring rqlite](https://rqlite.io/docs/guides/monitoring-rqlite/).
+
+## BackupApiClient
+
+```javascript
+import { BackupApiClient, BACKUP_DATA_FORMAT_SQL } from 'rqlite-js'
+
+const backupApiClient = new BackupApiClient('http://localhost:4001')
+
+// Binary SQLite backup stream (default):
+const backupStream = await backupApiClient.backup()
+
+// SQL text backup:
+const sqlStream = await backupApiClient.backup(BACKUP_DATA_FORMAT_SQL)
+
+// Restore from SQL buffer/string:
+await backupApiClient.load(
+  Buffer.from('CREATE TABLE foo (id INTEGER PRIMARY KEY);'),
+  BACKUP_DATA_FORMAT_SQL,
+)
+```
+
+See [Backup and restore](https://rqlite.io/docs/guides/backup/).
+
+## Releases
+
+Versions and `CHANGELOG.md` are managed with [release-please](https://github.com/googleapis/release-please). Merging the release PR creates a GitHub Release; the publish workflow re-runs the full test suite (including Docker integrations) before `npm publish`.
+
+**Local quality gate (required before commit/push/publish):**
+
+```bash
+npm run verify                 # lint, type-check, unit, build, compiled unit
+npm run verify:integrations    # Docker + rqlite 10.6.6 integrations
+```
+
+## Contributing / testing
+
+See [docs/test/README.md](docs/test/README.md).

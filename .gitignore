@@ -64,3 +64,7 @@ typings/
 .env
 
 tap
+
+# Private agent tooling (not published)
+.cursor/
+graphify-out/

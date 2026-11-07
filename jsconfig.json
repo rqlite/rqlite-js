@@ -1,19 +1,26 @@
 {
   "compilerOptions": {
+    "checkJs": true,
+    "allowJs": true,
+    "noEmit": true,
+    "maxNodeModuleJsDepth": 0,
     "allowSyntheticDefaultImports": true,
     "moduleResolution": "node",
-    "module": "commonJS",
-    "target": "ES5"
+    "module": "commonjs",
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "types": ["node"],
+    "strictNullChecks": false,
+    "noImplicitAny": false
   },
   "exclude": [
     "node_modules",
-    "lib"
+    "lib",
+    "es6/**/*.unit.js",
+    "es6/**/*.integration.js",
+    "es6/test/**/*"
   ],
   "include": [
     "es6/**/*"
-  ],
-  "files.eol": "\n",
-  "editor.insertSpaces": true,
-  "editor.tabSize": 2,
-  "editor.detectIndentation": false
+  ]
 }

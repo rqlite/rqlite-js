@@ -1,12 +1,29 @@
 /**
  * Class for handling many RQLite data api results
  * @module api/results/data-results
+ * @see https://rqlite.io/docs/api/api/
+ * @see module:api/results/result-fields
  */
 import DataResult from './data-result'
 import DataResultError from './data-result-error'
+import {
+  RESULT_FIELD_ERROR,
+  RESULT_FIELD_ERROR_V2,
+  RESULT_FIELD_RESULTS,
+  RESULT_FIELD_TIME,
+  RESULT_FIELD_VALUES,
+} from './result-fields'
+
+/**
+ * @typedef {Object} RqliteResultRow
+ * @property {String} [error] Legacy error message
+ * @property {Object} [error_v2] Structured error from rqlite v10+
+ * @property {Array<*>} [values] Query row values
+ */
 
 /**
  * A class to manage a list of results from an RQLite query or execute API response
+ * @see https://rqlite.io/docs/api/api/
  */
 export default class DataResults {
   /**
@@ -17,16 +34,16 @@ export default class DataResults {
   time = 0.0
 
   /**
-   * The results which is an empty arry to start
-   * @type {DataResult[]}
+   * The results which is an empty array to start
+   * @type {Array<DataResult|DataResultError>}
    */
   results = []
 
   /**
    * The data result list constructor
    * @param {Object} data The data object sent from a RQLite API response
-   * @param {Number} data.time The time the API response took to complete
-   * @param {Object[{error:String,values:Object}]} data.results The results array
+   * @param {Number} [data.time] The time the API response took to complete
+   * @param {RqliteResultRow[]} data.results The results array
    */
   constructor (data) {
     this.setApiData(data)
@@ -40,17 +57,19 @@ export default class DataResults {
     if (typeof data !== 'object') {
       throw new Error('The data argument is required to be an object')
     }
-    if (!data.results) {
+    if (!data[RESULT_FIELD_RESULTS]) {
       throw new Error('The data object is required to have a results property')
     }
-    this.time = parseFloat(data.time || 0.0)
-    const { results = [] } = data
+    this.time = parseFloat(data[RESULT_FIELD_TIME] || 0.0)
+    const results = data[RESULT_FIELD_RESULTS] || []
     this.results = results.reduce((acc, result) => {
       // If there is an error property this is an error
-      if (typeof result === 'object' && result.error) {
-        return acc.concat(new DataResultError(result.error))
+      if (typeof result === 'object' && result[RESULT_FIELD_ERROR]) {
+        return acc.concat(
+          new DataResultError(result[RESULT_FIELD_ERROR], result[RESULT_FIELD_ERROR_V2]),
+        )
       }
-      const { values: vals } = result
+      const vals = result[RESULT_FIELD_VALUES]
       // We don't have values so this is a single result row
       if (!vals) {
         return acc.concat(new DataResult(result))
@@ -87,6 +106,7 @@ export default class DataResults {
 
   /**
    * Return one result at a specific index or undefined it it does not exist
+   * @param {Number} index The result index
    * @returns {DataResult|DataResultError|undefined}
    */
   get (index) {

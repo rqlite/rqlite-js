@@ -4,6 +4,7 @@
  */
 import nock from 'nock'
 import { CONTENT_TYPE_APPLICATION_JSON } from '../http-request/content-types'
+import { HTTP_HEADER_ACCEPT, HTTP_HEADER_CONTENT_TYPE } from '../http-request/http-headers'
 
 /**
  * A nock HTTP request mock
@@ -40,8 +41,8 @@ export function executeSuccess (options = {}) {
     url,
   } = options
   const scope = nock(url)
-    .matchHeader('Accept', CONTENT_TYPE_APPLICATION_JSON)
-    .matchHeader('Content-Type', CONTENT_TYPE_APPLICATION_JSON)
+    .matchHeader(HTTP_HEADER_ACCEPT, CONTENT_TYPE_APPLICATION_JSON)
+    .matchHeader(HTTP_HEADER_CONTENT_TYPE, CONTENT_TYPE_APPLICATION_JSON)
     .post(path, body)
   if (auth) {
     scope.basicAuth(auth)
@@ -69,8 +70,8 @@ export function executeFailureHttpStatusCode (options = {}) {
     url,
   } = options
   const scope = nock(url)
-    .matchHeader('Accept', CONTENT_TYPE_APPLICATION_JSON)
-    .matchHeader('Content-Type', CONTENT_TYPE_APPLICATION_JSON)
+    .matchHeader(HTTP_HEADER_ACCEPT, CONTENT_TYPE_APPLICATION_JSON)
+    .matchHeader(HTTP_HEADER_CONTENT_TYPE, CONTENT_TYPE_APPLICATION_JSON)
     .post(path, body)
   if (auth) {
     scope.basicAuth(auth)
@@ -96,8 +97,8 @@ export function executeFailureErrorCode (options = {}) {
     url,
   } = options
   const scope = nock(url)
-    .matchHeader('Accept', CONTENT_TYPE_APPLICATION_JSON)
-    .matchHeader('Content-Type', CONTENT_TYPE_APPLICATION_JSON)
+    .matchHeader(HTTP_HEADER_ACCEPT, CONTENT_TYPE_APPLICATION_JSON)
+    .matchHeader(HTTP_HEADER_CONTENT_TYPE, CONTENT_TYPE_APPLICATION_JSON)
     .post(path, body)
   if (auth) {
     scope.basicAuth(auth)
@@ -128,8 +129,8 @@ export function executeRedirectSuccess (options = {}) {
     url,
   } = options
   const scope = nock(url)
-    .matchHeader('Accept', CONTENT_TYPE_APPLICATION_JSON)
-    .matchHeader('Content-Type', CONTENT_TYPE_APPLICATION_JSON)
+    .matchHeader(HTTP_HEADER_ACCEPT, CONTENT_TYPE_APPLICATION_JSON)
+    .matchHeader(HTTP_HEADER_CONTENT_TYPE, CONTENT_TYPE_APPLICATION_JSON)
     .post(path, body)
   if (auth) {
     scope.basicAuth(auth)

@@ -1,0 +1,28 @@
+name: npm-publish
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+          cache: npm
+      - run: npm install
+      - name: Full verify (lint, types, unit, build)
+        run: npm run verify
+      - name: Integration tests against rqlite
+        run: |
+          docker compose -p rqlitejs build
+          docker compose -p rqlitejs run --rm test
+          docker compose -p rqlitejs down
+      - name: Publish to npm
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -4,6 +4,7 @@
  */
 import nock from 'nock'
 import { CONTENT_TYPE_APPLICATION_JSON } from '../http-request/content-types'
+import { HTTP_HEADER_ACCEPT, HTTP_HEADER_LOCATION } from '../http-request/http-headers'
 
 /**
  * A nock HTTP request mock
@@ -68,7 +69,7 @@ export function querySuccess (options = {}) {
     url,
   } = options
   const scope = nock(url)
-    .matchHeader('Accept', CONTENT_TYPE_APPLICATION_JSON)
+    .matchHeader(HTTP_HEADER_ACCEPT, CONTENT_TYPE_APPLICATION_JSON)
     .get(path)
     .query(query)
   if (auth) {
@@ -100,7 +101,7 @@ export function queryFailureHttpStatusCode (options = {}) {
     times,
   } = options
   const scope = nock(url)
-    .matchHeader('Accept', CONTENT_TYPE_APPLICATION_JSON)
+    .matchHeader(HTTP_HEADER_ACCEPT, CONTENT_TYPE_APPLICATION_JSON)
     .get(path)
     .query(query)
   if (auth) {
@@ -132,7 +133,7 @@ export function queryFailureErrorCode (options = {}) {
     url,
   } = options
   const scope = nock(url)
-    .matchHeader('Accept', CONTENT_TYPE_APPLICATION_JSON)
+    .matchHeader(HTTP_HEADER_ACCEPT, CONTENT_TYPE_APPLICATION_JSON)
     .get(path)
     .query(query)
   if (auth) {
@@ -167,14 +168,14 @@ export function queryRedirectSuccess (options = {}) {
     url,
   } = options
   const scope = nock(url)
-    .matchHeader('Accept', CONTENT_TYPE_APPLICATION_JSON)
+    .matchHeader(HTTP_HEADER_ACCEPT, CONTENT_TYPE_APPLICATION_JSON)
     .get(path)
     .query(query)
   if (auth) {
     scope.basicAuth(auth)
   }
-  return scope.reply(statusCode, { Location: redirectLocation }, {
-    Location: redirectLocation,
+  return scope.reply(statusCode, { [HTTP_HEADER_LOCATION]: redirectLocation }, {
+    [HTTP_HEADER_LOCATION]: redirectLocation,
   })
 }
 
@@ -198,7 +199,7 @@ export function queryMultipleSuccess (options = {}) {
     url,
   } = options
   const scope = nock(url)
-    .matchHeader('Accept', CONTENT_TYPE_APPLICATION_JSON)
+    .matchHeader(HTTP_HEADER_ACCEPT, CONTENT_TYPE_APPLICATION_JSON)
     .post(path, body)
     .query(query)
   if (auth) {

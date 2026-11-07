@@ -2,80 +2,52 @@
  * Data api client to perform RQLite data operations such
  * as query and execute
  * @module api/data
+ * @see https://rqlite.io/docs/api/api/
+ * @see https://rqlite.io/docs/api/read-consistency/
  */
 import ApiClient from '../client'
 import { DataResults } from '../results'
+import { PATH_EXECUTE, PATH_QUERY } from '../paths'
+import { CONSISTENCY_LEVEL_NONE } from '../consistency-levels'
+
+export {
+  PATH_QUERY,
+  PATH_EXECUTE,
+} from '../paths'
+
+export {
+  CONSISTENCY_LEVEL_NONE,
+  CONSISTENCY_LEVEL_STRONG,
+  CONSISTENCY_LEVEL_LINEARIZABLE,
+  CONSISTENCY_LEVEL_WEAK,
+} from '../consistency-levels'
 
 /**
- * The RQLite query api path
- */
-export const PATH_QUERY = '/db/query'
-
-/**
- * The RQLite execute api path
- */
-export const PATH_EXECUTE = '/db/execute'
-
-/**
- * Read query consistency level none which means
- * any node can respond
- */
-export const CONSISTENCY_LEVEL_NONE = 'none'
-
-/**
- * Read query consistency strong which must come from
- * the master node
- */
-export const CONSISTENCY_LEVEL_STRONG = 'strong'
-
-/**
- * Read query consistency linearizable which must come from
- * the master node
- */
-export const CONSISTENCY_LEVEL_LINEARIZABLE = 'linearizable'
-
-/**
- * Read query consistency weak which must come from
- * the master node
- */
-export const CONSISTENCY_LEVEL_WEAK = 'weak'
-
-/**
- * @typedef HttpRequestOptions
- * @type {import('../../http-request').HttpRequestOptions}
+ * @typedef {import('../client').ApiClientRequestOptions} ApiClientRequestOptions
  */
 
 /**
  * Data request base options
- * @typedef DataRequestBaseOptions
- * @type {Object}
+ * @typedef {Object} DataRequestBaseOptions
  * @property {Boolean} [raw] If true return the raw http response from
  * RQLite response
  */
 
 /**
- * Data query request base options
- * @typedef QueryRequestBaseOptions
- * @type {Object}
- * @property {String} level The api consistency level
- */
-
-/**
  * Data query request options
- * @typedef QueryRequestOptions
- * @type {HttpRequestOptions & DataRequestBaseOptions & QueryRequestBaseOptions}
+ * @typedef {ApiClientRequestOptions & DataRequestBaseOptions} QueryRequestOptions
  */
 
 /**
  * Data execute request options
- * @typedef ExecuteRequestOptions
- * @type {HttpRequestOptions & DataRequestBaseOptions}
+ * @typedef {ApiClientRequestOptions & DataRequestBaseOptions} ExecuteRequestOptions
  */
 
 /**
- * Send an RQLite query API request to the RQLite server
- * @param {String} sql The SQL string to excute on the server
+ * Handle an RQLite data API response
+ * @param {{status: Number, body: Object}} response The HTTP response
  * @param {DataRequestBaseOptions} [options={}] RQLite api options
+ * @returns {DataResults|{status: Number, body: Object}}
  */
 function handleResponse (response, options = {}) {
   const { raw } = options
@@ -92,8 +64,12 @@ function handleResponse (response, options = {}) {
 export default class DataApiClient extends ApiClient {
   /**
    * Send an RQLite query API request to the RQLite server
-   * @param {String} sql The SQL string to excute on the server
+   * @param {String|String[]} sql The SQL string to execute on the server
    * @param {QueryRequestOptions} [options={}] RQLite api options
+   * @returns {Promise<DataResults|{status: Number, body: Object}>}
+   * @see https://rqlite.io/docs/api/api/
+   * @see https://rqlite.io/docs/api/read-consistency/
+   * @see module:api/consistency-levels
    */
   async query (sql, options = {}) {
     const { level } = options
@@ -119,8 +95,10 @@ export default class DataApiClient extends ApiClient {
 
   /**
    * Send an RQLite execute API request to the RQLite server
-   * @param {String} sql The SQL string to excute on the server
+   * @param {String|String[]} sql The SQL string to execute on the server
    * @param {ExecuteRequestOptions} [options={}] RQLite execute api options
+   * @returns {Promise<DataResults|{status: Number, body: Object}>}
+   * @see https://rqlite.io/docs/api/api/
    */
   async execute (sql, options = {}) {
     const response = await super.post(PATH_EXECUTE, sql, options)

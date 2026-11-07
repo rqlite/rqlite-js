@@ -19,6 +19,19 @@ describe('api data results', () => {
       assert.propertyVal(dataResultError, 'name', 'DataResultError')
       assert.propertyVal(dataResultError, 'code', 'DataResultError')
     })
+    it('should include error_v2 when provided', () => {
+      const message = 'incomplete input'
+      const errorV2 = {
+        message,
+        sqlite: { code: 1, extended_code: 1 },
+      }
+      const dataResultError = new DataResultError(message, errorV2)
+      assert.deepEqual(dataResultError.getErrorV2(), errorV2)
+      assert.deepEqual(dataResultError.toObject(), {
+        error: message,
+        error_v2: errorV2,
+      })
+    })
   })
   describe('DataResult', () => {
     it('should throw an error when a result argument is missing', () => {
@@ -113,6 +126,26 @@ describe('api data results', () => {
       const dataResultError = dataResults.getFirstError()
       assert.instanceOf(dataResultError, DataResultError)
       assert.equal(dataResultError.message, error)
+    })
+    it('should capture error_v2 from rqlite v10+ responses', () => {
+      const error = 'incomplete input'
+      const errorV2 = {
+        message: error,
+        sqlite: { code: 1, extended_code: 1 },
+      }
+      const dataResults = new DataResults({
+        results: [{
+          error,
+          error_v2: errorV2,
+        }],
+      })
+      const dataResultError = dataResults.getFirstError()
+      assert.instanceOf(dataResultError, DataResultError)
+      assert.deepEqual(dataResultError.getErrorV2(), errorV2)
+      assert.deepEqual(dataResultError.toObject(), {
+        error,
+        error_v2: errorV2,
+      })
     })
     it('should create a list of data results and get the time', () => {
       const time = 0.8234
