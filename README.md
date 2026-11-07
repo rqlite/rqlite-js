@@ -398,7 +398,7 @@ See [Backup and restore](https://rqlite.io/docs/guides/backup/).
 
 ## Releases
 
-Versions and `CHANGELOG.md` are managed with [release-please](https://github.com/googleapis/release-please). Merging the release PR creates a GitHub Release; the workflow re-runs the full suite (including Docker integrations) and runs [`npm stage publish`](https://docs.npmjs.com/staged-publishing/) via [trusted publishing](https://docs.npmjs.com/trusted-publishers/) (OIDC). A maintainer must approve the staged version with 2FA on npmjs.com (or `npm stage approve <id>`) before it goes live.
+Versions and `CHANGELOG.md` are managed with [release-please](https://github.com/googleapis/release-please). Merging the release PR creates a GitHub Release; release-please then dispatches [`npm-publish.yml`](.github/workflows/npm-publish.yml), which re-runs the full suite (including Docker integrations) and runs [`npm stage publish`](https://docs.npmjs.com/staged-publishing/) via [trusted publishing](https://docs.npmjs.com/trusted-publishers/) (OIDC). The trusted publisher on npmjs.com must list workflow filename `npm-publish.yml`. A maintainer must approve the staged version with 2FA on npmjs.com (or `npm stage approve <id>`) before it goes live.
 
 **Local quality gate (required before commit/push/publish):**
 
