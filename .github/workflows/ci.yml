@@ -2,8 +2,7 @@ name: CI
 
 on:
   push:
-    # Prefer main; keep master until the GitHub default branch is flipped.
-    branches: [main, master]
+    branches: [main]
   pull_request:
 
 jobs:
