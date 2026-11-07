@@ -2,7 +2,7 @@
 
 A promise-based client library for [rqlite](https://rqlite.io), the lightweight, distributed database built on SQLite. Clients mirror the HTTP API endpoints (`/db/query`, `/db/execute`, `/db/backup`, `/status`). This package does not generate SQL—use your own SQL strings or another SQL builder.
 
-**Requirements:** Node.js `>= 18`. CI tests Node 18–24 on `ubuntu-latest`; Docker integrations use Node 24. Tested against **rqlite 10.x** (Docker image `rqlite/rqlite:10.6.6`).
+**Requirements:** Node.js `>= 18`. CI tests Node 18–24 on `ubuntu-26.04`; Docker integrations use Node 24. Tested against **rqlite 10.x** (Docker image `rqlite/rqlite:10.6.6`).
 
 See the official docs:
 
@@ -220,7 +220,7 @@ See [Backup and restore](https://rqlite.io/docs/guides/backup/).
 
 ## Releases
 
-Versions and `CHANGELOG.md` are managed with [release-please](https://github.com/googleapis/release-please). Merging the release PR creates a GitHub Release; the publish workflow re-runs the full test suite (including Docker integrations) then runs [`npm stage publish`](https://docs.npmjs.com/staged-publishing/) via [trusted publishing](https://docs.npmjs.com/trusted-publishers/) (OIDC). A maintainer must then approve the staged version with 2FA on npmjs.com (or `npm stage approve <id>`) before it goes live.
+Versions and `CHANGELOG.md` are managed with [release-please](https://github.com/googleapis/release-please). Merging the release PR creates a GitHub Release; the same workflow then re-runs the full test suite (including Docker integrations) and runs [`npm stage publish`](https://docs.npmjs.com/staged-publishing/) via [trusted publishing](https://docs.npmjs.com/trusted-publishers/) (OIDC). A maintainer must then approve the staged version with 2FA on npmjs.com (or `npm stage approve <id>`) before it goes live.
 
 **Local quality gate (required before commit/push/publish):**
 
