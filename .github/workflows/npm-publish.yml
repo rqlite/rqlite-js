@@ -8,7 +8,7 @@ on:
       ref:
         description: Git ref to stage (tag or branch)
         required: true
-        default: v2.6.0
+        default: v3.0.0
 
 permissions:
   contents: read
