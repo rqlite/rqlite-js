@@ -6,7 +6,7 @@ A promise-based TypeScript/JavaScript client for [rqlite](https://rqlite.io) —
 
 **Prefer parameterized statements for anything that includes user or external input.** Interpolating values into SQL strings (`WHERE name = "${name}"`) risks SQL injection. Use rqlite’s bound-parameter form (`[["SELECT … WHERE name = ?", name]]`) or equivalent bindings from your own SQL tooling. Treat string-concatenated SQL as unsafe unless the values are strictly trusted constants you control.
 
-**Requirements:** Node.js `>= 20.19`. **Zero runtime dependencies** (native `fetch`). Types ship in-box. CI tests Node 20–24; Docker integrations use Node 24 against **rqlite 10.x** (`rqlite/rqlite:10.6.6`).
+**Requirements:** Node.js `>= 20.19`. **Zero runtime dependencies** (native `fetch`). Types ship in-box. CI tests Node 20–24; Docker integrations use Node 24 against a **3-node rqlite 10.x cluster** (`rqlite/rqlite:10.6.6`).
 
 Upgrading from v2? See [docs/MIGRATION-v2-to-v3.md](docs/MIGRATION-v2-to-v3.md).
 
@@ -404,7 +404,7 @@ Versions and `CHANGELOG.md` are managed with [release-please](https://github.com
 
 ```bash
 npm run verify                 # lint, type-check, unit, build, pack checks
-npm run verify:integrations    # Docker + rqlite 10.6.6 integrations
+npm run verify:integrations    # 3-node Docker cluster + rqlite 10.6.6 integrations
 ```
 
 ## Contributing / testing

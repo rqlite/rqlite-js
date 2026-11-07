@@ -47,8 +47,5 @@ jobs:
     runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v7
-      - name: Build and run integration tests
-        run: |
-          docker compose -p rqlitejs build
-          docker compose -p rqlitejs run --rm test
-          docker compose -p rqlitejs down
+      - name: Build and run integration tests (3-node cluster)
+        run: ./bin/rqlite-cluster.sh test

@@ -14,23 +14,23 @@ import { PATH_STATUS } from './api/status'
 import { DataApiClient, BackupApiClient, StatusApiClient } from '.'
 import { DataResults } from './api/results'
 import type { HttpResponse } from './http-request'
-import { DEFAULT_RQLITE_HOST, ENV_RQLITE_HOSTS } from './test/env'
+import {
+  findFollowerHosts,
+  findLeaderHost,
+  getIntegrationHosts,
+  sleep,
+  waitForClusterReady,
+} from './test/cluster'
 
 /**
- * The RQLite host for integration tests, which can be changed
- * using the RQLITE_HOSTS environment variable or defaults to
- * http://localhost:4001
+ * RQLite host list for integration tests (`RQLITE_HOSTS`, comma-separated).
+ * Compose cluster sets three HTTP endpoints on the Docker network.
  */
-const HOST = process.env[ENV_RQLITE_HOSTS] || DEFAULT_RQLITE_HOST
+const HOSTS = getIntegrationHosts()
+const HOST = HOSTS.join(',')
 
 const httpAgent = new http.Agent({ keepAlive: true })
 const httpsAgent = new https.Agent({ keepAlive: true })
-
-async function sleep (ms: number): Promise<void> {
-  await new Promise((resolve) => {
-    setTimeout(resolve, ms)
-  })
-}
 
 function asDataResults (value: DataResults | HttpResponse): DataResults {
   if (value instanceof DataResults) {
@@ -61,32 +61,20 @@ function handleRequestStreamAsPromise (request: Readable): Promise<Buffer> {
   })
 }
 
+const statusApiClient = new StatusApiClient(HOST, { httpAgent, httpsAgent })
+
+beforeAll(async () => {
+  await waitForClusterReady(statusApiClient, {
+    expectedNodes: HOSTS.length,
+    attempts: 40,
+    delayMs: 500,
+  })
+}, 60000)
+
 describe('api status client', () => {
-  const statusApiClient = new StatusApiClient(HOST, { httpAgent, httpsAgent })
-
-  async function checkRqliteServerReady (backoffBase = 500, max = 10) {
-    let lastError: unknown
-    for (let attempt = 0; attempt < max; attempt += 1) {
-      try {
-        const status = await statusApiClient.statusAllHosts()
-        const ready = status.map((v) => (v.response?.body as { store?: { ready?: boolean } })?.store?.ready)
-          .every((v) => v === true)
-        if (!ready) {
-          throw new Error('All stores are not ready')
-        }
-        return status
-      } catch (error) {
-        lastError = error
-        await sleep(backoffBase)
-      }
-    }
-    throw lastError
-  }
-
-  beforeAll(() => checkRqliteServerReady())
 
   describe('should get status response', () => {
-    it(`should call ${HOST}${PATH_STATUS} and return status body fields`, async () => {
+    it(`should call ${PATH_STATUS} and return status body fields`, async () => {
       const { body } = await statusApiClient.status()
       expect(typeof body).toBe('object')
       expect(body).toHaveProperty('build')
@@ -96,12 +84,14 @@ describe('api status client', () => {
       expect(body).toHaveProperty('store')
     })
 
-    it(`should call statusAllHosts and return one entry for ${HOST}`, async () => {
+    it('should call statusAllHosts and return an entry for each configured host', async () => {
       const all = await statusApiClient.statusAllHosts()
-      expect(all).toHaveLength(1)
-      expect(all[0].host).toEqual(HOST)
-      expect(all[0].response.status).toBeGreaterThanOrEqual(200)
-      expect(all[0].response.body).toHaveProperty('store')
+      expect(all).toHaveLength(HOSTS.length)
+      expect(all.map((entry) => entry.host).sort()).toEqual([...HOSTS].sort())
+      for (const entry of all) {
+        expect(entry.response.status).toBeGreaterThanOrEqual(200)
+        expect(entry.response.body).toHaveProperty('store')
+      }
     })
   })
 })
@@ -359,12 +349,21 @@ describe('api data client SQL patterns', () => {
 
     levels.forEach((level) => {
       it(`should query successfully with level=${level}`, async () => {
-        const dataResults = asDataResults(await dataApiClient.query(
-          `SELECT COUNT(*) AS total FROM ${TABLE}`,
-          { level },
-        ))
-        expect(dataResults.getFirstError()).toBeUndefined()
-        expect(Number(dataResults.get(0)!.get('total'))).toBeGreaterThanOrEqual(1)
+        // `none` may hit a follower before Raft applies catch up; retry briefly.
+        let total = 0
+        for (let attempt = 0; attempt < 10; attempt += 1) {
+          const dataResults = asDataResults(await dataApiClient.query(
+            `SELECT COUNT(*) AS total FROM ${TABLE}`,
+            { level },
+          ))
+          expect(dataResults.getFirstError()).toBeUndefined()
+          total = Number(dataResults.get(0)!.get('total'))
+          if (total >= 1) {
+            break
+          }
+          await sleep(100)
+        }
+        expect(total).toBeGreaterThanOrEqual(1)
       })
     })
   })
@@ -486,5 +485,79 @@ describe('api backups client', () => {
       expect(dataResults.getFirstError()).toBeUndefined()
       expect(dataResults.get(0)!.get('name')).toEqual('loaded')
     })
+  })
+})
+
+describe('rqlite cluster behavior', () => {
+  const TABLE = 'cluster_foo'
+  const dataApiClient = new DataApiClient(HOST, { httpAgent, httpsAgent })
+
+  beforeAll(async () => {
+    await dataApiClient.execute(`DROP TABLE IF EXISTS ${TABLE}`)
+    await dataApiClient.execute(
+      `CREATE TABLE ${TABLE} (id integer not null primary key, name text)`,
+    )
+  })
+
+  afterAll(async () => {
+    await dataApiClient.execute(`DROP TABLE IF EXISTS ${TABLE}`)
+  })
+
+  it('should expose a single leader across configured hosts', async () => {
+    const nodes = await waitForClusterReady(statusApiClient, {
+      expectedNodes: HOSTS.length,
+      attempts: 10,
+      delayMs: 250,
+    })
+    expect(HOSTS.length).toBeGreaterThanOrEqual(1)
+    expect(nodes.filter((node) => node.isLeader)).toHaveLength(1)
+    expect(findLeaderHost(nodes)).toBeTruthy()
+  })
+
+  it('should replicate writes so a follower-hosted client can read them', async () => {
+    const nodes = await waitForClusterReady(statusApiClient, {
+      expectedNodes: HOSTS.length,
+      attempts: 10,
+      delayMs: 250,
+    })
+    const followers = findFollowerHosts(nodes)
+    // Single-node fallback still passes; cluster mode exercises followers.
+    const writeClient = new DataApiClient(findLeaderHost(nodes), { httpAgent, httpsAgent })
+    const readHost = followers[0] || findLeaderHost(nodes)
+    const readClient = new DataApiClient(readHost, { httpAgent, httpsAgent })
+
+    const insert = asDataResults(await writeClient.execute([
+      [`INSERT INTO ${TABLE}(name) VALUES(?)`, 'cluster-fiona'],
+    ]))
+    expect(insert.getFirstError()).toBeUndefined()
+
+    // Give followers a moment; then strong read via follower HTTP endpoint.
+    await sleep(200)
+    const select = asDataResults(await readClient.query([
+      [`SELECT name FROM ${TABLE} WHERE name=?`, 'cluster-fiona'],
+    ], { level: CONSISTENCY_LEVEL_STRONG }))
+    expect(select.getFirstError()).toBeUndefined()
+    expect(select.get(0)!.get('name')).toEqual('cluster-fiona')
+  })
+
+  it('should accept executes against a follower host (forward/redirect to leader)', async () => {
+    const nodes = await waitForClusterReady(statusApiClient, {
+      expectedNodes: HOSTS.length,
+      attempts: 10,
+      delayMs: 250,
+    })
+    const followers = findFollowerHosts(nodes)
+    // Cluster integrations configure 3 hosts; require a follower endpoint.
+    expect(followers.length).toBeGreaterThan(0)
+    const followerClient = new DataApiClient(followers[0], { httpAgent, httpsAgent })
+    const insert = asDataResults(await followerClient.execute([
+      [`INSERT INTO ${TABLE}(name) VALUES(?)`, 'via-follower'],
+    ]))
+    expect(insert.getFirstError()).toBeUndefined()
+    const select = asDataResults(await followerClient.query([
+      [`SELECT name FROM ${TABLE} WHERE name=?`, 'via-follower'],
+    ], { level: CONSISTENCY_LEVEL_STRONG }))
+    expect(select.getFirstError()).toBeUndefined()
+    expect(select.get(0)!.get('name')).toEqual('via-follower')
   })
 })
